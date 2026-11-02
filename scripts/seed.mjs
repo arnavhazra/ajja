@@ -83,7 +83,7 @@ const defaults = {
   },
   faqs: [
     { q: "How do I buy a piece?", a: "Send a message. I tell you the price and whether it is still here. You do not pay on this website." },
-    { q: "Where is the studio?", a: "Collegeville, Pennsylvania. I will add the street address when I am ready to publish it." },
+    { q: "Where is the studio?", a: "Private studio in Collegeville, Pennsylvania. Studio viewings are welcomed by appointment. Inquire below to arrange a visit." },
   ],
   theme: "walnut",
   fontPair: "fraunces",

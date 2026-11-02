@@ -142,7 +142,8 @@ html[data-text="lg"] {
 }
 
 :root,
-html[data-font="fraunces"] {
+html[data-font="fraunces"],
+html[data-font="spectral"] {
   --font-display: var(--font-spectral), "Iowan Old Style", Palatino, serif;
   --font-body: var(--font-source), "Avenir Next", "Segoe UI", sans-serif;
 }
@@ -582,9 +583,15 @@ dialog.sheet[open] {
   }
 }
 
+.nav-inline {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
 @media (max-width: 767px) {
   .nav-inline {
-    display: none;
+    display: none !important;
   }
 }
 

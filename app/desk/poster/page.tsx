@@ -20,7 +20,7 @@ async function Poster() {
   const home = await QRCode.toDataURL(siteUrl(), { margin: 1, width: 480 });
   const stickers = await Promise.all(
     pieces.map(async (piece) => ({
-      title: piece.title.trim() || "Title not written yet",
+      title: piece.title.trim() || "Studio Study",
       src: await QRCode.toDataURL(`${siteUrl()}/p/${piece.slug}`, { margin: 1, width: 240 }),
     })),
   );

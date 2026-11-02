@@ -132,7 +132,7 @@ function CollectionForm({
         {pieces.map((piece) => (
           <label key={piece.id} className="flex min-h-12 items-center gap-3">
             <input type="checkbox" name="productId" value={piece.id} defaultChecked={selected.includes(piece.id)} />
-            {piece.title.trim() || "Title not written yet"}
+            {piece.title.trim() || "Studio Study"}
           </label>
         ))}
       </fieldset>

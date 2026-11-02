@@ -43,7 +43,7 @@ async function Review({ searchParams }: { searchParams: Promise<Record<string, s
               <p>No photo yet</p>
             )}
           </figure>
-          <p className="display text-3xl">{item.product.title.trim() || "Title not written yet"}</p>
+          <p className="display text-3xl">{item.product.title.trim() || "Studio Study"}</p>
           <p className="nums text-ink-soft">{item.remaining} still in the queue.</p>
           {item.missing.length ? (
             <p className="desk-note">Still missing: {item.missing.join(", ")}.</p>

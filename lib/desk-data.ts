@@ -103,7 +103,7 @@ export async function loadDashboard() {
     sql`select type, count(*)::int as count from events where created_at >= ${since} and type in ('whatsapp', 'call') group by type`,
   );
   const top = await db.execute<{ title: string; slug: string; count: number }>(sql`
-    select coalesce(nullif(p.title, ''), 'Title not written yet') as title, p.slug, count(*)::int as count
+    select coalesce(nullif(p.title, ''), 'Studio Study') as title, p.slug, count(*)::int as count
     from events e
     join products p on p.id = e.product_id
     where e.type = 'view' and e.created_at >= ${since}
@@ -134,7 +134,7 @@ export async function loadInsights(days: number) {
     sql`select type, count(*)::int as count from events where created_at >= ${since} group by type order by count desc`,
   );
   const top = await db.execute<{ title: string; count: number }>(sql`
-    select coalesce(nullif(p.title, ''), 'Title not written yet') as title, count(*)::int as count
+    select coalesce(nullif(p.title, ''), 'Studio Study') as title, count(*)::int as count
     from events e join products p on p.id = e.product_id
     where e.type = 'view' and e.created_at >= ${since}
     group by p.title order by count desc limit 5

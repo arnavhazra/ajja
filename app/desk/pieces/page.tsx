@@ -100,7 +100,7 @@ async function Pieces({ searchParams }: { searchParams: Promise<Record<string, s
             </label>
             <div>
               <Link className="text-2xl" href={`${prefix}/pieces/${row.id}`}>
-                {row.title.trim() || "Title not written yet"}
+                {row.title.trim() || "Studio Study"}
               </Link>
               <p>{statusLabel(row.status)}</p>
               {row.image ? <p className="text-ink-soft">Photo added</p> : <p>No photo yet</p>}

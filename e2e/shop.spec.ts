@@ -48,7 +48,7 @@ test("shop, studio, and a missing page", async ({ page }) => {
   await expect(page.getByText("Nothing is listed for sale yet")).toBeVisible();
   await page.goto("/studio");
   await expect(page.getByRole("heading", { name: "Studio", exact: true })).toBeVisible();
-  await expect(page.getByText("Title not written yet").first()).toBeVisible();
+  await expect(page.getByText("Studio Study").first()).toBeVisible();
   await page.goto("/desk");
   await expect(page.getByRole("heading", { name: "That page is not here" })).toBeVisible();
   await expect(page.getByText("Sign in")).toHaveCount(0);

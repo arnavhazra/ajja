@@ -31,30 +31,30 @@ export function SiteHeader({ settings }: { settings: ShopSettings }) {
       {settings.announcementLive && settings.announcement ? (
         <p className="border-b border-line bg-paper-2 px-4 py-3 text-center text-ink">{settings.announcement}</p>
       ) : null}
-      <div className="flex items-center gap-3 px-4 py-2 md:px-8">
+      <div className="flex items-center gap-4 px-4 py-2.5 md:gap-8 md:px-8">
         <div className="min-w-0 flex-1">
           <Link href="/" className="block min-h-12 no-underline">
-            <span className="font-display text-3xl text-ink">{settings.businessName}</span>
-            <span className="block text-ink-soft">
+            <span className="font-display text-2xl md:text-3xl tracking-tight text-ink">{settings.businessName}</span>
+            <span className="block text-sm text-ink-soft">
               {settings.town}, {settings.region}
             </span>
           </Link>
         </div>
-        <nav className="nav-inline flex items-center gap-1" aria-label="Shop">
+        <nav className="nav-inline flex items-center gap-6" aria-label="Shop">
           {PRIMARY.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="inline-flex min-h-12 items-center px-3 text-ink no-underline transition-opacity duration-150 ease-out hover:opacity-70"
+              className="inline-flex min-h-12 items-center text-ink no-underline font-medium transition-opacity duration-150 ease-out hover:opacity-70"
             >
               {link.label}
             </Link>
           ))}
         </nav>
-        <div className="flex flex-1 items-center justify-end gap-2">
+        <div className="flex flex-1 items-center justify-end gap-2 md:gap-3">
           <details className="nav-inline relative">
             <summary className="control cursor-pointer px-4">Text</summary>
-            <div className="absolute right-0 z-50 mt-2 border border-line bg-paper p-3">
+            <div className="absolute right-0 z-50 mt-2 border border-line bg-paper p-3 shadow-soft">
               <TextControls />
             </div>
           </details>
@@ -65,7 +65,7 @@ export function SiteHeader({ settings }: { settings: ShopSettings }) {
           ) : null}
           <details className="nav-menu">
             <summary className="control cursor-pointer px-4">Menu</summary>
-            <nav className="absolute inset-x-4 top-full z-50 mt-2 flex flex-col gap-1 border border-line bg-paper p-3" aria-label="Shop">
+            <nav className="absolute inset-x-4 top-full z-50 mt-2 flex flex-col gap-1 border border-line bg-paper p-3 shadow-soft" aria-label="Shop">
               {MENU.map((link) => (
                 <Link
                   key={link.href}
