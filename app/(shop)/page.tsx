@@ -115,23 +115,24 @@ export default async function HomePage() {
       {featured.length ? <Rail title="On the table" products={featured} /> : null}
       {arrivals.length ? <Rail title="New arrivals" products={arrivals} /> : null}
       {reduced.length ? <Rail title="Recently reduced" products={reduced} /> : null}
-      <section className="grid gap-8 border-t border-line px-4 py-12 md:grid-cols-2 md:items-start md:px-8">
+      <section
+        className={cn(
+          "grid gap-8 border-t border-line px-4 py-12 md:items-start md:px-8",
+          settings.ownerPhoto ? "md:grid-cols-2" : "max-w-3xl",
+        )}
+      >
         <div>
           <h2 className="text-3xl text-ink">From Ajja</h2>
-          <p className="measure mt-4">{settings.story}</p>
+          <p className="measure mt-4 text-lg leading-relaxed">{settings.story}</p>
           <p className="mt-4 border-t border-line pt-4 text-ink-soft">
             {settings.town}, {settings.region}
           </p>
         </div>
         {settings.ownerPhoto ? (
-          <div className="photo-frame crop relative">
+          <div className="photo-frame crop relative" style={{ position: "relative" }}>
             <Image src={settings.ownerPhoto} alt={`${settings.ownerName} at the studio`} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
           </div>
-        ) : (
-          <div className="photo-frame crop relative grid place-items-center p-6 text-center text-ink-soft">
-            <p>A photo of Ajja will go here when he adds one.</p>
-          </div>
-        )}
+        ) : null}
       </section>
       {quotes.length ? (
         <section className="border-t border-line px-4 py-12 md:px-8" aria-labelledby="quotes-heading">
@@ -151,17 +152,28 @@ export default async function HomePage() {
       <section className="border-t border-line px-4 py-12 md:px-8">
         <div className="max-w-3xl">
           <h2 className="text-3xl text-ink">Visit</h2>
-          <p className="mt-4">
-            {settings.town}, {settings.region}
-            {settings.address ? `, ${settings.address}` : ". The street address is not listed yet."}
-          </p>
-          <p className="mt-2 text-ink-soft">{open == null ? "Hours are not listed yet." : open ? "Open today." : "Closed today."}</p>
+          {settings.address ? (
+            <>
+              <p className="mt-4">
+                {settings.town}, {settings.region}, {settings.address}
+              </p>
+              {open != null ? (
+                <p className="mt-2 text-ink-soft">{open ? "Open today." : "Closed today."}</p>
+              ) : null}
+            </>
+          ) : (
+            <p className="mt-4 text-ink-soft leading-relaxed">
+              Private studio in {settings.town || "Collegeville"}, {settings.region || "Pennsylvania"}. Studio viewings are welcomed by appointment. Inquire below to arrange a visit.
+            </p>
+          )}
           <div className="mt-6 flex flex-wrap gap-3">
-            <a className="btn btn-primary" href={settings.mapUrl}>
-              Open the map
-            </a>
+            {settings.mapUrl ? (
+              <a className="btn btn-primary" href={settings.mapUrl}>
+                Open the map
+              </a>
+            ) : null}
             <Link className="btn btn-secondary" href="/visit">
-              Hours and the studio
+              Studio details
             </Link>
           </div>
         </div>
@@ -193,7 +205,7 @@ export default async function HomePage() {
 function CollectionTile({ collection }: { collection: PublicCollection }) {
   return (
     <figure>
-      <Link href={`/c/${collection.slug}`} className="photo-frame crop relative block no-underline">
+      <Link href={`/c/${collection.slug}`} className="photo-frame crop relative block no-underline" style={{ position: "relative" }}>
         {collection.imageUrl ? (
           <Image
             src={collection.imageUrl}
