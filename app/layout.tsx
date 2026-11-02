@@ -1,44 +1,49 @@
 import type { Metadata } from "next";
-import Script from "next/script";
-import { Newsreader, Source_Sans_3, Spectral } from "next/font/google";
+import { Cormorant_Garamond, Plus_Jakarta_Sans, Space_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { getSettings } from "@/lib/public-data";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
-const spectral = Spectral({
+const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["500", "600"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
   display: "swap",
-  preload: false,
-  variable: "--font-spectral",
+  variable: "--font-cormorant",
 });
-const newsreader = Newsreader({ subsets: ["latin"], display: "swap", preload: false, variable: "--font-newsreader" });
-const sourceSans = Source_Sans_3({ subsets: ["latin"], display: "swap", preload: false, variable: "--font-source" });
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-jakarta",
+});
+
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
+  variable: "--font-mono",
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings();
   return {
     metadataBase: new URL(siteUrl()),
-    title: { default: settings.businessName, template: `%s · ${settings.businessName}` },
-    description: settings.heroText,
+    title: { default: `${settings.businessName} · Atelier & Archive`, template: `%s · ${settings.businessName}` },
+    description: "Original poured paintings and fine handcrafted woodwork from Collegeville, Pennsylvania.",
     applicationName: settings.businessName,
   };
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const settings = await getSettings();
   return (
     <html
       lang="en"
-      data-theme={settings.theme}
-      data-font={settings.fontPair}
-      className={`${spectral.variable} ${newsreader.variable} ${sourceSans.variable} h-full`}
+      className={`${cormorant.variable} ${jakarta.variable} ${spaceMono.variable} h-full scroll-smooth`}
     >
-      <body className="min-h-dvh flex flex-col">
-        <Script id="ajja-prefs" strategy="beforeInteractive">
-          {`try{var t=localStorage.getItem('ajja-text');var c=localStorage.getItem('ajja-contrast');if(t)document.documentElement.dataset.text=t;if(c)document.documentElement.dataset.contrast=c;}catch(e){}`}
-        </Script>
+      <body className="min-h-dvh flex flex-col font-sans bg-linen text-ink selection:bg-terracotta selection:text-linen">
         <a className="skip-link" href="#content">
           Skip to content
         </a>

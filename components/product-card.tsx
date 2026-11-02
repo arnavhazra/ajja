@@ -3,60 +3,122 @@ import Link from "next/link";
 import { formatMoney } from "@/lib/money";
 import type { PublicProduct } from "@/lib/types";
 
-export function pieceTitle(title?: string | null, slugOrHint?: string) {
+export function pieceTitle(
+  title?: string | null,
+  categoryOrHint?: string | null,
+  attributes?: Record<string, string>
+) {
   const trimmed = title?.trim();
-  if (trimmed && !/^title not written yet$/i.test(trimmed)) return trimmed;
-  if (slugOrHint) {
-    const match = slugOrHint.match(/(?:piece|study)[-_]?([a-zA-Z0-9]+)/i);
-    if (match?.[1]) {
-      const id = match[1];
-      if (/^\d+$/.test(id)) {
-        return `Studio Study No. ${id}`;
-      }
-      return `Studio Study ${id.slice(0, 4).toUpperCase()}`;
-    }
+  if (trimmed && !/^title not written yet$/i.test(trimmed) && !/^studio study/i.test(trimmed)) {
+    return trimmed;
   }
-  return "Studio Study";
+  const medium = attributes?.medium?.toLowerCase() ?? "";
+  const cat = (categoryOrHint ?? "").toLowerCase();
+  if (cat.includes("paint") || medium.includes("paint") || medium.includes("canvas")) {
+    return "Poured Painting";
+  }
+  if (cat.includes("wood") || medium.includes("wood") || medium.includes("pine")) {
+    return "Handcrafted Woodwork";
+  }
+  return "Studio Piece";
 }
 
-export function ProductCard({ product, href }: { product: PublicProduct; href?: string }) {
+export function ProductCard({
+  product,
+  onSave,
+  isSaved,
+  href,
+}: {
+  product: PublicProduct;
+  onSave?: (id: string) => void;
+  isSaved?: boolean;
+  href?: string;
+}) {
+  const targetHref = href || `/p/${product.slug}`;
   const image = product.images[0];
-  const listed = product.status === "published" || product.status === "sold" || product.status === "scheduled";
-  const price = listed ? formatMoney(product.priceMinor, product.currency) : null;
-  const compare =
-    price && product.comparePriceMinor && product.priceMinor != null && product.comparePriceMinor > product.priceMinor
-      ? formatMoney(product.comparePriceMinor, product.currency)
-      : null;
-  const destination = href ?? (listed ? `/p/${product.slug}` : `/studio/${product.slug}`);
-  const title = pieceTitle(product.title, product.slug);
+  const price = product.priceMinor != null ? formatMoney(product.priceMinor, product.currency) : null;
+  const title = pieceTitle(product.title, product.categorySlug, product.attributes);
+  const categoryLabel = product.categoryName || (product.attributes?.medium?.includes("wood") ? "Woodwork" : "Paintings");
+
+  // Determine native aspect ratio class based on image dimensions
+  const aspectClass =
+    image && image.width && image.height
+      ? image.height / image.width > 1.8
+        ? "aspect-[1/2]"
+        : image.height > image.width
+          ? "aspect-[4/5]"
+          : image.width > image.height
+            ? "aspect-[4/3]"
+            : "aspect-square"
+      : "aspect-[4/5]";
+
   return (
-    <article>
-      <Link href={destination} className="photo-link">
-        <div className="photo-frame crop relative" style={{ position: "relative" }}>
-          {image ? (
-            <Image
-              src={image.url}
-              alt={image.alt || `${title} in the studio.`}
-              fill
-              sizes="(max-width: 768px) 100vw, 33vw"
-              className="object-cover"
-              style={{ objectPosition: `${image.focalX * 100}% ${image.focalY * 100}%` }}
-              placeholder={image.blurData ? "blur" : "empty"}
-              blurDataURL={image.blurData ?? undefined}
-            />
-          ) : (
-            <div className="grid h-full place-items-center p-4 text-center text-ink-soft">Studio Study</div>
-          )}
-        </div>
-        <h2 className="mt-3 font-display text-xl text-ink">{title}</h2>
-        {product.categoryName ? <p className="text-ink-soft">{product.categoryName}</p> : null}
-      </Link>
-      <p className="nums mt-1">
-        {product.status === "sold" ? <span className="text-sold">Sold. </span> : null}
-        {compare ? <s className="mr-2 text-ink-soft">{compare}</s> : null}
-        <span>{price ?? (listed ? "Inquire for price" : "Studio Collection · Inquire")}</span>
-      </p>
-      {product.quantity === 1 && product.status === "published" ? <p className="text-ink-soft">Only 1 available</p> : null}
+    <article className="art-card group bg-bone hairline-box rounded-sm p-3.5 sm:p-4 flex flex-col justify-between transition-all duration-300 hover:shadow-[0_16px_36px_rgba(30,27,24,0.08)]">
+      <div>
+        <Link href={targetHref} className="block">
+          <div className={`art-card-img-wrap ${aspectClass} w-full rounded-sm mb-3.5 archival-vignette relative overflow-hidden bg-bone-dark`}>
+            {image ? (
+              <Image
+                src={image.url}
+                alt={image.alt || `${title} in the Collegeville studio.`}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="art-card-img object-cover"
+                style={{ objectPosition: `${image.focalX * 100}% ${image.focalY * 100}%` }}
+                placeholder={image.blurData ? "blur" : "empty"}
+                blurDataURL={image.blurData ?? undefined}
+              />
+            ) : (
+              <div className="grid h-full place-items-center p-4 text-center text-umber font-mono text-xs uppercase">
+                {title}
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between pb-2 mb-2 hairline-b font-mono text-[10px] tracking-widest uppercase">
+            <span className="text-ink font-bold">{categoryLabel}</span>
+            <span className="text-terracotta font-bold">1 OF 1</span>
+          </div>
+
+          <div className="flex items-baseline justify-between gap-2 mb-1.5">
+            <h3 className="font-serif text-xl sm:text-2xl text-ink font-medium leading-snug group-hover:text-terracotta transition-colors">
+              {title}
+            </h3>
+            <span className="font-mono text-xs text-ink font-bold whitespace-nowrap">
+              {price ?? "Ask about this piece"}
+            </span>
+          </div>
+
+          {product.description ? (
+            <p className="text-xs text-umber line-clamp-2 leading-relaxed mb-4">
+              {product.description}
+            </p>
+          ) : null}
+        </Link>
+      </div>
+
+      <div className="pt-3 hairline-t flex items-center justify-between gap-2 font-mono text-[11px] uppercase tracking-wider">
+        <Link
+          href={targetHref}
+          className="py-1.5 px-3 rounded-sm bg-linen hover:bg-ink hover:text-linen text-ink hairline-box transition-colors text-center"
+        >
+          [Inspect Piece]
+        </Link>
+
+        {onSave ? (
+          <button
+            type="button"
+            onClick={() => onSave(product.id)}
+            className={`py-1.5 px-3 rounded-sm hairline-box transition-colors cursor-pointer ${
+              isSaved
+                ? "bg-terracotta text-linen border-terracotta"
+                : "bg-linen text-umber hover:text-ink hover:bg-bone-dark"
+            }`}
+          >
+            {isSaved ? "Saved ✓" : "[+ Save]"}
+          </button>
+        ) : null}
+      </div>
     </article>
   );
 }

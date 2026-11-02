@@ -4,10 +4,12 @@ globs: "**/*.{tsx,css}"
 alwaysApply: false
 ---
 
-Follow DESIGN.md. Use the CSS tokens. Do not add a colour, radius, or shadow without a token.
+Follow DESIGN.md. Use the Linen Archive Folio CSS tokens.
 
-Body text stays at least 18px. Tap targets stay at least 48px. Prices use tabular numbers.
+Display serif is Cormorant Garamond, body sans is Plus Jakarta Sans, monospaced metadata is Space Mono.
 
-Support reduced motion. Do not animate from scale zero. Animate only transform and opacity, under 300ms.
+Tap targets stay at least 44px. Prices use tabular numbers.
 
-One accent, used for the main action. Photographs use a 4:5 crop unless the desk sets a focal point.
+Support reduced motion: when `prefers-reduced-motion: reduce` is active, disable smooth scroll and GSAP scrubbed animations, rendering final states immediately.
+
+Photographs showcase real artworks from the Collegeville studio. Never introduce fake placeholder art or generic stock images.

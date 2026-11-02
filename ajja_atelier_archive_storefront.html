@@ -1,0 +1,2151 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AJJA — Atelier & Archive | Master Woodwork, Ceramics & Paintings from Mysore</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Cormorant Garamond (Editorial Serif), Space Mono (Archival Specs), Plus Jakarta Sans (Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            linen: '#F7F4EE',
+            bone: '#EFEAE1',
+            boneDark: '#E5DEC9',
+            ink: '#1E1B18',
+            umber: '#6B6258',
+            terracotta: '#C2593F',
+            terracottaDark: '#A3442D',
+            moss: '#3E5C47',
+          },
+          fontFamily: {
+            serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+            mono: ['"Space Mono"', 'monospace'],
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --bg-linen: #F7F4EE;
+      --bg-bone: #EFEAE1;
+      --ink: #1E1B18;
+      --umber: #6B6258;
+      --terracotta: #C2593F;
+      --moss: #3E5C47;
+      --hairline: rgba(30, 27, 24, 0.11);
+    }
+
+    body {
+      background-color: var(--bg-linen);
+      color: var(--ink);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      line-height: 1.65;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Subtle museum cotton-rag paper texture across viewport */
+    .paper-grain {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.036;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Crisp 0.5px / 1px architectural hairline borders */
+    .hairline-t { border-top: 1px solid var(--hairline); }
+    .hairline-b { border-bottom: 1px solid var(--hairline); }
+    .hairline-l { border-left: 1px solid var(--hairline); }
+    .hairline-r { border-right: 1px solid var(--hairline); }
+    .hairline-box { border: 1px solid var(--hairline); }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F7F4EE;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #C5BDB0;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #6B6258;
+    }
+
+    /* Equalizer animation for live Mysore studio audio */
+    @keyframes eqBar1 {
+      0%, 100% { height: 3px; }
+      50% { height: 11px; }
+    }
+    @keyframes eqBar2 {
+      0%, 100% { height: 10px; }
+      33% { height: 3px; }
+      66% { height: 12px; }
+    }
+    @keyframes eqBar3 {
+      0%, 100% { height: 5px; }
+      40% { height: 12px; }
+      80% { height: 4px; }
+    }
+    .eq-active .bar-1 { animation: eqBar1 0.9s infinite ease-in-out; }
+    .eq-active .bar-2 { animation: eqBar2 0.75s infinite ease-in-out; }
+    .eq-active .bar-3 { animation: eqBar3 1.1s infinite ease-in-out; }
+    .eq-active .bar-4 { animation: eqBar1 0.85s infinite ease-in-out reverse; }
+
+    /* Interactive Macro Loupe Lens */
+    .loupe-lens {
+      position: absolute;
+      width: 175px;
+      height: 175px;
+      border-radius: 9999px;
+      border: 1.5px solid rgba(247, 244, 238, 0.9);
+      box-shadow: 0 16px 40px rgba(30, 27, 24, 0.35), inset 0 0 18px rgba(30, 27, 24, 0.25);
+      pointer-events: none;
+      background-repeat: no-repeat;
+      z-index: 30;
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.85);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .loupe-lens.active {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .loupe-lens::after {
+      content: '2.5× GRAIN LOUPE';
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.08em;
+      background: rgba(30, 27, 24, 0.82);
+      color: #F7F4EE;
+      padding: 2px 6px;
+      border-radius: 2px;
+      white-space: nowrap;
+    }
+
+    /* Artwork Card Image Hover & Macro Preview */
+    .art-card-img-wrap {
+      overflow: hidden;
+      position: relative;
+      background-color: #E6E0D4;
+    }
+    .art-card-img {
+      transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s ease;
+      will-change: transform;
+    }
+    .art-card:hover .art-card-img {
+      transform: scale(1.06);
+    }
+    .art-card.macro-mode .art-card-img {
+      transform: scale(2.15);
+      transform-origin: center center;
+    }
+
+    /* Subtle image vignette for archival film look */
+    .archival-vignette::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      box-shadow: inset 0 0 40px rgba(30, 27, 24, 0.08);
+      pointer-events: none;
+    }
+
+    /* Handwritten SVG signature stroke animation */
+    .sig-path {
+      stroke-dasharray: 600;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 1.8s ease;
+    }
+  </style>
+</head>
+<body class="selection:bg-terracotta selection:text-linen">
+
+  <!-- Fixed Paper Grain Texture Overlay -->
+  <div class="paper-grain" aria-hidden="true"></div>
+
+  <!-- =====================================================================
+       1. TOP SENSORY MICRO-BAR (Atmosphere, Web Audio Rain & Chisel, Currency)
+       ===================================================================== -->
+  <div class="bg-bone hairline-b text-[11px] font-mono tracking-wider text-umber relative z-40">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-8 py-2 flex flex-wrap items-center justify-between gap-y-2">
+      
+      <!-- Left: Studio Status & Interactive Web Audio Toggle -->
+      <div class="flex flex-wrap items-center gap-3 sm:gap-5">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-moss animate-pulse"></span>
+          <span class="uppercase text-ink font-bold">MYSORE ATELIER</span>
+          <span class="hidden md:inline text-umber">• CHAMUNDI FOOTHILLS • 28°C • KILN & BENCH ACTIVE</span>
+        </div>
+
+        <span class="hidden sm:inline text-ink/20">|</span>
+
+        <!-- Interactive Studio Soundscape Synthesizer -->
+        <button 
+          id="audioToggleBtn"
+          onclick="toggleStudioAudio()"
+          class="group flex items-center gap-2 px-2.5 py-0.5 rounded bg-linen/80 hover:bg-linen hairline-box transition-all cursor-pointer text-ink"
+          title="Synthesizes soothing Mysore monsoon rain on tin roof & gentle timber chisel resonance"
+        >
+          <div id="eqContainer" class="flex items-end gap-[2px] h-3 w-3.5">
+            <span class="bar-1 w-[2px] h-1 bg-terracotta transition-all"></span>
+            <span class="bar-2 w-[2px] h-2 bg-terracotta transition-all"></span>
+            <span class="bar-3 w-[2px] h-1.5 bg-terracotta transition-all"></span>
+            <span class="bar-4 w-[2px] h-1 bg-terracotta transition-all"></span>
+          </div>
+          <span id="audioStatusText" class="text-[10px] tracking-widest uppercase">
+            LISTEN: MONSOON RAIN & CHISEL RESONANCE [OFF]
+          </span>
+        </button>
+      </div>
+
+      <!-- Right: Provenance Note & Live Currency Switcher -->
+      <div class="flex items-center gap-4 ml-auto">
+        <span class="hidden xl:inline text-[10px] uppercase tracking-widest text-umber">
+          INSURED WHITE-GLOVE TIMBER CRATE DISPATCH WORLDWIDE
+        </span>
+
+        <!-- Currency Switcher (USD / INR) -->
+        <div class="flex items-center hairline-box bg-linen rounded overflow-hidden text-[10px]">
+          <button 
+            id="currUsdBtn"
+            onclick="setCurrency('USD')"
+            class="px-2.5 py-0.5 font-bold bg-ink text-linen transition-colors"
+          >
+            USD $
+          </button>
+          <button 
+            id="currInrBtn"
+            onclick="setCurrency('INR')"
+            class="px-2.5 py-0.5 text-umber hover:text-ink transition-colors"
+          >
+            INR ₹
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       2. STICKY ARCHIVAL HEADER & UTILITY FILTER BAR
+       ===================================================================== -->
+  <header class="sticky top-0 z-30 bg-linen/95 backdrop-blur-md hairline-b transition-all">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-8 h-20 flex items-center justify-between gap-4">
+      
+      <!-- Left: Classical Wordmark + Live Dispatch Status -->
+      <div class="flex items-center gap-4 sm:gap-6">
+        <a href="#" class="group focus:outline-none">
+          <div class="flex items-baseline gap-2">
+            <span class="font-serif text-3xl sm:text-4xl font-semibold tracking-tight text-ink">AJJA</span>
+            <span class="font-mono text-[9px] uppercase tracking-widest text-terracotta border border-terracotta/30 px-1.5 py-0.5 rounded-sm">ARCHIVE</span>
+          </div>
+          <p class="font-mono text-[9px] tracking-widest uppercase text-umber -mt-1">
+            Mysore Studio • Est. 1964
+          </p>
+        </a>
+
+        <div class="hidden lg:block h-7 w-[1px] bg-ink/10"></div>
+
+        <div class="hidden lg:block">
+          <p class="font-mono text-[10px] uppercase tracking-widest text-ink flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-terracotta"></span>
+            Studio Open • Dispatching from Mysore
+          </p>
+          <p class="font-mono text-[9px] text-umber tracking-wider">
+            Master Artisan: Ajja Narayan Rao (80)
+          </p>
+        </div>
+      </div>
+
+      <!-- Center: Minimal Text Pill Filters -->
+      <nav aria-label="Archive Categories" class="hidden md:flex items-center gap-1.5 bg-bone/80 p-1 rounded hairline-box">
+        <button 
+          onclick="filterWorks('all')"
+          data-filter-btn="all"
+          class="filter-pill active px-3 py-1.5 rounded text-[11px] font-mono tracking-wider uppercase transition-all bg-ink text-linen"
+        >
+          All Works <span class="opacity-70">(8)</span>
+        </button>
+        <button 
+          onclick="filterWorks('painting')"
+          data-filter-btn="painting"
+          class="filter-pill px-3 py-1.5 rounded text-[11px] font-mono tracking-wider uppercase text-umber hover:text-ink transition-all"
+        >
+          Canvas & Pigment <span class="opacity-70">(3)</span>
+        </button>
+        <button 
+          onclick="filterWorks('wood')"
+          data-filter-btn="wood"
+          class="filter-pill px-3 py-1.5 rounded text-[11px] font-mono tracking-wider uppercase text-umber hover:text-ink transition-all"
+        >
+          Wood & Timber <span class="opacity-70">(3)</span>
+        </button>
+        <button 
+          onclick="filterWorks('ceramic')"
+          data-filter-btn="ceramic"
+          class="filter-pill px-3 py-1.5 rounded text-[11px] font-mono tracking-wider uppercase text-umber hover:text-ink transition-all"
+        >
+          Clay & Glaze <span class="opacity-70">(2)</span>
+        </button>
+        <a 
+          href="#atelier-section"
+          class="px-3 py-1.5 rounded text-[11px] font-mono tracking-wider uppercase text-umber hover:text-ink transition-all"
+        >
+          The Atelier
+        </a>
+      </nav>
+
+      <!-- Right: Collector's Bag / Inquiries Trigger -->
+      <div class="flex items-center gap-3">
+        <a 
+          href="#commission-section"
+          class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 text-[11px] font-mono uppercase tracking-wider text-umber hover:text-ink hairline-box rounded bg-bone/40 hover:bg-bone transition-colors"
+        >
+          <span>Inquire / Commission</span>
+        </a>
+
+        <button 
+          onclick="toggleCartDrawer(true)"
+          class="flex items-center gap-2.5 px-3.5 py-2 rounded bg-ink text-linen hover:bg-ink/90 transition-all shadow-sm cursor-pointer"
+          aria-label="Open Collector's Bag"
+        >
+          <span class="font-mono text-[11px] uppercase tracking-widest">Bag / Inquiries</span>
+          <span 
+            id="headerBagCount"
+            class="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-sm bg-terracotta text-linen"
+          >
+            1
+          </span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile Category Filter Strip -->
+    <div class="md:hidden hairline-t bg-bone/60 px-4 py-2 flex items-center gap-2 overflow-x-auto no-scrollbar">
+      <button onclick="filterWorks('all')" data-filter-btn="all" class="filter-pill-mobile px-2.5 py-1 rounded text-[10px] font-mono uppercase whitespace-nowrap bg-ink text-linen">All Works (8)</button>
+      <button onclick="filterWorks('painting')" data-filter-btn="painting" class="filter-pill-mobile px-2.5 py-1 rounded text-[10px] font-mono uppercase whitespace-nowrap text-umber hairline-box bg-linen">Canvas & Pigment (3)</button>
+      <button onclick="filterWorks('wood')" data-filter-btn="wood" class="filter-pill-mobile px-2.5 py-1 rounded text-[10px] font-mono uppercase whitespace-nowrap text-umber hairline-box bg-linen">Wood & Timber (3)</button>
+      <button onclick="filterWorks('ceramic')" data-filter-btn="ceramic" class="filter-pill-mobile px-2.5 py-1 rounded text-[10px] font-mono uppercase whitespace-nowrap text-umber hairline-box bg-linen">Clay & Glaze (2)</button>
+      <a href="#atelier-section" class="px-2.5 py-1 rounded text-[10px] font-mono uppercase whitespace-nowrap text-umber hairline-box bg-linen">The Atelier</a>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       MAIN ARCHIVE CANVAS (1440px Editorial Container)
+       ===================================================================== -->
+  <main class="max-w-[1440px] mx-auto px-4 sm:px-8">
+
+    <!-- ===================================================================
+         3. HERO EXHIBITION / FEATURED PROVENANCE (Asymmetric 2-Column)
+         =================================================================== -->
+    <section class="py-10 sm:py-16 lg:py-20 hairline-b">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+        
+        <!-- Left Column (7 Cols): Poetic Editorial Manifesto & Studio Specs -->
+        <div class="lg:col-span-7 lg:pr-6 pt-2">
+          
+          <!-- Small Archival Catalog Stamp -->
+          <div class="inline-flex items-center gap-2.5 px-3 py-1 rounded-sm bg-bone hairline-box mb-6">
+            <span class="w-1.5 h-1.5 rounded-full bg-terracotta"></span>
+            <span class="font-mono text-[11px] uppercase tracking-[0.18em] text-terracotta font-bold">
+              SERIES XI • AUTUMN BATCH // ARCHIVE FOLIO
+            </span>
+          </div>
+
+          <!-- Large Editorial Serif Headline -->
+          <h1 class="font-serif text-4xl sm:text-6xl lg:text-[68px] text-ink font-normal leading-[1.06] tracking-[-0.015em] mb-6">
+            Objects shaped by sixty years of patience and <span class="italic font-normal text-terracotta">timber dust.</span>
+          </h1>
+
+          <!-- 2-Sentence Manifesto on Analog Slow Craft vs Mass Production -->
+          <p class="text-base sm:text-lg text-umber font-normal leading-[1.75] max-w-2xl mb-8">
+            Every vessel, canvas, and carved stool in the Mysore atelier begins as storm-felled Kaveri river timber, coarse red earth clay, or hand-ground mineral pigment aged for seasons before meeting the gouge or the wheel. We make strictly one of each; when a work finds its custodian, its archive number is permanently retired into the studio ledger.
+          </p>
+
+          <!-- Primary & Secondary Hero CTAs -->
+          <div class="flex flex-wrap items-center gap-4 mb-12">
+            <a 
+              href="#manifest-grid"
+              class="px-7 py-4 bg-ink text-linen font-mono text-xs uppercase tracking-[0.16em] rounded-sm hover:bg-terracotta transition-colors shadow-sm"
+            >
+              Explore Available Archive
+            </a>
+            <button 
+              onclick="openDossierModal('AJJA-2024-W04')"
+              class="px-6 py-4 bg-bone hover:bg-boneDark text-ink font-mono text-xs uppercase tracking-[0.15em] rounded-sm hairline-box transition-colors cursor-pointer"
+            >
+              [Inspect Hero Vessel Dossier]
+            </button>
+          </div>
+
+          <!-- Archival Provenance Ledger Table -->
+          <div class="bg-bone/80 hairline-box rounded-sm p-5 sm:p-6 max-w-2xl">
+            <div class="flex items-center justify-between pb-3 mb-4 hairline-b">
+              <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-umber">
+                STUDIO PROVENANCE SPECIFICATION
+              </span>
+              <span class="font-mono text-[10px] uppercase tracking-widest text-moss font-bold">
+                ● MYSORE GUILD AUTHENTICATED
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div>
+                <p class="font-mono text-[10px] uppercase tracking-widest text-umber mb-1">MASTER ARTISAN</p>
+                <p class="font-serif text-xl font-semibold text-ink">Ajja Narayan Rao</p>
+                <p class="font-mono text-[11px] text-umber">80 Yrs • 62 Years at the Bench</p>
+              </div>
+              <div class="sm:hairline-l sm:pl-5">
+                <p class="font-mono text-[10px] uppercase tracking-widest text-umber mb-1">EDITION POLICY</p>
+                <p class="font-serif text-xl font-semibold text-ink">1 of 1 Unrepeatable</p>
+                <p class="font-mono text-[11px] text-umber">Zero molds, CNC, or synthetics</p>
+              </div>
+              <div class="sm:hairline-l sm:pl-5">
+                <p class="font-mono text-[10px] uppercase tracking-widest text-umber mb-1">CUSTODIAL DEED</p>
+                <p class="font-serif text-xl font-semibold text-ink">Hand-Signed Linen</p>
+                <p class="font-mono text-[11px] text-umber">Wax seal & thumbprint registry</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column (5 Cols): Hero Spotlight Card of Hand-Carved Teak Bowl -->
+        <div class="lg:col-span-5">
+          <div class="bg-bone hairline-box rounded-sm p-4 sm:p-5 shadow-[0_20px_50px_rgba(30,27,24,0.05)]">
+            
+            <!-- Top Specimen Plate Header -->
+            <div class="flex items-center justify-between pb-3 mb-3 hairline-b font-mono text-[10px] tracking-widest uppercase">
+              <span class="text-ink font-bold">HERO SPECIMEN // AJJA-2024-W04</span>
+              <div class="flex items-center gap-2">
+                <button 
+                  id="heroLoupeToggleBtn"
+                  onclick="toggleHeroLoupeLock()"
+                  class="px-2 py-0.5 rounded bg-linen hairline-box text-ink hover:bg-terracotta hover:text-linen transition-colors cursor-pointer"
+                  title="Toggle 2.5x Magnifying Grain Loupe"
+                >
+                  [🔍 2.5× LOUPE]
+                </button>
+                <span class="px-2 py-0.5 bg-moss/15 text-moss font-bold rounded-sm">EDITION 1 OF 1</span>
+              </div>
+            </div>
+
+            <!-- Interactive Hero Image Container with 2.5x Macro Grain Loupe -->
+            <div 
+              id="heroImageContainer"
+              class="relative aspect-[4/3] w-full overflow-hidden rounded-sm bg-boneDark cursor-crosshair select-none archival-vignette"
+              onmousemove="handleHeroLoupeMove(event)"
+              onmouseenter="handleHeroLoupeEnter()"
+              onmouseleave="handleHeroLoupeLeave()"
+              onclick="openDossierModal('AJJA-2024-W04')"
+            >
+              <img 
+                id="heroSpecimenImg"
+                src="https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=1400&q=85"
+                onerror="this.onerror=null;this.src='https://placehold.co/900x675/DDD5C7/1E1B18?text=Aged+Nilgiri+Teak+Vessel';"
+                alt="Hand-Carved Aged Nilgiri Teak Offering Bowl in warm Mysore daylight"
+                class="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-[1.02]"
+              />
+
+              <!-- Floating Overlay Caption Badge -->
+              <div class="absolute top-3 left-3 bg-linen/90 backdrop-blur-sm px-2.5 py-1 rounded-sm hairline-box pointer-events-none">
+                <span class="font-mono text-[9px] uppercase tracking-widest text-ink">
+                  FIG 01. HAND-GOUGED HEARTWOOD BOWL (HOVER FOR GRAIN LOUPE)
+                </span>
+              </div>
+
+              <!-- Magnifying Loupe Lens -->
+              <div id="heroLoupeLens" class="loupe-lens"></div>
+            </div>
+
+            <!-- Specimen Title & Craft Story -->
+            <div class="pt-4 pb-3 hairline-b">
+              <div class="flex items-baseline justify-between gap-2 mb-1">
+                <h2 class="font-serif text-2xl sm:text-3xl text-ink font-medium">
+                  Hand-Carved Nilgiri Teak Bowl
+                </h2>
+                <span class="font-mono text-sm font-bold text-ink" data-price-usd="1250">
+                  $1,250 USD
+                </span>
+              </div>
+              <p class="text-xs sm:text-sm text-umber leading-relaxed">
+                Hollowed by hand over nineteen days from a single storm-felled Nilgiri teak burl. Exterior retains raw 14mm curved gouge facets; interior burnished with raw wildforest beeswax and cold-pressed sesame oil.
+              </p>
+            </div>
+
+            <!-- Monospaced Metadata Block Underneath -->
+            <div class="py-3 hairline-b font-mono text-[11px] text-umber leading-relaxed">
+              <div class="flex flex-wrap items-center justify-between gap-y-1">
+                <span>Item No. <strong class="text-ink">AJJA-2024-W04</strong></span>
+                <span>|</span>
+                <span>Aged Nilgiri Teak</span>
+                <span>|</span>
+                <span class="text-ink font-bold" data-price-usd="1250">$1,250</span>
+                <span>|</span>
+                <span class="text-terracotta font-bold">Edition 1 of 1</span>
+              </div>
+              <div class="grid grid-cols-3 gap-2 pt-2.5 mt-2.5 hairline-t text-[10px]">
+                <div>
+                  <span class="block text-umber/70 uppercase">DIMENSIONS</span>
+                  <span class="text-ink">42 × 28 × 18 cm</span>
+                </div>
+                <div>
+                  <span class="block text-umber/70 uppercase">TIMBER AGE</span>
+                  <span class="text-ink">Seasoned 14 Yrs</span>
+                </div>
+                <div>
+                  <span class="block text-umber/70 uppercase">CUSTODY</span>
+                  <span class="text-moss font-bold">In Studio Vault</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Bar: [Inspect & Acquire] + Quick Add -->
+            <div class="pt-3.5 flex flex-wrap items-center justify-between gap-3">
+              <button 
+                onclick="openDossierModal('AJJA-2024-W04')"
+                class="flex-1 py-2.5 px-4 bg-linen hover:bg-boneDark text-ink font-mono text-xs uppercase tracking-widest hairline-box rounded-sm transition-colors cursor-pointer text-center"
+              >
+                [Inspect & Acquire]
+              </button>
+              <button 
+                id="heroAcquireBtn"
+                onclick="addToCart('AJJA-2024-W04')"
+                class="py-2.5 px-5 bg-terracotta hover:bg-terracottaDark text-linen font-mono text-xs uppercase tracking-widest rounded-sm transition-colors cursor-pointer"
+              >
+                [+ Reserve Piece]
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         4. CURATED INVENTORY GRID (Staggered 3-Column Editorial Masonry)
+         =================================================================== -->
+    <section id="manifest-grid" class="py-14 sm:py-20 hairline-b">
+      
+      <!-- Section Header & Active Filter Status -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-6 hairline-b">
+        <div>
+          <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-terracotta mb-2">
+            FOLIO 02 // CATALOGUE RAISONNÉ & CURRENT HOLDINGS
+          </p>
+          <h2 class="font-serif text-4xl sm:text-5xl text-ink font-normal tracking-tight">
+            Current Studio Manifest
+          </h2>
+        </div>
+
+        <div class="max-w-md">
+          <p class="text-xs sm:text-sm text-umber leading-relaxed">
+            Displayed in uncropped native aspect ratios—square ceramic pedestals (1:1), vertical linen canvases (3:4), and horizontal timber carvings (4:3). Hover any work to reveal macro surface grain or inspect scale.
+          </p>
+        </div>
+      </div>
+
+      <!-- Filter Bar Sub-Controls & Macro Preview Hint -->
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="font-mono text-[10px] uppercase tracking-widest text-umber mr-2">FILTER ARCHIVE:</span>
+          <button onclick="filterWorks('all')" data-subfilter="all" class="subfilter-pill px-3 py-1 rounded-sm font-mono text-[11px] uppercase bg-ink text-linen cursor-pointer">
+            ● All Works (8)
+          </button>
+          <button onclick="filterWorks('ceramic')" data-subfilter="ceramic" class="subfilter-pill px-3 py-1 rounded-sm font-mono text-[11px] uppercase bg-bone text-umber hover:text-ink hairline-box cursor-pointer">
+            Clay & Glaze (2)
+          </button>
+          <button onclick="filterWorks('painting')" data-subfilter="painting" class="subfilter-pill px-3 py-1 rounded-sm font-mono text-[11px] uppercase bg-bone text-umber hover:text-ink hairline-box cursor-pointer">
+            Canvas & Pigment (3)
+          </button>
+          <button onclick="filterWorks('wood')" data-subfilter="wood" class="subfilter-pill px-3 py-1 rounded-sm font-mono text-[11px] uppercase bg-bone text-umber hover:text-ink hairline-box cursor-pointer">
+            Wood & Timber (3)
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2 font-mono text-[10px] text-umber">
+          <span class="inline-block w-2 h-2 rounded-full bg-terracotta"></span>
+          <span>CLICK ANY SPECIMEN FOR IN-ROOM SCALE & STUDIO NOTES</span>
+        </div>
+      </div>
+
+      <!-- Staggered 3-Column Editorial Masonry Container -->
+      <div id="masonryGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
+        <!-- Populated dynamically via JS to preserve staggered column masonry & native aspect ratios -->
+      </div>
+
+      <!-- Custom Architectural Commission Callout Banner -->
+      <div class="mt-14 bg-bone hairline-box rounded-sm p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div class="max-w-2xl">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="font-mono text-[10px] uppercase tracking-widest text-terracotta font-bold">BESPOKE PATRONAGE</span>
+            <span class="text-umber/40">•</span>
+            <span class="font-mono text-[10px] uppercase tracking-widest text-umber">3 COMMISSIONS PER SEASON</span>
+          </div>
+          <h3 class="font-serif text-2xl sm:text-3xl text-ink mb-1">
+            Seeking specific architectural dimensions or timber species?
+          </h3>
+          <p class="text-sm text-umber">
+            Ajja undertakes three custom woodworking or canvas commissions each monsoon cycle using naturally fallen rosewood, teak, and jackfruit logs seasoned in our Mysore yard.
+          </p>
+        </div>
+        <a 
+          href="#commission-section"
+          class="px-6 py-3.5 bg-ink text-linen font-mono text-xs uppercase tracking-widest rounded-sm hover:bg-terracotta transition-colors whitespace-nowrap"
+        >
+          [Inquire on Commission]
+        </a>
+      </div>
+
+    </section>
+
+    <!-- ===================================================================
+         5. ATELIER PROVENANCE SECTION (Full-Width Split: B&W Hands + Quote)
+         =================================================================== -->
+    <section id="atelier-section" class="py-16 sm:py-24 hairline-b">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+        
+        <!-- Left Column (6 Cols): Authentic B&W Grain Photograph of Artisan's Hands & Chisel -->
+        <div class="lg:col-span-6">
+          <div class="bg-bone p-4 sm:p-6 hairline-box rounded-sm shadow-sm">
+            <div class="relative aspect-[4/5] w-full overflow-hidden rounded-sm bg-ink">
+              <img 
+                src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1200&q=85"
+                onerror="this.onerror=null;this.src='https://placehold.co/800x1000/1E1B18/EFEAE1?text=Mysore+Atelier+Chisel+Archive';"
+                alt="Black and white archival photograph of Ajja Narayan Rao's hands holding carving chisels in natural window light"
+                class="w-full h-full object-cover grayscale contrast-125 brightness-95 hover:scale-103 transition-transform duration-1000"
+              />
+              <!-- Film Grain & Darkroom Vignette Overlay -->
+              <div class="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-ink/10 pointer-events-none"></div>
+
+              <div class="absolute bottom-4 left-4 right-4 flex items-end justify-between text-linen/90 font-mono text-[10px] tracking-widest uppercase">
+                <span>MYSORE ATELIER EAST WING // NORTH WINDOW</span>
+                <span>SILVER GELATIN PRINT #71</span>
+              </div>
+            </div>
+
+            <div class="pt-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-widest text-umber">
+              <span>PHOTO ARCHIVE — CHAMUNDI FOOTHILLS BENCH</span>
+              <span>HAND-FORGED 18MM KANNA & GOUGE</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column (6 Cols): Editorial Interview Excerpt & Handwritten Signature -->
+        <div class="lg:col-span-6 lg:pl-4">
+          <div class="inline-flex items-center gap-2 mb-4">
+            <span class="w-6 h-[1px] bg-terracotta"></span>
+            <span class="font-mono text-[11px] uppercase tracking-[0.2em] text-terracotta font-bold">
+              THE MAKER'S CREDO // AJJA NARAYAN RAO (B. 1946)
+            </span>
+          </div>
+
+          <h2 class="font-serif text-4xl sm:text-5xl text-ink font-normal leading-[1.12] mb-6">
+            On letting the wood decide the grain.
+          </h2>
+
+          <blockquote class="font-serif italic text-2xl sm:text-[28px] text-ink/90 leading-[1.38] pl-5 border-l-2 border-terracotta mb-8">
+            “When I was twenty, I tried to force the timber to submit to my drawing. Now that I am eighty, I know the tree has lived three hundred monsoons longer than I have. My only task is to clear away the silence so its grain can speak.”
+          </blockquote>
+
+          <div class="space-y-4 text-sm sm:text-base text-umber leading-[1.75] mb-10">
+            <p>
+              Nothing in the Chamundi Foothills workshop has ever known mechanical sandpaper speed, synthetic polyurethane, or chemical stains. Timber surfaces are trued using hand-forged Japanese smoothing planes (<em class="text-ink font-serif text-lg">kanna</em>) and local high-carbon steel gouges, then burnished with dried horsetail reed stalks and unrefined cold-pressed sesame oil.
+            </p>
+            <p>
+              Each ceramic vessel is thrown on a kick-wheel from Kaveri river silt clay and fired for seven days in a wood-stoked kiln, where falling teak ash melts naturally on the shoulders of the pot to form an unrepeatable mineral glaze.
+            </p>
+          </div>
+
+          <!-- Two Key Custodial Pillars -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 py-6 hairline-t hairline-b mb-8">
+            <div>
+              <h3 class="font-mono text-xs uppercase tracking-widest text-ink font-bold mb-1.5">
+                01. Zero Chemical Binders
+              </h3>
+              <p class="text-xs text-umber leading-relaxed">
+                Joined solely through hand-cut sliding dovetails, wedged mortise-and-tenon, and seasoned rosewood pins. Pigments are mulled by hand with raw linseed oil and dammar tree resin.
+              </p>
+            </div>
+            <div>
+              <h3 class="font-mono text-xs uppercase tracking-widest text-ink font-bold mb-1.5">
+                02. Perpetual Studio Custody
+              </h3>
+              <p class="text-xs text-umber leading-relaxed">
+                Every artifact carries a lifetime re-waxing and conservation guarantee at our Mysore bench at zero cost to the custodian or their heirs.
+              </p>
+            </div>
+          </div>
+
+          <!-- Handwritten Digital Signature + Embossed Mysore Guild Wax Seal SVG -->
+          <div class="flex flex-wrap items-center justify-between gap-6">
+            <div>
+              <!-- Custom SVG Handwritten Signature of Ajja Narayan Rao -->
+              <svg class="h-14 w-56 text-ink mb-1" viewBox="0 0 280 70" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Handwritten signature of Ajja Narayan Rao">
+                <path class="sig-path" d="M18 52C26 36 38 14 44 14C48 14 42 46 39 54C37 58 45 42 54 36C62 31 64 46 70 46C76 46 82 33 88 33C93 33 91 58 84 63C77 67 74 56 84 48C94 40 105 32 110 34C115 36 108 58 103 62C98 66 95 53 106 45C117 37 126 35 130 41C134 47 142 36 146 39C150 42 156 45 165 42M24 36C42 34 66 30 82 28M182 48C186 35 194 18 198 18C202 18 201 38 206 44C211 50 218 30 222 24C225 35 228 45 236 44C244 43 249 34 256 35C263 36 260 45 268 44" stroke="#1E1B18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="94" cy="24" r="1.5" fill="#1E1B18"/>
+                <circle cx="114" cy="23" r="1.5" fill="#1E1B18"/>
+                <path d="M16 60C75 56 175 53 265 51" stroke="#C2593F" stroke-width="1" stroke-linecap="round" stroke-dasharray="3 3"/>
+              </svg>
+              <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-umber">
+                AJJA NARAYAN RAO • MASTER OF THE MYSORE ATELIER
+              </p>
+            </div>
+
+            <!-- Custom Embossed Terracotta Wax Seal SVG -->
+            <div class="flex items-center gap-3 bg-bone px-4 py-2.5 rounded-sm hairline-box">
+              <svg class="w-11 h-11 text-terracotta shrink-0" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="32" cy="32" r="29" fill="#C2593F" fill-opacity="0.14" stroke="#C2593F" stroke-width="1.5" stroke-dasharray="2 2"/>
+                <circle cx="32" cy="32" r="23" stroke="#C2593F" stroke-width="1.2"/>
+                <path d="M32 16L36 26L46 28L38 35L40 45L32 39L24 45L26 35L18 28L28 26L32 16Z" stroke="#C2593F" stroke-width="1.2" fill="#C2593F" fill-opacity="0.2"/>
+                <text x="32" y="35" text-anchor="middle" fill="#C2593F" font-family="Space Mono, monospace" font-size="7" font-weight="bold">1964</text>
+              </svg>
+              <div class="font-mono text-[10px] leading-tight">
+                <span class="block text-ink font-bold uppercase">MYSORE CRAFTSMEN GUILD</span>
+                <span class="text-umber">SEAL NO. KA-MYS-0194</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         6. DEED OF TRANSFER & ARCHIVAL SEALS (Tactile Provenance Accordion)
+         =================================================================== -->
+    <section class="py-16 sm:py-20 hairline-b max-w-4xl mx-auto">
+      <div class="text-center mb-12">
+        <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-terracotta mb-2">
+          CUSTODIAL TRANSPARENCY & LOGISTICS
+        </p>
+        <h2 class="font-serif text-3xl sm:text-4xl text-ink font-normal mb-2">
+          Deed of Transfer & Archival Crating
+        </h2>
+        <p class="text-sm text-umber max-w-xl mx-auto">
+          How each one-of-a-kind work is sourced, authenticated on hand-loomed cotton rag, and crated in custom pine for safe passage from Mysore to your home.
+        </p>
+      </div>
+
+      <div class="space-y-3">
+        <!-- Accordion Item 1 -->
+        <div class="bg-bone hairline-box rounded-sm overflow-hidden">
+          <button 
+            onclick="toggleAccordion(1)"
+            class="w-full px-6 py-5 flex items-center justify-between text-left cursor-pointer hover:bg-boneDark/50 transition-colors"
+          >
+            <div class="flex items-center gap-4">
+              <span class="font-mono text-xs text-terracotta font-bold">SEC-01</span>
+              <span class="font-serif text-xl sm:text-2xl text-ink">Fallen Timber & Kaveri River Clay Sourcing</span>
+            </div>
+            <span id="accIcon1" class="font-mono text-lg text-umber">−</span>
+          </button>
+          <div id="accContent1" class="px-6 pb-6 pt-2 hairline-t bg-linen/50 text-sm text-umber space-y-3">
+            <p>
+              We never fell living trees. All timber in the archive—Nilgiri teak, Malabar rosewood, Eastern white cedar, and wild jackfruit—is salvaged from trees naturally uprooted during the southwest monsoon along the Kabini and Kaveri river basins. Logs are air-dried under shade in our Mysore courtyard for 8 to 14 years until equilibrium moisture content reaches a stable 8.2%.
+            </p>
+            <div class="flex flex-wrap gap-6 pt-2 font-mono text-[11px] text-ink">
+              <span>• MOISTURE EQUILIBRIUM: 8.2% STABLE</span>
+              <span>• CLAY SOURCE: KAVERI DELTA SILT</span>
+              <span>• PIGMENTS: NATURAL EARTH & MINERAL OXIDES</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accordion Item 2 -->
+        <div class="bg-bone hairline-box rounded-sm overflow-hidden">
+          <button 
+            onclick="toggleAccordion(2)"
+            class="w-full px-6 py-5 flex items-center justify-between text-left cursor-pointer hover:bg-boneDark/50 transition-colors"
+          >
+            <div class="flex items-center gap-4">
+              <span class="font-mono text-xs text-terracotta font-bold">SEC-02</span>
+              <span class="font-serif text-xl sm:text-2xl text-ink">Hand-Signed Linen Deed & Physical Wax Seal</span>
+            </div>
+            <span id="accIcon2" class="font-mono text-lg text-umber">+</span>
+          </button>
+          <div id="accContent2" class="hidden px-6 pb-6 pt-2 hairline-t bg-linen/50 text-sm text-umber space-y-3">
+            <p>
+              Accompanying every acquisition is a physical archival folio containing a hand-typed Certificate of Provenance on 300gsm cold-pressed khadi cotton rag, embossed with the Mysore Studio red lac wax seal, Ajja’s wet-ink signature, the exact date of completion, and a 30ml glass apothecary vial of our studio beeswax-sesame maintenance balm.
+            </p>
+            <div class="flex flex-wrap gap-6 pt-2 font-mono text-[11px] text-ink">
+              <span>• DEED PAPER: 100% KHADI COTTON RAG</span>
+              <span>• INCLUDES: 30ML BEESWAX CARE VIAL</span>
+              <span>• ARCHIVE REGISTRY: PERMANENT LEDGER ENTRY</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accordion Item 3 -->
+        <div class="bg-bone hairline-box rounded-sm overflow-hidden">
+          <button 
+            onclick="toggleAccordion(3)"
+            class="w-full px-6 py-5 flex items-center justify-between text-left cursor-pointer hover:bg-boneDark/50 transition-colors"
+          >
+            <div class="flex items-center gap-4">
+              <span class="font-mono text-xs text-terracotta font-bold">SEC-03</span>
+              <span class="font-serif text-xl sm:text-2xl text-ink">Bespoke Slatted Timber Crating & Insured Air Transit</span>
+            </div>
+            <span id="accIcon3" class="font-mono text-lg text-umber">+</span>
+          </button>
+          <div id="accContent3" class="hidden px-6 pb-6 pt-2 hairline-t bg-linen/50 text-sm text-umber space-y-3">
+            <p>
+              Within 72 hours of acquisition, our studio carpenter constructs a custom ISPM-15 certified pine crate tailored to the exact geometry of your piece, suspended in acid-free glassine tissue and high-density natural coir cushioning. Dispatched worldwide via DHL Express Priority Air or BlueDart White-Glove with 100% marine & transit insurance included.
+            </p>
+            <div class="flex flex-wrap gap-6 pt-2 font-mono text-[11px] text-ink">
+              <span>• INDIA TRANSIT: 3–5 DAYS</span>
+              <span>• GLOBAL AIR: 6–9 DAYS (DHL PRIORITY)</span>
+              <span>• INSURANCE: 100% LLOYD'S UNDERWRITTEN</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         7. PRIVATE COMMISSION & STUDIO INQUIRY SECTION
+         =================================================================== -->
+    <section id="commission-section" class="py-16 sm:py-24 max-w-3xl mx-auto">
+      <div class="bg-bone hairline-box rounded-sm p-6 sm:p-12 relative">
+        
+        <div class="text-center mb-10">
+          <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-terracotta font-bold mb-2">
+            COMMISSIONS & CONSERVATION DIALOGUE
+          </p>
+          <h2 class="font-serif text-3xl sm:text-4xl text-ink font-normal mb-2">
+            Begin a Studio Inquiry
+          </h2>
+          <p class="text-xs sm:text-sm text-umber max-w-lg mx-auto">
+            If a piece is marked Reserved, or if you wish to request a custom architectural woodwork commission or live WhatsApp video viewing from the Mysore bench, write to us below.
+          </p>
+        </div>
+
+        <form id="studioInquiryForm" onsubmit="handleInquirySubmit(event)" class="space-y-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <label class="block font-mono text-[10px] uppercase tracking-widest text-umber mb-2">
+                PATRON FULL NAME *
+              </label>
+              <input 
+                type="text" 
+                id="inquiryName"
+                required
+                placeholder="e.g. Aarya Radhakrishnan"
+                class="w-full px-3.5 py-2.5 bg-linen hairline-box rounded-sm text-sm text-ink focus:outline-none focus:border-terracotta"
+              />
+            </div>
+            <div>
+              <label class="block font-mono text-[10px] uppercase tracking-widest text-umber mb-2">
+                EMAIL OR WHATSAPP NUMBER *
+              </label>
+              <input 
+                type="text" 
+                id="inquiryContact"
+                required
+                placeholder="patron@residence.org or +91 ..."
+                class="w-full px-3.5 py-2.5 bg-linen hairline-box rounded-sm text-sm text-ink focus:outline-none focus:border-terracotta"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-mono text-[10px] uppercase tracking-widest text-umber mb-2">
+              MEDIUM OR SPECIMEN OF INTEREST
+            </label>
+            <input 
+              type="text" 
+              id="inquirySubject"
+              placeholder="Reference item code (e.g. AJJA-2024-W04) or custom timber/canvas dimensions..."
+              class="w-full px-3.5 py-2.5 bg-linen hairline-box rounded-sm text-sm text-ink focus:outline-none focus:border-terracotta"
+            />
+          </div>
+
+          <div>
+            <label class="block font-mono text-[10px] uppercase tracking-widest text-umber mb-2">
+              ARCHITECTURAL SETTING & CUSTODIAL NOTES
+            </label>
+            <textarea 
+              rows="3"
+              id="inquiryMessage"
+              placeholder="Share details on your space, natural light conditions, or questions for Ajja..."
+              class="w-full px-3.5 py-2.5 bg-linen hairline-box rounded-sm text-sm text-ink focus:outline-none focus:border-terracotta"
+            ></textarea>
+          </div>
+
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+            <span class="font-mono text-[10px] text-umber">
+              ✓ All dispatches include signed hand-loomed linen deed of authenticity.
+            </span>
+            <button 
+              type="submit"
+              class="px-7 py-3.5 bg-ink hover:bg-terracotta text-linen font-mono text-xs uppercase tracking-[0.16em] rounded-sm transition-colors cursor-pointer"
+            >
+              Transmit Studio Letter
+            </button>
+          </div>
+        </form>
+
+        <!-- Confirmation Message Box (Hidden by default) -->
+        <div id="inquirySuccessBox" class="hidden mt-6 p-5 bg-linen hairline-box rounded-sm text-center">
+          <p class="font-serif text-2xl text-ink mb-1">Your letter has been logged in the Mysore studio ledger.</p>
+          <p class="font-mono text-xs text-umber">
+            Grandfather & our studio archivist review correspondence each evening at 6:00 PM IST. Reference ID: <span class="text-terracotta font-bold">#MYS-2026-884</span>
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =====================================================================
+       FOOTER: ARCHIVAL COLOPHON
+       ===================================================================== -->
+  <footer class="bg-bone hairline-t text-umber">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-8 py-14">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 hairline-b">
+        
+        <div class="md:col-span-5">
+          <div class="flex items-baseline gap-2 mb-3">
+            <span class="font-serif text-3xl text-ink font-semibold">AJJA</span>
+            <span class="font-mono text-[10px] uppercase tracking-widest text-terracotta">Atelier & Archive</span>
+          </div>
+          <p class="text-xs sm:text-sm text-umber max-w-sm leading-relaxed mb-4">
+            © 1964–2026 Ajja Studio Archive, Mysore, Karnataka. All original artifacts hand-carved, thrown, and painted by Master Artisan Ajja Narayan Rao. Bound in raw flax and seasoned teak.
+          </p>
+          <p class="font-mono text-[10px] uppercase tracking-widest text-ink">
+            CHAMUNDI FOOTHILLS • MYSORE 570008 • KARNATAKA, INDIA
+          </p>
+        </div>
+
+        <div class="md:col-span-3 font-mono text-xs space-y-2">
+          <p class="text-[10px] uppercase tracking-widest text-ink font-bold mb-3">REGISTRIES</p>
+          <p><a href="#manifest-grid" onclick="filterWorks('all')" class="hover:text-ink transition-colors">Catalogue Raisonné (8)</a></p>
+          <p><a href="#manifest-grid" onclick="filterWorks('wood')" class="hover:text-ink transition-colors">Salvaged Timber Manifest</a></p>
+          <p><a href="#manifest-grid" onclick="filterWorks('ceramic')" class="hover:text-ink transition-colors">Anagama Wood-Fired Kiln Log</a></p>
+          <p><a href="#manifest-grid" onclick="filterWorks('painting')" class="hover:text-ink transition-colors">Raw Linen & Mineral Studies</a></p>
+        </div>
+
+        <div class="md:col-span-4 font-mono text-xs space-y-2">
+          <p class="text-[10px] uppercase tracking-widest text-ink font-bold mb-3">PRIVATE STUDIO VIEWING</p>
+          <p class="text-umber text-xs leading-relaxed font-sans">
+            Collectors visiting Mysore are welcome at the workbench by prior appointment for tea and inspection of works in progress.
+          </p>
+          <div class="pt-2">
+            <button 
+              onclick="toggleCartDrawer(true)"
+              class="px-4 py-2 bg-linen hover:bg-ink hover:text-linen text-ink font-mono text-[11px] uppercase tracking-wider hairline-box rounded-sm transition-colors cursor-pointer"
+            >
+              Open Collector's Bag →
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="pt-6 flex flex-wrap items-center justify-between gap-4 font-mono text-[10px] uppercase tracking-widest text-umber">
+        <span>ARCHIVE REF: AJJA-MYS-VOL-XI // ALL PROVENANCE RESERVED</span>
+        <span>TYPESET IN CORMORANT GARAMOND & SPACE MONO</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =====================================================================
+       FLOATING RIGHT-EDGE QUICK DRAWER TRIGGER TAB
+       (Lets user easily toggle the 420px Slide-Over Cart Drawer at any time)
+       ===================================================================== -->
+  <button 
+    id="floatingBagTab"
+    onclick="toggleCartDrawer(true)"
+    class="fixed right-0 top-1/2 -translate-y-1/2 z-40 bg-bone hover:bg-ink text-ink hover:text-linen hairline-l hairline-t hairline-b px-2.5 py-4 rounded-l-sm shadow-md transition-all cursor-pointer flex flex-col items-center gap-2 group"
+    title="Open Collector's Bag Drawer"
+  >
+    <span class="w-2 h-2 rounded-full bg-terracotta"></span>
+    <span class="font-mono text-[10px] uppercase tracking-[0.2em] [writing-mode:vertical-rl] rotate-180">
+      COLLECTOR'S BAG (<span id="floatingBagCount">1</span>)
+    </span>
+  </button>
+
+  <!-- =====================================================================
+       5. SLIDE-OVER CART DRAWER (420px Overlay Drawer in #EFEAE1)
+       ===================================================================== -->
+  <!-- Subtle backdrop when open on mobile/tablet; transparent click-outside on desktop so user can see editorial layout -->
+  <div 
+    id="cartBackdrop"
+    onclick="toggleCartDrawer(false)"
+    class="fixed inset-0 bg-ink/20 backdrop-blur-[1px] z-40 opacity-0 pointer-events-none transition-opacity duration-300"
+  ></div>
+
+  <aside 
+    id="cartDrawer"
+    aria-label="Collector's Bag Drawer"
+    class="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-bone hairline-l z-50 flex flex-col justify-between shadow-[-20px_0_60px_rgba(30,27,24,0.12)] translate-x-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+  >
+    <!-- Top Drawer Header -->
+    <div>
+      <div class="px-6 py-5 hairline-b flex items-center justify-between bg-bone">
+        <div>
+          <p class="font-mono text-[9px] uppercase tracking-[0.2em] text-terracotta font-bold">
+            ACQUISITION FOLIO
+          </p>
+          <h2 class="font-serif text-2xl text-ink font-medium">
+            Collector's Bag (<span id="drawerItemCount">1 Item</span>)
+          </h2>
+        </div>
+
+        <button 
+          onclick="toggleCartDrawer(false)"
+          class="w-8 h-8 rounded-sm hairline-box bg-linen hover:bg-ink hover:text-linen text-ink flex items-center justify-center font-mono text-sm transition-colors cursor-pointer"
+          title="Close Drawer to inspect full page"
+          aria-label="Close Collector's Bag"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- Line Items Container -->
+      <div id="cartItemsContainer" class="p-6 space-y-4 max-h-[calc(100vh-350px)] overflow-y-auto">
+        <!-- Populated dynamically via JS (Pre-loaded with Smoked Stoneware Vessel $680) -->
+      </div>
+
+      <!-- Custodial Shipping & Crate Guarantee Box -->
+      <div class="px-6">
+        <div class="p-4 rounded-sm bg-linen/70 hairline-box space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-mono text-[10px] uppercase tracking-wider text-ink font-bold flex items-center gap-1.5">
+              <span>✓</span> Custodial Shipping Protocol
+            </span>
+            <select 
+              id="shippingRegionSelect"
+              onchange="renderCart()"
+              class="font-mono text-[10px] bg-bone px-2 py-0.5 rounded hairline-box text-ink focus:outline-none cursor-pointer"
+            >
+              <option value="0">India Crate (Included)</option>
+              <option value="95">Global Air Crate (+$95)</option>
+            </select>
+          </div>
+          <p class="text-[11px] text-umber leading-relaxed">
+            Insured white-glove crate delivery calculated at checkout. Bespoke pine slatted timber crate with climate buffering and hand-signed provenance certificate.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Dock: Subtotal & Solid #1E1B18 CTA Button with White Serif Text -->
+    <div class="p-6 hairline-t bg-bone space-y-4">
+      <div class="space-y-1.5 font-mono text-xs">
+        <div class="flex justify-between text-umber">
+          <span>Subtotal</span>
+          <span id="cartSubtotal">$680.00 USD</span>
+        </div>
+        <div class="flex justify-between text-umber text-[11px]">
+          <span>Archival Timber Crate & Wax Deed</span>
+          <span id="cartShippingCost">Included</span>
+        </div>
+        <div class="flex justify-between text-ink font-bold text-sm pt-2 hairline-t">
+          <span class="font-serif text-lg font-medium">Total Allocation</span>
+          <span id="cartTotal">$680.00 USD</span>
+        </div>
+      </div>
+
+      <!-- Solid #1E1B18 CTA Button with White Serif Text as specified -->
+      <button 
+        onclick="handleProceedToAcquisition()"
+        class="w-full py-4 px-6 bg-[#1E1B18] hover:bg-terracotta text-[#F7F4EE] font-serif text-xl tracking-wide rounded-sm transition-colors cursor-pointer shadow-sm"
+      >
+        Proceed to Acquisition
+      </button>
+
+      <!-- Acquisition Checkout Feedback Banner (Hidden until clicked) -->
+      <div id="checkoutFeedback" class="hidden p-3.5 rounded-sm bg-linen hairline-box text-center space-y-1">
+        <p class="font-serif text-lg text-ink font-medium">Custodial Reservation Initiated</p>
+        <p class="font-mono text-[10px] text-umber">
+          Our Mysore studio archivist has locked your 1-of-1 specimen for 24 hours and prepared your formal wire / card invoice dossier.
+        </p>
+      </div>
+
+      <div class="text-center">
+        <a 
+          href="#commission-section"
+          onclick="toggleCartDrawer(false)"
+          class="font-mono text-[10px] uppercase tracking-widest text-umber hover:text-ink underline underline-offset-4"
+        >
+          Or Inquire Directly via WhatsApp Studio
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- =====================================================================
+       MUSEUM DOSSIER & IN-ROOM SCALE VISUALIZER MODAL
+       ===================================================================== -->
+  <div 
+    id="dossierModal"
+    class="fixed inset-0 z-50 bg-ink/60 backdrop-blur-xs hidden items-center justify-center p-4 sm:p-6 overflow-y-auto"
+    onclick="if(event.target === this) closeDossierModal()"
+  >
+    <div class="bg-linen hairline-box rounded-sm max-w-5xl w-full overflow-hidden shadow-2xl my-auto">
+      
+      <!-- Modal Top Bar -->
+      <div class="px-6 py-4 bg-bone hairline-b flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <span id="modalCode" class="font-mono text-xs font-bold text-terracotta uppercase tracking-widest">AJJA-2024-C01</span>
+          <span class="text-umber/30">|</span>
+          <span id="modalCategory" class="font-mono text-xs uppercase tracking-widest text-umber">CLAY & GLAZE SPECIMEN</span>
+        </div>
+
+        <!-- View Mode Switcher (Daylight / Macro Crackle / In-Room Scale) -->
+        <div class="flex items-center gap-1 bg-linen p-1 rounded-sm hairline-box">
+          <button 
+            onclick="setModalViewMode('daylight')"
+            id="modalTabDaylight"
+            class="px-3 py-1 rounded-sm font-mono text-[10px] uppercase bg-ink text-linen cursor-pointer"
+          >
+            01. Studio Daylight
+          </button>
+          <button 
+            onclick="setModalViewMode('macro')"
+            id="modalTabMacro"
+            class="px-3 py-1 rounded-sm font-mono text-[10px] uppercase text-umber hover:text-ink cursor-pointer"
+          >
+            02. Macro Grain (2.5×)
+          </button>
+          <button 
+            onclick="setModalViewMode('scale')"
+            id="modalTabScale"
+            class="px-3 py-1 rounded-sm font-mono text-[10px] uppercase text-umber hover:text-ink cursor-pointer"
+          >
+            03. Scale Visualizer
+          </button>
+        </div>
+
+        <button 
+          onclick="closeDossierModal()"
+          class="px-3 py-1 bg-linen hover:bg-ink hover:text-linen text-ink font-mono text-xs hairline-box rounded-sm cursor-pointer"
+        >
+          [ESC / CLOSE ✕]
+        </button>
+      </div>
+
+      <!-- Modal Content Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12">
+        
+        <!-- Left 7 Cols: Visual Stage -->
+        <div class="lg:col-span-7 bg-bone/60 p-6 sm:p-8 flex flex-col justify-center items-center relative min-h-[380px] sm:min-h-[460px] hairline-b lg:hairline-b-0 lg:hairline-r">
+          
+          <!-- View 1 & 2: Image Stage -->
+          <div id="modalImageStage" class="w-full h-full flex items-center justify-center overflow-hidden rounded-sm relative bg-boneDark max-h-[420px]">
+            <img 
+              id="modalArtworkImg"
+              src=""
+              alt="Artwork specimen view"
+              class="w-full h-full object-cover transition-transform duration-700"
+            />
+            <div id="modalMacroBadge" class="hidden absolute bottom-3 left-3 bg-ink/85 text-linen font-mono text-[10px] uppercase tracking-widest px-3 py-1 rounded-sm">
+              MACRO LENS DETAIL — SURFACE TEXTURE & PATINA
+            </div>
+          </div>
+
+          <!-- View 3: Architectural Scale Visualizer Stage -->
+          <div id="modalScaleStage" class="hidden w-full h-full flex-col items-center justify-between p-6 bg-linen hairline-box rounded-sm">
+            <div class="w-full flex justify-between font-mono text-[10px] text-umber uppercase tracking-widest pb-3 hairline-b">
+              <span>ARCHITECTURAL PROPORTION DIAGRAM</span>
+              <span id="modalScaleDimensions">28 × 24 CM</span>
+            </div>
+
+            <div class="my-auto py-8 flex items-end justify-center gap-12 w-full">
+              <!-- Reference Tea Vessel / Studio Bench Silhouette -->
+              <div class="flex flex-col items-center">
+                <div class="w-10 h-14 border border-dashed border-umber/60 bg-bone flex items-center justify-center font-mono text-[9px] text-umber">
+                  12cm
+                </div>
+                <span class="font-mono text-[9px] text-umber mt-2 uppercase">STUDIO TEA CUP</span>
+              </div>
+
+              <!-- Dynamic Scaled Artwork Box -->
+              <div class="flex flex-col items-center">
+                <div id="modalScaleBox" class="relative overflow-hidden border-2 border-ink shadow-md bg-bone transition-all" style="width: 150px; height: 150px;">
+                  <img id="modalScaleThumb" src="" alt="" class="w-full h-full object-cover" />
+                </div>
+                <span id="modalScaleCaption" class="font-mono text-[10px] text-ink font-bold mt-2 uppercase">28 CM HEIGHT</span>
+              </div>
+            </div>
+
+            <p class="font-mono text-[10px] text-umber text-center">
+              PROPORTION SCALED AGAINST STANDARD 12CM STUDIO CHAWAN TEA BOWL
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Right 5 Cols: Archival Dossier & Ajja's Handwritten Note -->
+        <div class="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between bg-linen">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span id="modalTag" class="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-sm bg-moss/15 text-moss font-bold">
+                EDITION 1 OF 1
+              </span>
+              <span id="modalPrice" class="font-mono text-lg font-bold text-ink">$680 USD</span>
+            </div>
+
+            <h3 id="modalTitle" class="font-serif text-3xl sm:text-4xl text-ink font-normal mb-3">
+              Smoked Stoneware Vessel
+            </h3>
+
+            <p id="modalDescription" class="text-sm text-umber leading-relaxed mb-6">
+              Thrown on a traditional flywheel from coarse Kaveri riverbed clay and fired for 140 hours in our wood-stoked anagama kiln.
+            </p>
+
+            <!-- Technical Specs Grid -->
+            <div class="grid grid-cols-2 gap-3 p-4 bg-bone hairline-box rounded-sm font-mono text-[11px] mb-6">
+              <div>
+                <span class="block text-[9px] uppercase text-umber">MATERIAL & MEDIUM</span>
+                <span id="modalMaterial" class="text-ink font-bold">Wood-fired coarse clay</span>
+              </div>
+              <div>
+                <span class="block text-[9px] uppercase text-umber">EXACT DIMENSIONS</span>
+                <span id="modalDims" class="text-ink font-bold">28 × 24 cm</span>
+              </div>
+              <div>
+                <span class="block text-[9px] uppercase text-umber">COMPLETION DATE</span>
+                <span id="modalYear" class="text-ink">Autumn Batch • Mysore</span>
+              </div>
+              <div>
+                <span class="block text-[9px] uppercase text-umber">AUTHENTICATION</span>
+                <span class="text-moss font-bold">Signed Linen Deed</span>
+              </div>
+            </div>
+
+            <!-- Ajja's Bench Note -->
+            <div class="p-4 border-l-2 border-terracotta bg-bone/50 mb-6">
+              <p class="font-mono text-[9px] uppercase tracking-widest text-terracotta font-bold mb-1">
+                AJJA'S WORKBENCH MARGINALIA:
+              </p>
+              <p id="modalMakerNote" class="font-serif italic text-lg text-ink leading-snug">
+                “Placed near the firebox mouth where falling tamarind and teak embers fused directly into the shoulder clay.”
+              </p>
+            </div>
+          </div>
+
+          <!-- Modal Action Buttons -->
+          <div class="pt-4 hairline-t flex items-center gap-3">
+            <button 
+              id="modalAcquireBtn"
+              onclick=""
+              class="w-full py-3.5 px-6 bg-terracotta hover:bg-terracottaDark text-linen font-mono text-xs uppercase tracking-widest rounded-sm transition-colors cursor-pointer"
+            >
+              [+ Reserve Piece for Acquisition]
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       APPLICATION LOGIC & ARCHIVAL DATA STORE
+       ===================================================================== -->
+  <script>
+    // ---------------------------------------------------------------------
+    // 1. MASTER ARCHIVAL INVENTORY DATA (Uncropped Native Aspect Ratios)
+    // ---------------------------------------------------------------------
+    const ARCHIVE_WORKS = [
+      {
+        id: 'AJJA-2024-C01',
+        title: 'Smoked Stoneware Vessel',
+        category: 'ceramic',
+        categoryLabel: 'Clay & Glaze',
+        aspectClass: 'aspect-square', // 1:1 square ceramic pedestal
+        aspectLabel: '1:1 Ceramic Pedestal',
+        priceUsd: 680,
+        dimensions: '28 × 24 cm',
+        scaleWidthPx: 140,
+        scaleHeightPx: 140,
+        material: 'Wood-fired coarse clay • 28cm',
+        subtitle: 'Wood-fired coarse Kaveri clay, natural ash deposit, micro-crackle glaze.',
+        description: 'Thrown on a weighted kick-wheel from iron-rich Kaveri river silt clay and wood-fired for six days. High-gloss natural ash glaze reflections transition into raw toasted stoneware near the hand-trimmed foot ring.',
+        makerNote: '“Set near the front chamber of the kiln where tamarind wood ash drifted across the shoulder at 1,280°C.”',
+        status: 'available',
+        tag: '1 OF 1',
+        image: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=1000&q=85',
+        fallback: 'https://placehold.co/800x800/E5DEC9/1E1B18?text=Smoked+Stoneware+Vessel',
+        column: 1
+      },
+      {
+        id: 'AJJA-2024-P01',
+        title: 'Monsoon Over Wayanad',
+        category: 'painting',
+        categoryLabel: 'Canvas & Pigment',
+        aspectClass: 'aspect-[3/4]', // 3:4 vertical canvas frame
+        aspectLabel: '3:4 Vertical Portrait',
+        priceUsd: 3400,
+        dimensions: '90 × 120 cm',
+        scaleWidthPx: 150,
+        scaleHeightPx: 200,
+        material: 'Oil & natural resin on raw linen • 90×120cm',
+        subtitle: 'Heavy impasto oil & natural dammar resin layered on hand-stretched unbleached flax.',
+        description: 'Painted with palette knives and stiff hog-bristle brushes during the July monsoon. Pigments are ground in the Mysore courtyard from raw Nilgiri earth umber, crushed slate, and cold-pressed linseed oil, framed in hand-joined Burmese teak.',
+        makerNote: '“Sixteen layers of wet-on-dry mineral pigment; the lower ridge holds actual Wayanad red laterite dust mixed into the oil.”',
+        status: 'reserved',
+        tag: 'RESERVED',
+        image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1000&q=85',
+        fallback: 'https://placehold.co/750x1000/D9D2C5/1E1B18?text=Monsoon+Over+Wayanad',
+        column: 2
+      },
+      {
+        id: 'AJJA-2024-W01',
+        title: 'Low Carved Teak Stool',
+        category: 'wood',
+        categoryLabel: 'Wood & Timber',
+        aspectClass: 'aspect-[4/3]', // 4:3 horizontal crop
+        aspectLabel: '4:3 Horizontal Timber',
+        priceUsd: 1450,
+        dimensions: '48 × 36 × 42 cm',
+        scaleWidthPx: 175,
+        scaleHeightPx: 130,
+        material: 'Reclaimed Burmese teak, beeswax finish',
+        subtitle: 'Tactile chisel gouge textures across a gently dished saddle seat with wedged tenons.',
+        description: 'Hewn from reclaimed 80-year-old Burmese teak beams salvaged from an ancestral Mysore veranda. Every millimeter of the seat is hand-dished with a curved scorper so the surface warms immediately to touch.',
+        makerNote: '“Joined with four blind rosewood wedges—not a single iron nail or drop of synthetic glue touches this timber.”',
+        status: 'available',
+        tag: '1 OF 1',
+        image: 'https://images.unsplash.com/photo-1538688525198-9b88f6f53126?auto=format&fit=crop&w=1000&q=85',
+        fallback: 'https://placehold.co/900x675/E2DACB/1E1B18?text=Low+Carved+Teak+Stool',
+        column: 3
+      },
+      {
+        id: 'AJJA-2024-W02',
+        title: 'Fluted Cedar Bedside Stand',
+        category: 'wood',
+        categoryLabel: 'Wood & Timber',
+        aspectClass: 'aspect-[4/3]',
+        aspectLabel: '4:3 Horizontal Timber',
+        priceUsd: 1680,
+        dimensions: '55 × 45 × 62 cm',
+        scaleWidthPx: 170,
+        scaleHeightPx: 145,
+        material: 'Eastern white cedar, hand-cut dovetails • 55×45×62cm',
+        subtitle: 'Hand-fluted legs in aromatic white cedar, slatted lower gallery shelf, carved finger pull.',
+        description: 'Architectural bedside table crafted from naturally fallen Himalayan & Nilgiri cedar. Features hand-planed sliding dovetail joinery and a ventilated lower slatted shelf designed for books and ceramic vessels.',
+        makerNote: '“When you open the drawer on warm mornings, the raw unfinished cedar interior releases a quiet forest resin scent.”',
+        status: 'available',
+        tag: '1 OF 1',
+        image: 'https://images.unsplash.com/photo-1532372320572-cda25653a26d?auto=format&fit=crop&w=1000&q=85',
+        fallback: 'https://placehold.co/900x675/E5DEC9/1E1B18?text=Fluted+Cedar+Stand',
+        column: 1
+      },
+      {
+        id: 'AJJA-2024-C02',
+        title: 'Raku Glazed Offering Dish',
+        category: 'ceramic',
+        categoryLabel: 'Clay & Glaze',
+        aspectClass: 'aspect-square',
+        aspectLabel: '1:1 Ceramic Pedestal',
+        priceUsd: 540,
+        dimensions: '34 × 7 cm',
+        scaleWidthPx: 145,
+        scaleHeightPx: 75,
+        material: 'Copper-reduction stoneware • 34cm',
+        subtitle: 'Rapid reduction smoking in dried teak leaves, raw quartz inclusions, hand-burnished foot.',
+        description: 'Pulled glowing red from the kiln at 1,000°C and buried immediately in a pit of dry Mysore teak sawdust and tamarind husks. The thermal shock creates a labyrinth of carbon-black crackle lines across the mineral white slip.',
+        makerNote: '“The smoke pattern is drawn by fire and oxygen alone; even if I lived another eighty years, I could not repeat it.”',
+        status: 'available',
+        tag: '1 OF 1',
+        image: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&w=1000&q=85',
+        fallback: 'https://placehold.co/800x800/DFD8C8/1E1B18?text=Raku+Glazed+Dish',
+        column: 2
+      },
+      {
+        id: 'AJJA-2024-P02',
+        title: 'Dusk at Kaveri Ghat',
+        category: 'painting',
+        categoryLabel: 'Canvas & Pigment',
+        aspectClass: 'aspect-[3/4]',
+        aspectLabel: '3:4 Vertical Portrait',
+        priceUsd: 2800,
+        dimensions: '75 × 100 cm',
+        scaleWidthPx: 145,
+        scaleHeightPx: 190,
+        material: 'Raw umber & natural indigo on khadi • 75×100cm',
+        subtitle: 'Hand-mulled river ochre, natural indigocake, and cold-pressed linseed oil on heavy khadi.',
+        description: 'An atmospheric study of twilight descending over the stone river steps near Srirangapatna. Unbleached hand-spun cotton canvas is sized with traditional rabbit-skin alternative plant mucilage so the raw weave breathes through the pigment.',
+        makerNote: '“Painted by kerosene lamp and evening light between 5:30 and 6:45 PM over forty consecutive evenings.”',
+        status: 'available',
+        tag: '1 OF 1',
+        image: 'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?auto=format&fit=crop&w=1000&q=85',
+        fallback: 'https://placehold.co/750x1000/DDD5C7/1E1B18?text=Dusk+at+Kaveri+Ghat',
+        column: 3
+      },
+      {
+        id: 'AJJA-2024-P03',
+        title: 'Nilgiri Mist Study IV',
+        category: 'painting',
+        categoryLabel: 'Canvas & Pigment',
+        aspectClass: 'aspect-[3/4]',
+        aspectLabel: '3:4 Vertical Portrait',
+        priceUsd: 1950,
+        dimensions: '60 × 80 cm',
+        scaleWidthPx: 135,
+        scaleHeightPx: 175,
+        material: 'Earth pigment & beeswax encaustic • 60×80cm',
+        subtitle: 'Molten forest beeswax fused with burnt sienna, bone black, and raw chalk on linen panel.',
+        description: 'Created using heated brass spatulas to fuse raw Nilgiri beeswax with dry earth pigments. The surface possesses a deep, translucent luminescence and subtle honeyed aroma that never yellows or cracks.',
+        makerNote: '“Burnished with raw silk cloth while the wax was still warm to the palm.”',
+        status: 'available',
+        tag: '1 OF 1',
+        image: 'https://images.unsplash.com/photo-1580136579312-94651dfd596d?auto=format&fit=crop&w=1000&q=85',
+        fallback: 'https://placehold.co/750x1000/E2DACB/1E1B18?text=Nilgiri+Mist+Study+IV',
+        column: 1
+      },
+      {
+        id: 'AJJA-2024-W03',
+        title: 'Chisel-Gouged Jackfruit Platter',
+        category: 'wood',
+        categoryLabel: 'Wood & Timber',
+        aspectClass: 'aspect-[4/3]',
+        aspectLabel: '4:3 Horizontal Timber',
+        priceUsd: 620,
+        dimensions: '52 × 31 × 5 cm',
+        scaleWidthPx: 165,
+        scaleHeightPx: 100,
+        material: 'Single-slab fallen jackfruit timber • 52cm',
+        subtitle: 'Golden heartwood carved along the natural live edge, finished in cold-pressed sesame oil.',
+        description: 'Carved from a storm-felled orchard jackfruit trunk whose dense golden heartwood is prized in South Indian temple architecture for its acoustic warmth and deep amber patina.',
+        makerNote: '“Over 900 individual shallow gouge strokes across the basin; catches morning shadow like rippled pond water.”',
+        status: 'available',
+        tag: '1 OF 1',
+        image: 'https://images.unsplash.com/photo-1615529182904-14819c35db37?auto=format&fit=crop&w=1000&q=85',
+        fallback: 'https://placehold.co/900x675/E4DDD0/1E1B18?text=Jackfruit+Wood+Platter',
+        column: 2
+      }
+    ];
+
+    // Hero Specimen item so it can also be inspected in the modal or added to the Collector's Bag
+    const HERO_SPECIMEN = {
+      id: 'AJJA-2024-W04',
+      title: 'Hand-Carved Nilgiri Teak Bowl',
+      category: 'wood',
+      categoryLabel: 'Wood & Timber',
+      aspectClass: 'aspect-[4/3]',
+      aspectLabel: '4:3 Hero Specimen',
+      priceUsd: 1250,
+      dimensions: '42 × 28 × 18 cm',
+      scaleWidthPx: 160,
+      scaleHeightPx: 115,
+      material: 'Aged Nilgiri Teak • Edition 1 of 1',
+      subtitle: 'Hollowed by hand from a 14-year seasoned Nilgiri teak burl with raw gouge exterior.',
+      description: 'Carved solely with curved hand gouges and mallets over nineteen days in the Mysore studio. The undulating rim follows the natural tension of the root burl.',
+      makerNote: '“This burl sat beneath my workbench through fourteen monsoons before telling me how deep the hollow should go.”',
+      status: 'available',
+      tag: '1 OF 1',
+      image: 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=1400&q=85',
+      fallback: 'https://placehold.co/900x675/DDD5C7/1E1B18?text=Aged+Nilgiri+Teak+Bowl'
+    };
+
+    // ---------------------------------------------------------------------
+    // 2. APPLICATION STATE (Currency, Filter, Cart, Macro Mode, Audio)
+    // ---------------------------------------------------------------------
+    let currentCurrency = 'USD'; // 'USD' or 'INR'
+    const INR_RATE = 84; // 1 USD = 84 INR
+    let activeCategoryFilter = 'all';
+    let macroCardsState = { 'AJJA-2024-C01': false }; // Track macro toggle per card
+    let heroLoupeLocked = false;
+
+    // Pre-populated with "Smoked Stoneware Vessel" ($680) as specified in the prompt
+    let cartItems = ['AJJA-2024-C01'];
+
+    // ---------------------------------------------------------------------
+    // 3. CURRENCY FORMATTER & LIVE CONVERTER
+    // ---------------------------------------------------------------------
+    function formatPrice(usdAmount, includeCode = false) {
+      if (currentCurrency === 'USD') {
+        const formatted = '$' + usdAmount.toLocaleString('en-US');
+        return includeCode ? `${formatted} USD` : formatted;
+      } else {
+        const inrAmount = Math.round((usdAmount * INR_RATE) / 500) * 500;
+        const formatted = '₹' + inrAmount.toLocaleString('en-IN');
+        return includeCode ? `${formatted} INR` : formatted;
+      }
+    }
+
+    function setCurrency(curr) {
+      currentCurrency = curr;
+      const usdBtn = document.getElementById('currUsdBtn');
+      const inrBtn = document.getElementById('currInrBtn');
+
+      if (curr === 'USD') {
+        usdBtn.className = 'px-2.5 py-0.5 font-bold bg-ink text-linen transition-colors';
+        inrBtn.className = 'px-2.5 py-0.5 text-umber hover:text-ink transition-colors';
+      } else {
+        inrBtn.className = 'px-2.5 py-0.5 font-bold bg-ink text-linen transition-colors';
+        usdBtn.className = 'px-2.5 py-0.5 text-umber hover:text-ink transition-colors';
+      }
+
+      // Update static elements with data-price-usd
+      document.querySelectorAll('[data-price-usd]').forEach(el => {
+        const usd = parseFloat(el.getAttribute('data-price-usd'));
+        el.textContent = formatPrice(usd);
+      });
+
+      renderMasonryGrid();
+      renderCart();
+    }
+
+    // ---------------------------------------------------------------------
+    // 4. RENDER STAGGERED 3-COLUMN EDITORIAL MASONRY GRID
+    // ---------------------------------------------------------------------
+    function getItemById(id) {
+      if (id === HERO_SPECIMEN.id) return HERO_SPECIMEN;
+      return ARCHIVE_WORKS.find(w => w.id === id);
+    }
+
+    function toggleCardMacro(event, id) {
+      event.stopPropagation();
+      macroCardsState[id] = !macroCardsState[id];
+      renderMasonryGrid();
+    }
+
+    function buildCardHTML(item) {
+      const inCart = cartItems.includes(item.id);
+      const isReserved = item.status === 'reserved';
+      const isMacro = !!macroCardsState[item.id];
+
+      return `
+        <article 
+          class="art-card ${isMacro ? 'macro-mode' : ''} group bg-bone hairline-box rounded-sm p-4 transition-all duration-300 hover:shadow-[0_18px_40px_rgba(30,27,24,0.07)]"
+        >
+          <!-- Image Container with Native Uncropped Aspect Ratio -->
+          <div 
+            class="art-card-img-wrap ${item.aspectClass} w-full rounded-sm mb-4 cursor-pointer archival-vignette"
+            onclick="openDossierModal('${item.id}')"
+          >
+            <img 
+              src="${item.image}" 
+              onerror="this.onerror=null;this.src='${item.fallback}';"
+              alt="${item.title}"
+              class="art-card-img w-full h-full object-cover object-center"
+              loading="lazy"
+            />
+
+            <!-- Top-Left Native Ratio / Macro Toggle Pill -->
+            <button
+              onclick="toggleCardMacro(event, '${item.id}')"
+              class="absolute top-3 left-3 z-10 px-2 py-0.5 rounded-sm font-mono text-[9px] uppercase tracking-widest transition-colors cursor-pointer ${
+                isMacro 
+                  ? 'bg-terracotta text-linen font-bold' 
+                  : 'bg-linen/90 text-ink hover:bg-ink hover:text-linen'
+              } hairline-box"
+              title="Toggle macro surface grain detail"
+            >
+              ${isMacro ? '● 2.5× MACRO GLAZE/GRAIN' : '🔍 MACRO DETAIL'}
+            </button>
+
+            <!-- Top-Right Edition / Reserved Tag -->
+            <span class="absolute top-3 right-3 z-10 px-2.5 py-0.5 rounded-sm font-mono text-[9px] uppercase tracking-widest font-bold ${
+              isReserved 
+                ? 'bg-ink text-linen' 
+                : 'bg-linen/95 text-ink hairline-box'
+            }">
+              ${item.tag}
+            </span>
+
+            <!-- Hover Overlay with Macro Zoom Note & Quick Dossier Trigger -->
+            <div class="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-ink/80 via-ink/35 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between">
+              <span class="font-mono text-[9px] uppercase tracking-widest text-linen">
+                ${item.id === 'AJJA-2024-C01' ? 'MACRO GLAZE CRACKLE DETAIL' : item.aspectLabel}
+              </span>
+              <span class="font-mono text-[9px] uppercase tracking-widest text-linen underline">
+                [Inspect & Scale →]
+              </span>
+            </div>
+          </div>
+
+          <!-- Archival Code & Medium Subheader -->
+          <div class="flex items-center justify-between font-mono text-[10px] text-umber mb-1">
+            <span>${item.id}</span>
+            <span class="text-terracotta">${item.categoryLabel}</span>
+          </div>
+
+          <!-- Artwork Title -->
+          <h3 
+            onclick="openDossierModal('${item.id}')"
+            class="font-serif text-2xl text-ink font-medium mb-1.5 hover:text-terracotta transition-colors cursor-pointer"
+          >
+            ${item.title}
+          </h3>
+
+          <!-- Tactile Material & Dimensions Metadata -->
+          <p class="font-mono text-[11px] text-ink/85 mb-1.5">
+            ${item.material}
+          </p>
+          <p class="text-xs text-umber leading-relaxed mb-4">
+            ${item.subtitle}
+          </p>
+
+          <!-- Card Footer: Price + Terracotta [+ Reserve Piece] CTA -->
+          <div class="pt-3 hairline-t flex items-center justify-between gap-2">
+            <span class="font-mono text-xs font-bold text-ink">
+              ${formatPrice(item.priceUsd, true)}
+            </span>
+
+            ${
+              isReserved
+                ? `<button 
+                     onclick="inquireReservedPiece('${item.id}', '${item.title}')"
+                     class="px-3 py-1.5 rounded-sm font-mono text-[10px] uppercase tracking-widest text-umber hover:text-ink bg-linen hairline-box transition-colors cursor-pointer"
+                   >
+                     [Inquire / Waitlist]
+                   </button>`
+                : inCart
+                ? `<button 
+                     onclick="toggleCartDrawer(true)"
+                     class="px-3.5 py-1.5 rounded-sm font-mono text-[10px] uppercase tracking-widest bg-moss text-linen font-bold transition-colors cursor-pointer"
+                   >
+                     [✓ In Collector's Bag]
+                   </button>`
+                : `<button 
+                     onclick="addToCart('${item.id}')"
+                     class="px-3.5 py-1.5 rounded-sm font-mono text-[10px] uppercase tracking-widest bg-terracotta hover:bg-terracottaDark text-linen font-bold transition-colors cursor-pointer shadow-xs"
+                   >
+                     [+ Reserve Piece]
+                   </button>`
+            }
+          </div>
+        </article>
+      `;
+    }
+
+    function renderMasonryGrid() {
+      const gridEl = document.getElementById('masonryGrid');
+      const filtered = activeCategoryFilter === 'all'
+        ? ARCHIVE_WORKS
+        : ARCHIVE_WORKS.filter(w => w.category === activeCategoryFilter);
+
+      // Distribute works into 3 staggered editorial columns for desktop masonry
+      const col1 = [];
+      const col2 = [];
+      const col3 = [];
+
+      if (activeCategoryFilter === 'all') {
+        filtered.forEach(item => {
+          if (item.column === 1) col1.push(item);
+          else if (item.column === 2) col2.push(item);
+          else col3.push(item);
+        });
+      } else {
+        filtered.forEach((item, idx) => {
+          if (idx % 3 === 0) col1.push(item);
+          else if (idx % 3 === 1) col2.push(item);
+          else col3.push(item);
+        });
+      }
+
+      gridEl.innerHTML = `
+        <div class="space-y-8">${col1.map(buildCardHTML).join('')}</div>
+        <div class="space-y-8 lg:mt-10">${col2.map(buildCardHTML).join('')}</div>
+        <div class="space-y-8 lg:mt-4">${col3.map(buildCardHTML).join('')}</div>
+      `;
+
+      // Update Hero button state if hero piece is in cart
+      const heroBtn = document.getElementById('heroAcquireBtn');
+      if (heroBtn) {
+        if (cartItems.includes(HERO_SPECIMEN.id)) {
+          heroBtn.textContent = '[✓ In Collector\'s Bag]';
+          heroBtn.className = 'py-2.5 px-5 bg-moss text-linen font-mono text-xs uppercase tracking-widest rounded-sm transition-colors cursor-pointer';
+        } else {
+          heroBtn.textContent = '[+ Reserve Piece]';
+          heroBtn.className = 'py-2.5 px-5 bg-terracotta hover:bg-terracottaDark text-linen font-mono text-xs uppercase tracking-widest rounded-sm transition-colors cursor-pointer';
+        }
+      }
+    }
+
+    function filterWorks(category) {
+      activeCategoryFilter = category;
+
+      // Update Header Filter Pills
+      document.querySelectorAll('[data-filter-btn]').forEach(btn => {
+        const isMatch = btn.getAttribute('data-filter-btn') === category;
+        if (btn.classList.contains('filter-pill')) {
+          btn.className = isMatch
+            ? 'filter-pill active px-3 py-1.5 rounded text-[11px] font-mono tracking-wider uppercase transition-all bg-ink text-linen'
+            : 'filter-pill px-3 py-1.5 rounded text-[11px] font-mono tracking-wider uppercase text-umber hover:text-ink transition-all';
+        } else {
+          btn.className = isMatch
+            ? 'filter-pill-mobile px-2.5 py-1 rounded text-[10px] font-mono uppercase whitespace-nowrap bg-ink text-linen'
+            : 'filter-pill-mobile px-2.5 py-1 rounded text-[10px] font-mono uppercase whitespace-nowrap text-umber hairline-box bg-linen';
+        }
+      });
+
+      // Update Section Sub-filter Pills
+      document.querySelectorAll('[data-subfilter]').forEach(btn => {
+        const isMatch = btn.getAttribute('data-subfilter') === category;
+        btn.className = isMatch
+          ? 'subfilter-pill px-3 py-1 rounded-sm font-mono text-[11px] uppercase bg-ink text-linen cursor-pointer'
+          : 'subfilter-pill px-3 py-1 rounded-sm font-mono text-[11px] uppercase bg-bone text-umber hover:text-ink hairline-box cursor-pointer';
+      });
+
+      renderMasonryGrid();
+    }
+
+    // ---------------------------------------------------------------------
+    // 5. SLIDE-OVER COLLECTOR'S BAG DRAWER LOGIC
+    // ---------------------------------------------------------------------
+    function toggleCartDrawer(open) {
+      const drawer = document.getElementById('cartDrawer');
+      const backdrop = document.getElementById('cartBackdrop');
+      if (open) {
+        drawer.classList.remove('translate-x-full');
+        drawer.classList.add('translate-x-0');
+        backdrop.classList.remove('opacity-0', 'pointer-events-none');
+        backdrop.classList.add('opacity-100');
+      } else {
+        drawer.classList.remove('translate-x-0');
+        drawer.classList.add('translate-x-full');
+        backdrop.classList.remove('opacity-100');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+      }
+    }
+
+    function addToCart(itemId) {
+      if (!cartItems.includes(itemId)) {
+        cartItems.push(itemId);
+      }
+      renderCart();
+      renderMasonryGrid();
+      toggleCartDrawer(true);
+    }
+
+    function removeFromCart(itemId) {
+      cartItems = cartItems.filter(id => id !== itemId);
+      renderCart();
+      renderMasonryGrid();
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cartItemsContainer');
+      const countBadge = document.getElementById('headerBagCount');
+      const floatingCount = document.getElementById('floatingBagCount');
+      const drawerCountLabel = document.getElementById('drawerItemCount');
+      const subtotalEl = document.getElementById('cartSubtotal');
+      const shippingEl = document.getElementById('cartShippingCost');
+      const totalEl = document.getElementById('cartTotal');
+      const shippingSelect = document.getElementById('shippingRegionSelect');
+
+      const count = cartItems.length;
+      countBadge.textContent = count;
+      floatingCount.textContent = count;
+      drawerCountLabel.textContent = count === 1 ? '1 Item' : `${count} Items`;
+
+      if (count === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center bg-linen/60 hairline-box rounded-sm">
+            <p class="font-serif text-xl text-ink mb-1">Your Collector's Bag is empty.</p>
+            <p class="font-mono text-[11px] text-umber mb-4">Select any 1-of-1 specimen from the studio archive to reserve it for acquisition.</p>
+            <button onclick="addToCart('AJJA-2024-C01')" class="px-4 py-2 bg-ink text-linen font-mono text-[10px] uppercase tracking-widest rounded-sm cursor-pointer">
+              Restore Smoked Stoneware Vessel ($680)
+            </button>
+          </div>
+        `;
+        subtotalEl.textContent = formatPrice(0, true);
+        shippingEl.textContent = '—';
+        totalEl.textContent = formatPrice(0, true);
+        return;
+      }
+
+      let subtotalUsd = 0;
+      container.innerHTML = cartItems.map(id => {
+        const item = getItemById(id);
+        if (!item) return '';
+        subtotalUsd += item.priceUsd;
+
+        return `
+          <div class="p-3.5 bg-linen hairline-box rounded-sm space-y-3">
+            <div class="flex gap-3.5">
+              <img 
+                src="${item.image}" 
+                onerror="this.onerror=null;this.src='${item.fallback}';"
+                alt="${item.title}"
+                class="w-16 h-16 object-cover rounded-sm hairline-box shrink-0 bg-boneDark"
+              />
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-2">
+                  <span class="font-mono text-[9px] uppercase tracking-widest text-umber">${item.id}</span>
+                  <button 
+                    onclick="removeFromCart('${item.id}')"
+                    class="font-mono text-[10px] text-umber hover:text-terracotta cursor-pointer"
+                    title="Remove from bag"
+                  >
+                    [Remove]
+                  </button>
+                </div>
+                <h4 class="font-serif text-lg text-ink font-medium leading-snug truncate">${item.title}</h4>
+                <p class="font-mono text-[10px] text-terracotta">${item.dimensions} • Edition 1 of 1</p>
+                <p class="font-mono text-xs font-bold text-ink mt-1">${formatPrice(item.priceUsd, true)}</p>
+              </div>
+            </div>
+
+            <!-- Certificate of Authenticity Included Trust Pill -->
+            <div class="pt-2.5 hairline-t flex items-center gap-2 font-mono text-[10px] text-moss">
+              <span class="w-4 h-4 rounded-full bg-moss/15 flex items-center justify-center text-[9px] font-bold">✓</span>
+              <span>Certificate of Authenticity Included</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const shippingUsd = parseInt(shippingSelect.value || '0', 10);
+      const totalUsd = subtotalUsd + shippingUsd;
+
+      subtotalEl.textContent = formatPrice(subtotalUsd, true);
+      shippingEl.textContent = shippingUsd === 0 ? 'Included' : `+${formatPrice(shippingUsd, true)}`;
+      totalEl.textContent = formatPrice(totalUsd, true);
+    }
+
+    function handleProceedToAcquisition() {
+      const feedback = document.getElementById('checkoutFeedback');
+      feedback.classList.remove('hidden');
+      setTimeout(() => {
+        feedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
+    }
+
+    // ---------------------------------------------------------------------
+    // 6. HERO 2.5x INTERACTIVE MACRO GRAIN LOUPE
+    // ---------------------------------------------------------------------
+    function updateHeroLoupePosition(clientX, clientY) {
+      const container = document.getElementById('heroImageContainer');
+      const lens = document.getElementById('heroLoupeLens');
+      const img = document.getElementById('heroSpecimenImg');
+      if (!container || !lens || !img) return;
+
+      const rect = container.getBoundingClientRect();
+      const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+      const y = Math.max(0, Math.min(clientY - rect.top, rect.height));
+
+      const zoom = 2.5;
+      lens.style.left = `${x}px`;
+      lens.style.top = `${y}px`;
+      lens.style.backgroundImage = `url('${img.src}')`;
+      lens.style.backgroundSize = `${rect.width * zoom}px ${rect.height * zoom}px`;
+
+      const bgX = -((x * zoom) - (lens.offsetWidth / 2));
+      const bgY = -((y * zoom) - (lens.offsetHeight / 2));
+      lens.style.backgroundPosition = `${bgX}px ${bgY}px`;
+    }
+
+    function handleHeroLoupeEnter() {
+      const lens = document.getElementById('heroLoupeLens');
+      if (lens) lens.classList.add('active');
+    }
+
+    function handleHeroLoupeMove(e) {
+      const lens = document.getElementById('heroLoupeLens');
+      if (lens && !lens.classList.contains('active')) {
+        lens.classList.add('active');
+      }
+      updateHeroLoupePosition(e.clientX, e.clientY);
+    }
+
+    function handleHeroLoupeLeave() {
+      if (heroLoupeLocked) return;
+      const lens = document.getElementById('heroLoupeLens');
+      if (lens) lens.classList.remove('active');
+    }
+
+    function toggleHeroLoupeLock() {
+      heroLoupeLocked = !heroLoupeLocked;
+      const lens = document.getElementById('heroLoupeLens');
+      const btn = document.getElementById('heroLoupeToggleBtn');
+      const container = document.getElementById('heroImageContainer');
+
+      if (heroLoupeLocked) {
+        const rect = container.getBoundingClientRect();
+        lens.classList.add('active');
+        updateHeroLoupePosition(rect.left + rect.width * 0.52, rect.top + rect.height * 0.48);
+        btn.className = 'px-2 py-0.5 rounded bg-terracotta text-linen font-bold transition-colors cursor-pointer';
+      } else {
+        lens.classList.remove('active');
+        btn.className = 'px-2 py-0.5 rounded bg-linen hairline-box text-ink hover:bg-terracotta hover:text-linen transition-colors cursor-pointer';
+      }
+    }
+
+    // ---------------------------------------------------------------------
+    // 7. MUSEUM DOSSIER & SCALE VISUALIZER MODAL
+    // ---------------------------------------------------------------------
+    let activeModalItem = null;
+
+    function openDossierModal(itemId) {
+      const item = getItemById(itemId);
+      if (!item) return;
+      activeModalItem = item;
+
+      document.getElementById('modalCode').textContent = item.id;
+      document.getElementById('modalCategory').textContent = `${item.categoryLabel} • ${item.aspectLabel}`;
+      document.getElementById('modalTag').textContent = item.status === 'reserved' ? 'RESERVED IN ARCHIVE' : 'EDITION 1 OF 1';
+      document.getElementById('modalPrice').textContent = formatPrice(item.priceUsd, true);
+      document.getElementById('modalTitle').textContent = item.title;
+      document.getElementById('modalDescription').textContent = item.description;
+      document.getElementById('modalMaterial').textContent = item.material;
+      document.getElementById('modalDims').textContent = item.dimensions;
+      document.getElementById('modalMakerNote').textContent = item.makerNote;
+
+      const modalImg = document.getElementById('modalArtworkImg');
+      modalImg.src = item.image;
+      modalImg.onerror = function() { this.src = item.fallback; };
+
+      // Configure Scale Visualizer dimensions
+      document.getElementById('modalScaleDimensions').textContent = item.dimensions;
+      document.getElementById('modalScaleCaption').textContent = `${item.dimensions} (${item.categoryLabel})`;
+      const scaleBox = document.getElementById('modalScaleBox');
+      scaleBox.style.width = `${item.scaleWidthPx}px`;
+      scaleBox.style.height = `${item.scaleHeightPx}px`;
+      document.getElementById('modalScaleThumb').src = item.image;
+
+      // Configure Modal CTA
+      const acquireBtn = document.getElementById('modalAcquireBtn');
+      if (item.status === 'reserved') {
+        acquireBtn.textContent = '[Inquire on Commission / Join Waitlist]';
+        acquireBtn.className = 'w-full py-3.5 px-6 bg-ink hover:bg-terracotta text-linen font-mono text-xs uppercase tracking-widest rounded-sm transition-colors cursor-pointer';
+        acquireBtn.onclick = () => {
+          closeDossierModal();
+          inquireReservedPiece(item.id, item.title);
+        };
+      } else if (cartItems.includes(item.id)) {
+        acquireBtn.textContent = '[✓ Reserved in Collector\'s Bag — View Folio]';
+        acquireBtn.className = 'w-full py-3.5 px-6 bg-moss text-linen font-mono text-xs uppercase tracking-widest rounded-sm transition-colors cursor-pointer';
+        acquireBtn.onclick = () => {
+          closeDossierModal();
+          toggleCartDrawer(true);
+        };
+      } else {
+        acquireBtn.textContent = `[+ Reserve Piece for Acquisition • ${formatPrice(item.priceUsd)}]`;
+        acquireBtn.className = 'w-full py-3.5 px-6 bg-terracotta hover:bg-terracottaDark text-linen font-mono text-xs uppercase tracking-widest rounded-sm transition-colors cursor-pointer';
+        acquireBtn.onclick = () => {
+          addToCart(item.id);
+          closeDossierModal();
+        };
+      }
+
+      setModalViewMode('daylight');
+      const modal = document.getElementById('dossierModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeDossierModal() {
+      const modal = document.getElementById('dossierModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function setModalViewMode(mode) {
+      const imgStage = document.getElementById('modalImageStage');
+      const scaleStage = document.getElementById('modalScaleStage');
+      const artImg = document.getElementById('modalArtworkImg');
+      const macroBadge = document.getElementById('modalMacroBadge');
+
+      const tabDaylight = document.getElementById('modalTabDaylight');
+      const tabMacro = document.getElementById('modalTabMacro');
+      const tabScale = document.getElementById('modalTabScale');
+
+      const inactiveClass = 'px-3 py-1 rounded-sm font-mono text-[10px] uppercase text-umber hover:text-ink cursor-pointer';
+      const activeClass = 'px-3 py-1 rounded-sm font-mono text-[10px] uppercase bg-ink text-linen cursor-pointer';
+
+      tabDaylight.className = mode === 'daylight' ? activeClass : inactiveClass;
+      tabMacro.className = mode === 'macro' ? activeClass : inactiveClass;
+      tabScale.className = mode === 'scale' ? activeClass : inactiveClass;
+
+      if (mode === 'daylight') {
+        imgStage.classList.remove('hidden');
+        imgStage.classList.add('flex');
+        scaleStage.classList.add('hidden');
+        scaleStage.classList.remove('flex');
+        artImg.style.transform = 'scale(1)';
+        macroBadge.classList.add('hidden');
+      } else if (mode === 'macro') {
+        imgStage.classList.remove('hidden');
+        imgStage.classList.add('flex');
+        scaleStage.classList.add('hidden');
+        scaleStage.classList.remove('flex');
+        artImg.style.transform = 'scale(2.35)';
+        macroBadge.classList.remove('hidden');
+      } else if (mode === 'scale') {
+        imgStage.classList.add('hidden');
+        imgStage.classList.remove('flex');
+        scaleStage.classList.remove('hidden');
+        scaleStage.classList.add('flex');
+      }
+    }
+
+    // ---------------------------------------------------------------------
+    // 8. WEB AUDIO API STUDIO SOUNDSCAPE (Mysore Monsoon Rain & Chisel Tap)
+    // ---------------------------------------------------------------------
+    let audioCtx = null;
+    let isAudioPlaying = false;
+    let rainGainNode = null;
+    let chiselInterval = null;
+
+    function toggleStudioAudio() {
+      const eqContainer = document.getElementById('eqContainer');
+      const statusText = document.getElementById('audioStatusText');
+
+      if (!isAudioPlaying) {
+        try {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!audioCtx) {
+            audioCtx = new AudioContext();
+          }
+          if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+          }
+
+          // Generate soothing warm pink noise for Mysore rain on clay tiles
+          const bufferSize = 2 * audioCtx.sampleRate;
+          const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+          const output = noiseBuffer.getChannelData(0);
+          let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+          for (let i = 0; i < bufferSize; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.99886 * b0 + white * 0.0555179;
+            b1 = 0.99332 * b1 + white * 0.0750759;
+            b2 = 0.96900 * b2 + white * 0.1538520;
+            b3 = 0.86650 * b3 + white * 0.3104856;
+            b4 = 0.55000 * b4 + white * 0.5329522;
+            b5 = -0.7616 * b5 - white * 0.0168980;
+            output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+            output[i] *= 0.04;
+            b6 = white * 0.115926;
+          }
+
+          const whiteNoise = audioCtx.createBufferSource();
+          whiteNoise.buffer = noiseBuffer;
+          whiteNoise.loop = true;
+
+          const filter = audioCtx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.value = 950;
+
+          rainGainNode = audioCtx.createGain();
+          rainGainNode.gain.setValueAtTime(0.01, audioCtx.currentTime);
+          rainGainNode.gain.exponentialRampToValueAtTime(0.28, audioCtx.currentTime + 1.2);
+
+          whiteNoise.connect(filter);
+          filter.connect(rainGainNode);
+          rainGainNode.connect(audioCtx.destination);
+          whiteNoise.start(0);
+          whiteNoise._sourceNode = whiteNoise;
+
+          // Subtle wooden mallet / chisel resonance every few seconds
+          chiselInterval = setInterval(() => {
+            if (!isAudioPlaying || !audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const tapGain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(195 + Math.random() * 45, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(75, audioCtx.currentTime + 0.09);
+
+            tapGain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+            tapGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.09);
+
+            osc.connect(tapGain);
+            tapGain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+          }, 3400);
+
+          isAudioPlaying = true;
+          eqContainer.classList.add('eq-active');
+          statusText.textContent = 'LISTEN: MONSOON RAIN & CHISEL RESONANCE [LIVE]';
+        } catch (err) {
+          console.error('Audio synthesis unavailable:', err);
+        }
+      } else {
+        if (rainGainNode && audioCtx) {
+          rainGainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.4);
+          setTimeout(() => {
+            if (audioCtx) audioCtx.suspend();
+          }, 420);
+        }
+        if (chiselInterval) clearInterval(chiselInterval);
+        isAudioPlaying = false;
+        eqContainer.classList.remove('eq-active');
+        statusText.textContent = 'LISTEN: MONSOON RAIN & CHISEL RESONANCE [OFF]';
+      }
+    }
+
+    // ---------------------------------------------------------------------
+    // 9. ACCORDION & INQUIRY FORM HELPERS
+    // ---------------------------------------------------------------------
+    function toggleAccordion(index) {
+      const content = document.getElementById(`accContent${index}`);
+      const icon = document.getElementById(`accIcon${index}`);
+      const isHidden = content.classList.contains('hidden');
+
+      if (isHidden) {
+        content.classList.remove('hidden');
+        icon.textContent = '−';
+      } else {
+        content.classList.add('hidden');
+        icon.textContent = '+';
+      }
+    }
+
+    function inquireReservedPiece(itemId, title) {
+      const subjectInput = document.getElementById('inquirySubject');
+      if (subjectInput) {
+        subjectInput.value = `Waitlist / Similar Commission Inquiry for ${itemId} (${title})`;
+      }
+      document.getElementById('commission-section').scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => {
+        document.getElementById('inquiryName').focus();
+      }, 600);
+    }
+
+    function handleInquirySubmit(event) {
+      event.preventDefault();
+      document.getElementById('inquirySuccessBox').classList.remove('hidden');
+      document.getElementById('studioInquiryForm').reset();
+    }
+
+    // Close modal on Escape key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeDossierModal();
+      }
+    });
+
+    // Initialize Storefront on Window Load
+    window.onload = function () {
+      renderMasonryGrid();
+      renderCart();
+    };
+  </script>
+</body>
+</html>
