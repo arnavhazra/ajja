@@ -1,29 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
+import gsap from "gsap";
+import { Flip } from "gsap/Flip";
 import { ProductCard } from "./product-card";
 import type { PublicProduct } from "@/lib/types";
 
+gsap.registerPlugin(Flip);
+
 export function ManifestGrid({ products }: { products: PublicProduct[] }) {
   const [filter, setFilter] = useState<"all" | "paintings" | "woodwork">("all");
+  const gridRef = useRef<HTMLDivElement>(null);
+  const pendingFlip = useRef<Flip.FlipState | null>(null);
 
-  const paintingsCount = products.filter(
-    (p) => p.categorySlug === "paintings" || p.attributes?.medium?.toLowerCase().includes("paint")
-  ).length;
+  const applyFilter = (next: "all" | "paintings" | "woodwork") => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const cards = gridRef.current?.querySelectorAll("[data-flip-id]");
+    if (reduced || !cards?.length) {
+      setFilter(next);
+      return;
+    }
+    pendingFlip.current = Flip.getState(cards);
+    setFilter(next);
+  };
 
-  const woodworkCount = products.filter(
-    (p) => p.categorySlug === "woodwork" || p.attributes?.medium?.toLowerCase().includes("wood")
-  ).length;
+  useLayoutEffect(() => {
+    const state = pendingFlip.current;
+    pendingFlip.current = null;
+    if (!state) return;
+    Flip.from(state, {
+      duration: 0.55,
+      ease: "power3.inOut",
+      absolute: true,
+      fade: true,
+      stagger: 0.015,
+      onEnter: (els) => gsap.fromTo(els, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power3.out" }),
+      onLeave: (els) => gsap.to(els, { autoAlpha: 0, y: -16, duration: 0.3, ease: "power2.in" }),
+    });
+  }, [filter]);
+
+  const paintingsCount = products.filter((p) => p.categorySlug === "paintings").length;
+
+  const woodworkCount = products.filter((p) => p.categorySlug === "woodwork").length;
 
   const filteredProducts = products.filter((p) => {
     if (filter === "all") return true;
-    if (filter === "paintings") {
-      return p.categorySlug === "paintings" || p.attributes?.medium?.toLowerCase().includes("paint");
-    }
-    if (filter === "woodwork") {
-      return p.categorySlug === "woodwork" || p.attributes?.medium?.toLowerCase().includes("wood");
-    }
-    return true;
+    return p.categorySlug === filter;
   });
 
   return (
@@ -54,7 +76,7 @@ export function ManifestGrid({ products }: { products: PublicProduct[] }) {
           </span>
           <button
             type="button"
-            onClick={() => setFilter("all")}
+            onClick={() => applyFilter("all")}
             className={`px-3 py-1 rounded-sm font-mono text-[11px] uppercase transition-colors cursor-pointer ${
               filter === "all"
                 ? "bg-ink text-linen"
@@ -65,7 +87,7 @@ export function ManifestGrid({ products }: { products: PublicProduct[] }) {
           </button>
           <button
             type="button"
-            onClick={() => setFilter("paintings")}
+            onClick={() => applyFilter("paintings")}
             className={`px-3 py-1 rounded-sm font-mono text-[11px] uppercase transition-colors cursor-pointer ${
               filter === "paintings"
                 ? "bg-ink text-linen"
@@ -76,7 +98,7 @@ export function ManifestGrid({ products }: { products: PublicProduct[] }) {
           </button>
           <button
             type="button"
-            onClick={() => setFilter("woodwork")}
+            onClick={() => applyFilter("woodwork")}
             className={`px-3 py-1 rounded-sm font-mono text-[11px] uppercase transition-colors cursor-pointer ${
               filter === "woodwork"
                 ? "bg-ink text-linen"
@@ -94,9 +116,11 @@ export function ManifestGrid({ products }: { products: PublicProduct[] }) {
       </div>
 
       {/* Staggered 3-Column Editorial Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 items-start">
+      <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 items-start">
         {filteredProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <div key={product.id} data-flip-id={product.id}>
+            <ProductCard product={product} />
+          </div>
         ))}
       </div>
 

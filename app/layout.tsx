@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Plus_Jakarta_Sans, Space_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import { Suspense } from "react";
+import { CustomCursor } from "@/components/custom-cursor";
 import { MotionRoot } from "@/components/motion-root";
+import { PageVeil } from "@/components/page-veil";
 import { getSettings } from "@/lib/public-data";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
@@ -51,6 +54,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {children}
         <div className="paper-grain" aria-hidden="true" />
         <MotionRoot />
+        <CustomCursor />
+        <Suspense>
+          <PageVeil />
+        </Suspense>
         <Analytics />
       </body>
     </html>

@@ -50,7 +50,10 @@ export function ProductCard({
       : "aspect-[4/5]";
 
   return (
-    <article className="art-card group bg-bone hairline-box rounded-sm p-3.5 sm:p-4 flex flex-col justify-between transition-all duration-300 hover:shadow-[0_16px_36px_rgba(30,27,24,0.08)]">
+    <article
+      data-cursor="View"
+      className="art-card group bg-bone hairline-box rounded-sm p-3.5 sm:p-4 flex flex-col justify-between transition-all duration-300 hover:shadow-[0_16px_36px_rgba(30,27,24,0.08)]"
+    >
       <div>
         <Link href={targetHref} className="block">
           <div className={`art-card-img-wrap ${aspectClass} w-full rounded-sm mb-3.5 archival-vignette relative overflow-hidden bg-bone-dark`}>

@@ -16,8 +16,9 @@ import { digits, pieceMessage, whatsAppHref } from "@/lib/whatsapp";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const { product } = await loadProduct(slug);
-  if (!product) return { title: "Piece" };
+  const { product, redirect } = await loadProduct(slug);
+  if (redirect) permanentRedirect(redirect);
+  if (!product) notFound();
   return {
     title: pieceTitle(product.title, product.categorySlug, product.attributes),
     description: product.description || undefined,

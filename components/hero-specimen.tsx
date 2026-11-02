@@ -6,6 +6,7 @@ import Link from "next/link";
 import { formatMoney } from "@/lib/money";
 import { pieceTitle } from "./product-card";
 import { useSaved } from "./saved-context";
+import { SpecimenCanvas } from "./specimen-canvas";
 import type { PublicProduct } from "@/lib/types";
 
 export function HeroSpecimen({ product }: { product: PublicProduct }) {
@@ -101,6 +102,7 @@ export function HeroSpecimen({ product }: { product: PublicProduct }) {
       <div
         ref={containerRef}
         id="heroImageContainer"
+        data-cursor="Loupe"
         className="relative aspect-[4/3] w-full overflow-hidden rounded-sm bg-bone-dark cursor-crosshair select-none archival-vignette"
         onMouseMove={handleMouseMove}
         onMouseEnter={handleMouseEnter}
@@ -118,6 +120,7 @@ export function HeroSpecimen({ product }: { product: PublicProduct }) {
             style={{ objectPosition: `${image.focalX * 100}% ${image.focalY * 100}%` }}
           />
         ) : null}
+        {image ? <SpecimenCanvas src={image.url} focalX={image.focalX} focalY={image.focalY} /> : null}
 
         {/* Floating Caption Badge */}
         <div className="absolute top-3 left-3 bg-linen/90 backdrop-blur-sm px-2.5 py-1 rounded-sm hairline-box pointer-events-none z-10">

@@ -417,3 +417,89 @@ dialog.sheet[open] {
     transform: none;
   }
 }
+
+/* Custom cursor — fine pointers only, mounted by CustomCursor */
+.cursor-dot {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 90;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--ink);
+  pointer-events: none;
+}
+
+.cursor-ring {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--hairline);
+  border-radius: 9999px;
+  pointer-events: none;
+  transition:
+    width 220ms ease,
+    height 220ms ease,
+    background-color 220ms ease,
+    border-color 220ms ease;
+}
+
+.cursor-ring[data-state="link"] {
+  width: 46px;
+  height: 46px;
+  border-color: var(--terracotta);
+  background: color-mix(in srgb, var(--terracotta) 12%, transparent);
+}
+
+.cursor-ring[data-state="label"] {
+  width: 72px;
+  height: 72px;
+  border-color: var(--ink);
+  background: var(--ink);
+}
+
+.cursor-ring[data-state="text"] {
+  width: 18px;
+  height: 18px;
+  border-color: var(--umber);
+}
+
+.cursor-ring-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--linen);
+}
+
+html.custom-cursor,
+html.custom-cursor * {
+  cursor: none;
+}
+
+html.custom-cursor input,
+html.custom-cursor textarea,
+html.custom-cursor select {
+  cursor: text;
+}
+
+/* Page veil — transition plate mounted by PageVeil */
+.page-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--linen);
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}

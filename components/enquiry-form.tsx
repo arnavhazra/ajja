@@ -47,14 +47,6 @@ export function EnquiryForm({ productId, productName }: { productId?: string; pr
         <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-umber">Gift note, if this is a gift</span>
         <textarea className="field" name="giftNote" />
       </label>
-      <label className="grid gap-1.5">
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-umber">Quantity</span>
-        <input className="field" name="quantity" inputMode="numeric" min={1} />
-      </label>
-      <label className="flex min-h-[44px] cursor-pointer items-center gap-3 text-sm text-ink">
-        <input type="checkbox" name="bulk" className="size-5 border-line accent-terracotta" />
-        Ask for a bulk price
-      </label>
       <input type="hidden" name="productId" value={productId ?? ""} />
       <input className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" name="company" />
       {state.message ? (
