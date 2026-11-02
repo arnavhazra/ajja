@@ -46,6 +46,20 @@ function MaskedWords({ text, className }: { text: string; className?: string }) 
   );
 }
 
+function ScrubWords({ text }: { text: string }) {
+  const words = text.split(/\s+/).filter(Boolean);
+  return (
+    <span data-scrub-words>
+      {words.map((word, i) => (
+        <span key={i} className="scrub-word">
+          {word}
+          {i < words.length - 1 ? " " : ""}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export default async function HomePage() {
   const [settings, manifest] = await Promise.all([getSettings(), loadManifest()]);
   const hero =
@@ -178,7 +192,7 @@ export default async function HomePage() {
             A note from the studio
           </p>
           <blockquote className="mt-6 font-serif text-2xl italic leading-relaxed text-ink sm:text-3xl">
-            <MaskedWords text={`\u201C${settings.story}\u201D`} />
+            <ScrubWords text={settings.story} />
           </blockquote>
           <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.22em] text-umber">
             {settings.ownerName} · {settings.town}, {settings.region}

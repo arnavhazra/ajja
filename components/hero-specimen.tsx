@@ -77,7 +77,7 @@ export function HeroSpecimen({ product }: { product: PublicProduct }) {
   };
 
   return (
-    <div className="bg-bone hairline-box rounded-sm p-4 sm:p-5 shadow-[0_20px_50px_rgba(30,27,24,0.05)]">
+    <div className="weave-overlay bg-bone hairline-box rounded-sm p-4 sm:p-5 shadow-[0_20px_50px_rgba(30,27,24,0.05)]">
       {/* Top Specimen Plate Header */}
       <div className="flex items-center justify-between pb-3 mb-3 hairline-b font-mono text-[10px] tracking-widest uppercase">
         <span className="text-ink font-bold">HERO SPECIMEN // AJJA ARCHIVE</span>
@@ -103,7 +103,7 @@ export function HeroSpecimen({ product }: { product: PublicProduct }) {
         ref={containerRef}
         id="heroImageContainer"
         data-cursor="Loupe"
-        className="relative aspect-[4/3] w-full overflow-hidden rounded-sm bg-bone-dark cursor-crosshair select-none archival-vignette"
+        className="relative aspect-[4/3] w-full overflow-hidden rounded-sm bg-bone-dark cursor-crosshair select-none archival-vignette deckled-b"
         onMouseMove={handleMouseMove}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}

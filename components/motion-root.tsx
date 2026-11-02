@@ -146,6 +146,18 @@ export function MotionRoot() {
         }),
       );
 
+    // Scrubbed story: words darken/lighten with scroll progress.
+    const scrubTriggers = gsap.utils
+      .toArray<HTMLElement>("[data-scrub-words]")
+      .map((el) =>
+        gsap.to(el.querySelectorAll(".scrub-word"), {
+          opacity: 1,
+          ease: "none",
+          stagger: 0.04,
+          scrollTrigger: { trigger: el, start: "top 78%", end: "top 34%", scrub: 0.5 },
+        }),
+      );
+
     // Gentle parallax inside marked elements.
     const parallaxTriggers = gsap.utils
       .toArray<HTMLElement>("[data-parallax]")
@@ -188,7 +200,7 @@ export function MotionRoot() {
       introTl?.kill();
       tl?.kill();
       dossierTl?.kill();
-      [...triggers, ...maskTriggers, ...parallaxTriggers].forEach((tween) => {
+      [...triggers, ...maskTriggers, ...scrubTriggers, ...parallaxTriggers].forEach((tween) => {
         tween.scrollTrigger?.kill();
         tween.kill();
       });

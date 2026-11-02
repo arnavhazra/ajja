@@ -636,3 +636,48 @@ html.custom-cursor select {
     animation: none;
   }
 }
+
+/* === Texture layer (Awwwards depth pass) === */
+
+/* Woven linen: layered SVG noise + crosshatch, applied via .weave-* classes */
+.weave-overlay {
+  position: relative;
+}
+.weave-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9 0.35' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.16'/%3E%3C/svg%3E");
+}
+.weave-overlay > * {
+  position: relative;
+}
+
+/* Deckled (torn paper) bottom edge for specimen mounts */
+.deckled-b {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='14' preserveAspectRatio='none'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04 0.5' numOctaves='3'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='8'/%3E%3C/filter%3E%3Crect x='0' y='0' width='200' height='14' fill='white' filter='url(%23r)'/%3E%3C/svg%3E"), linear-gradient(to bottom, black calc(100% - 14px), transparent 100%);
+  -webkit-mask-position: bottom, top;
+  -webkit-mask-size: 100% 14px, 100% calc(100% - 0px);
+  -webkit-mask-repeat: repeat-x, no-repeat;
+  -webkit-mask-composite: source-in;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='14' preserveAspectRatio='none'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04 0.5' numOctaves='3'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='8'/%3E%3C/filter%3E%3Crect x='0' y='0' width='200' height='14' fill='white' filter='url(%23r)'/%3E%3C/svg%3E"), linear-gradient(to bottom, black calc(100% - 14px), transparent 100%);
+  mask-position: bottom, top;
+  mask-size: 100% 14px, 100%;
+  mask-repeat: repeat-x, no-repeat;
+  mask-composite: intersect;
+}
+
+/* Scrubbed story words start dim; GSAP brings them up word by word */
+.scrub-word {
+  opacity: 0.18;
+  transition: opacity 0.3s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scrub-word {
+    opacity: 1;
+  }
+}

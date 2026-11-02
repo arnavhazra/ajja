@@ -113,7 +113,7 @@ export function SavedDrawer({
         role="dialog"
         aria-modal="true"
         aria-label="Saved Studio Works"
-        className={`fixed top-0 right-0 h-full w-full sm:w-[420px] bg-bone hairline-l z-50 flex flex-col justify-between shadow-[-20px_0_60px_rgba(30,27,24,0.14)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        className={`weave-overlay fixed top-0 right-0 h-full w-full sm:w-[420px] bg-bone hairline-l z-50 flex flex-col justify-between shadow-[-20px_0_60px_rgba(30,27,24,0.14)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
