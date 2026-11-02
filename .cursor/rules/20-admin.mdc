@@ -1,0 +1,13 @@
+---
+description: Desk language and safety
+globs: "{app/desk,lib/desk,app/api/desk}/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+Plain language. Buttons say Photos, Price, Hide, Mark as sold. No technical words.
+
+Prefer undo over a confirmation box. Trash can be restored for 30 days.
+
+Check the session inside every server action and every data write. Write an audit row for every change.
+
+Do not link the secret path from the public site.

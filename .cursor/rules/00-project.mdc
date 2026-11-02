@@ -1,0 +1,14 @@
+---
+description: TypeScript, server components, and validation
+alwaysApply: true
+---
+
+TypeScript strict. No `any`. Named exports except Next.js pages, layouts, and route handlers.
+
+Server components by default. Add `use client` only for interaction.
+
+Kebab-case file names. Use `cn` from `lib/cn.ts` for class names.
+
+Validate every server input with Zod. Money is integer cents. Slugs stay stable and write a redirect when they change.
+
+Keep components focused. Split a file that is doing two jobs.

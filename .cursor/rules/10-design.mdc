@@ -1,0 +1,13 @@
+---
+description: Visual rules for the shop and the desk
+globs: "**/*.{tsx,css}"
+alwaysApply: false
+---
+
+Follow DESIGN.md. Use the CSS tokens. Do not add a colour, radius, or shadow without a token.
+
+Body text stays at least 18px. Tap targets stay at least 48px. Prices use tabular numbers.
+
+Support reduced motion. Do not animate from scale zero. Animate only transform and opacity, under 300ms.
+
+One accent, used for the main action. Photographs use a 4:5 crop unless the desk sets a focal point.

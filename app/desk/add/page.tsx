@@ -1,0 +1,24 @@
+import { Suspense } from "react";
+import { PhotoUpload } from "@/components/desk/upload";
+import { requireDesk } from "@/lib/desk-data";
+
+export default function AddPage() {
+  return (
+    <Suspense fallback={<p className="p-4">Loading…</p>}>
+      <Add />
+    </Suspense>
+  );
+}
+
+async function Add() {
+  await requireDesk();
+  return (
+    <main className="desk-page">
+      <div className="desk-lead">
+        <h1 className="text-4xl">Add a piece</h1>
+        <p className="desk-note">Start with a photo. It is saved as a draft right away. JPEG, PNG, WebP, or HEIC, up to 15 MB.</p>
+      </div>
+      <PhotoUpload />
+    </main>
+  );
+}

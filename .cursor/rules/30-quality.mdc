@@ -1,0 +1,10 @@
+---
+description: Finish a task clean
+alwaysApply: true
+---
+
+Before finishing a task, run lint, typecheck, and unit tests when the change can affect them.
+
+Do not leave placeholder copy, lorem ipsum, or invented facts on a published page.
+
+Do not print secrets, database URLs, or tokens.
