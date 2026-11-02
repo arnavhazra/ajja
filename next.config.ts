@@ -35,6 +35,19 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  async redirects() {
+    return [
+      { source: "/shop", destination: "/", permanent: true },
+      { source: "/studio", destination: "/", permanent: true },
+      { source: "/studio/:slug", destination: "/p/:slug", permanent: true },
+      { source: "/about", destination: "/", permanent: true },
+      { source: "/visit", destination: "/", permanent: true },
+      { source: "/c/:slug", destination: "/", permanent: true },
+      { source: "/search", destination: "/", permanent: true },
+      { source: "/sold", destination: "/", permanent: true },
+      { source: "/saved", destination: "/", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

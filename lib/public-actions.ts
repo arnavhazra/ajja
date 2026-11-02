@@ -13,6 +13,7 @@ export async function sendEnquiry(_state: { ok: boolean; message: string }, form
   const parsed = enquirySchema.safeParse({
     name: formData.get("name"),
     contact: formData.get("contact"),
+    subject: formData.get("subject") ?? "",
     message: formData.get("message"),
     giftNote: formData.get("giftNote") ?? "",
     quantity: quantity || undefined,
@@ -30,12 +31,13 @@ export async function sendEnquiry(_state: { ok: boolean; message: string }, form
   const allowed = await allowRate(`enquiry:${hash}`, 5, 60 * 60);
   if (!allowed) return { ok: false, message: "Too many messages from this device. Try again later." };
   const productId = parsed.data.productId && parsed.data.productId.length > 10 ? parsed.data.productId : null;
+  const message = parsed.data.subject ? `${parsed.data.subject}\n\n${parsed.data.message}` : parsed.data.message;
   const db = getDb();
   await db.insert(enquiries).values({
     productId,
     name: parsed.data.name,
     contact: parsed.data.contact,
-    message: parsed.data.message,
+    message,
     giftNote: parsed.data.giftNote,
     quantity: parsed.data.quantity,
     bulk: parsed.data.bulk,

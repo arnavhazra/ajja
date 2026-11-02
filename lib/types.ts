@@ -32,14 +32,3 @@ export type PublicProduct = {
   images: PublicImage[];
   createdAt: string;
 };
-
-export type PublicCategory = {
-  id: string;
-  slug: string;
-  name: string;
-  intro: string;
-  imageUrl: string | null;
-  sortOrder: number;
-};
-
-export type PublicCollection = PublicCategory & { productIds: string[] };

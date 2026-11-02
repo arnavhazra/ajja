@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { formatMoney } from "@/lib/money";
+import { SaveButton } from "./save-button";
 import type { PublicProduct } from "@/lib/types";
 
 export function pieceTitle(
@@ -25,13 +26,9 @@ export function pieceTitle(
 
 export function ProductCard({
   product,
-  onSave,
-  isSaved,
   href,
 }: {
   product: PublicProduct;
-  onSave?: (id: string) => void;
-  isSaved?: boolean;
   href?: string;
 }) {
   const targetHref = href || `/p/${product.slug}`;
@@ -77,7 +74,9 @@ export function ProductCard({
 
           <div className="flex items-center justify-between pb-2 mb-2 hairline-b font-mono text-[10px] tracking-widest uppercase">
             <span className="text-ink font-bold">{categoryLabel}</span>
-            <span className="text-terracotta font-bold">1 OF 1</span>
+            <span className={product.status === "sold" ? "text-umber font-bold" : "text-terracotta font-bold"}>
+              {product.status === "sold" ? "ACQUIRED" : "1 OF 1"}
+            </span>
           </div>
 
           <div className="flex items-baseline justify-between gap-2 mb-1.5">
@@ -85,7 +84,7 @@ export function ProductCard({
               {title}
             </h3>
             <span className="font-mono text-xs text-ink font-bold whitespace-nowrap">
-              {price ?? "Ask about this piece"}
+              {product.status === "sold" ? "Acquired" : (price ?? "Ask about this piece")}
             </span>
           </div>
 
@@ -105,19 +104,7 @@ export function ProductCard({
           [Inspect Piece]
         </Link>
 
-        {onSave ? (
-          <button
-            type="button"
-            onClick={() => onSave(product.id)}
-            className={`py-1.5 px-3 rounded-sm hairline-box transition-colors cursor-pointer ${
-              isSaved
-                ? "bg-terracotta text-linen border-terracotta"
-                : "bg-linen text-umber hover:text-ink hover:bg-bone-dark"
-            }`}
-          >
-            {isSaved ? "Saved ✓" : "[+ Save]"}
-          </button>
-        ) : null}
+        <SaveButton slug={product.slug} className="py-1.5 px-3 rounded-sm hairline-box bg-linen hover:bg-bone-dark" />
       </div>
     </article>
   );

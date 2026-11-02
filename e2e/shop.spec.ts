@@ -40,15 +40,16 @@ test.afterAll(async () => {
   await sql`update site_settings set value = jsonb_set(value, '{whatsapp}', '""'::jsonb, true) where key = 'shop'`;
 });
 
-test("shop, studio, and a missing page", async ({ page }) => {
+test("archive home, redirects, and a missing page", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await page.goto("/shop");
-  await expect(page.getByText("Nothing is listed for sale yet")).toBeVisible();
-  await page.goto("/studio");
-  await expect(page.getByRole("heading", { name: "Studio", exact: true })).toBeVisible();
-  await expect(page.getByText("Studio Study").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Current Studio Manifest" })).toBeVisible();
+  for (const old of ["/shop", "/studio", "/about", "/visit", "/sold", "/saved", "/search"]) {
+    await page.goto(old);
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByRole("heading", { name: "Current Studio Manifest" })).toBeVisible();
+  }
   await page.goto("/desk");
   await expect(page.getByRole("heading", { name: "That page is not here" })).toBeVisible();
   await expect(page.getByText("Sign in")).toHaveCount(0);
@@ -117,14 +118,12 @@ test("staff can add, price, publish, hide, undo, and share", async ({ page }) =>
   await page.getByRole("button", { name: "Undo" }).click();
   await expect(page.getByRole("status")).toContainText("undone");
 
-  await page.goto("/shop?max=10");
-  await expect(page.getByText(title)).toHaveCount(0);
-  await page.goto("/shop?max=100");
-  await expect(page.getByText(title)).toBeVisible();
+  await page.goto("/");
+  await expect(page.getByText(title).first()).toBeVisible();
 });
 
 test("pages stay accessible", async ({ page }) => {
-  for (const path of ["/", "/shop", "/studio", "/about", "/visit"]) {
+  for (const path of ["/", "/policies", "/privacy"]) {
     await page.goto(path);
     const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations, path).toEqual([]);

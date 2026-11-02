@@ -1,32 +1,41 @@
-import Image from "next/image";
 import Link from "next/link";
-import { cn } from "@/lib/cn";
-import { ProductCard } from "@/components/product-card";
+import { CustodialAccordion } from "@/components/custodial-accordion";
+import { EnquiryForm } from "@/components/enquiry-form";
+import { HeroSpecimen } from "@/components/hero-specimen";
 import { JsonLd } from "@/components/json-ld";
-import { connection } from "next/server";
-import { heroSrc } from "@/lib/hero-src";
-import { openNow } from "@/lib/open-now";
-import { getSettings, loadCollections, loadFeatured, loadNewArrivals, loadReduced, loadStudio, loadTestimonials } from "@/lib/public-data";
+import { ManifestGrid } from "@/components/manifest-grid";
+import { getSettings, loadManifest } from "@/lib/public-data";
 import { siteUrl } from "@/lib/site-url";
-import type { PublicCollection, PublicProduct } from "@/lib/types";
+
+function HeroHeadline({ text }: { text: string }) {
+  const words = text.split(/\s+/).filter(Boolean);
+  return (
+    <h1
+      aria-label={text}
+      className="font-serif text-5xl font-medium leading-[1.04] tracking-tight text-ink sm:text-6xl lg:text-[4.6rem]"
+    >
+      <span aria-hidden="true">
+        {words.map((word, i) => (
+          <span key={i} className="hero-word inline-block will-change-transform">
+            {word}
+            {i < words.length - 1 ? " " : ""}
+          </span>
+        ))}
+      </span>
+    </h1>
+  );
+}
 
 export default async function HomePage() {
-  const [settings, studio, featured, arrivals, reduced, quotes, collections] = await Promise.all([
-    getSettings(),
-    loadStudio(),
-    loadFeatured(),
-    loadNewArrivals(),
-    loadReduced(),
-    loadTestimonials(),
-    loadCollections(),
-  ]);
-  const hero = settings.heroImage || studio[0]?.images[0]?.url || "";
-  const picture = await heroSrc(hero);
-  const open = settings.hours.length ? (await connection(), openNow(settings.hours)) : null;
-  const wall = studio.slice(0, 7);
+  const [settings, manifest] = await Promise.all([getSettings(), loadManifest()]);
+  const hero =
+    manifest.find((product) => product.images[0]?.url === settings.heroImage) ??
+    manifest.find((product) => product.categorySlug === "paintings") ??
+    manifest[0] ??
+    null;
+
   return (
     <main>
-      {picture.src ? <link rel="preload" as="image" href={picture.src} fetchPriority="high" /> : null}
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -40,200 +49,113 @@ export default async function HomePage() {
             streetAddress: settings.address || undefined,
           },
           url: siteUrl(),
-          image: hero || undefined,
+          image: hero?.images[0]?.url || settings.heroImage || undefined,
           telephone: settings.phone || undefined,
         }}
       />
-      <section className="hero-frame">
-        {picture.src ? (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={picture.src}
-              alt="A piece from the studio."
-              width={picture.width}
-              height={picture.height}
-              fetchPriority="high"
-              decoding="async"
-              loading="eager"
-              className="hero-photo"
-              style={{ objectPosition: `${settings.heroFocalX * 100}% ${settings.heroFocalY * 100}%` }}
-            />
-            <div className="hero-scrim">
-              <h1 className="text-4xl md:text-5xl">{settings.heroHeadline}</h1>
-              <p className="measure">{settings.heroText}</p>
-              <Link className="btn btn-primary" href={studio.length ? "/studio" : "/shop"}>
-                See the work
-              </Link>
-            </div>
-          </>
-        ) : (
-          <div className="grid min-h-[86dvh] place-items-center px-4 py-16 text-center">
-            <div className="grid justify-items-center gap-4">
-              <h1 className="text-4xl text-ink md:text-5xl">{settings.heroHeadline}</h1>
-              <p className="measure text-ink-soft">{settings.heroText}</p>
-              <p className="text-ink-soft">Photographs will appear here.</p>
-              <Link className="btn btn-primary" href={studio.length ? "/studio" : "/shop"}>
-                See the work
-              </Link>
-            </div>
-          </div>
-        )}
-      </section>
-      {wall.length ? (
-        <section className="px-4 py-12 md:px-8" aria-labelledby="studio-heading">
-          <div className="border-b border-line pb-4">
-            <h2 id="studio-heading" className="text-3xl text-ink">
-              From the studio
-            </h2>
-            <p className="measure mt-2 text-ink-soft">Photographs of work. A price appears only after it is written in.</p>
-          </div>
-          <div className="hang mt-8">
-            {wall.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-          <p className="mt-6">
-            <Link href="/studio" className="inline-flex min-h-12 items-center text-ink no-underline">
-              See the studio
-            </Link>
-          </p>
-        </section>
-      ) : null}
-      {collections.length ? (
-        <section className="border-t border-line px-4 py-12 md:px-8" aria-labelledby="groups-heading">
-          <h2 id="groups-heading" className="text-3xl text-ink">
-            Collections
-          </h2>
-          <div className="hang mt-8">
-            {collections.map((collection) => (
-              <CollectionTile key={collection.id} collection={collection} />
-            ))}
-          </div>
-        </section>
-      ) : null}
-      {featured.length ? <Rail title="On the table" products={featured} /> : null}
-      {arrivals.length ? <Rail title="New arrivals" products={arrivals} /> : null}
-      {reduced.length ? <Rail title="Recently reduced" products={reduced} /> : null}
+
       <section
-        className={cn(
-          "grid gap-8 border-t border-line px-4 py-12 md:items-start md:px-8",
-          settings.ownerPhoto ? "md:grid-cols-2" : "max-w-3xl",
-        )}
+        data-motion="hero"
+        className="hairline-b px-4 py-10 sm:py-14 md:px-8 lg:py-16"
+        aria-label="Archive introduction"
       >
-        <div>
-          <h2 className="text-3xl text-ink">From Ajja</h2>
-          <p className="measure mt-4 text-lg leading-relaxed">{settings.story}</p>
-          <p className="mt-4 border-t border-line pt-4 text-ink-soft">
-            {settings.town}, {settings.region}
-          </p>
-        </div>
-        {settings.ownerPhoto ? (
-          <div className="photo-frame crop relative" style={{ position: "relative" }}>
-            <Image src={settings.ownerPhoto} alt={`${settings.ownerName} at the studio`} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
-          </div>
-        ) : null}
-      </section>
-      {quotes.length ? (
-        <section className="border-t border-line px-4 py-12 md:px-8" aria-labelledby="quotes-heading">
-          <h2 id="quotes-heading" className="text-3xl text-ink">
-            In their words
-          </h2>
-          <div className="mt-6 grid gap-8 md:grid-cols-2">
-            {quotes.map((quote) => (
-              <blockquote key={quote.id} className="border-t border-line pt-4">
-                <p className="font-display text-xl leading-relaxed">{quote.text}</p>
-                <footer className="mt-3 text-ink-soft">{quote.name}</footer>
-              </blockquote>
-            ))}
-          </div>
-        </section>
-      ) : null}
-      <section className="border-t border-line px-4 py-12 md:px-8">
-        <div className="max-w-3xl">
-          <h2 className="text-3xl text-ink">Visit</h2>
-          {settings.address ? (
-            <>
-              <p className="mt-4">
-                {settings.town}, {settings.region}, {settings.address}
-              </p>
-              {open != null ? (
-                <p className="mt-2 text-ink-soft">{open ? "Open today." : "Closed today."}</p>
-              ) : null}
-            </>
-          ) : (
-            <p className="mt-4 text-ink-soft leading-relaxed">
-              Private studio in {settings.town || "Collegeville"}, {settings.region || "Pennsylvania"}. Studio viewings are welcomed by appointment. Inquire below to arrange a visit.
+        <div className="mx-auto grid max-w-[1440px] items-start gap-10 lg:grid-cols-12">
+          <div className="lg:col-span-7">
+            <p
+              data-motion="hero-stamp"
+              className="inline-flex items-center gap-2 rounded-sm bg-bone px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-terracotta hairline-box"
+            >
+              Archive Folio · {settings.town} Studio
             </p>
-          )}
-          <div className="mt-6 flex flex-wrap gap-3">
-            {settings.mapUrl ? (
-              <a className="btn btn-primary" href={settings.mapUrl}>
-                Open the map
-              </a>
+            <div className="mt-5">
+              <HeroHeadline text={settings.heroHeadline} />
+            </div>
+            {settings.heroText ? (
+              <p
+                data-motion="hero-manifesto"
+                className="mt-6 max-w-xl text-base leading-relaxed text-umber sm:text-lg"
+              >
+                {settings.heroText}
+              </p>
             ) : null}
-            <Link className="btn btn-secondary" href="/visit">
-              Studio details
-            </Link>
-          </div>
-        </div>
-      </section>
-      {settings.faqs.length ? (
-        <section className="border-t border-line px-4 py-12 md:px-8">
-          <div className="max-w-3xl">
-            <h2 className="text-3xl text-ink">Questions</h2>
-            <div className="mt-4 border-t border-line">
-              {settings.faqs.map((faq) => (
-                <details key={faq.q} className="group border-b border-line py-2">
-                  <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 font-display text-xl text-ink">
-                    <span>{faq.q}</span>
-                    <span className="text-ink-soft transition-transform duration-200 ease-out group-open:rotate-45" aria-hidden="true">
-                      +
-                    </span>
-                  </summary>
-                  <p className="measure pb-3 text-ink-soft">{faq.a}</p>
-                </details>
-              ))}
+            <div data-motion="hero-ctas" className="mt-8 flex flex-wrap gap-3">
+              <a href="#manifest-grid" className="btn btn-primary">
+                Explore the archive
+              </a>
+              {hero ? (
+                <Link href={`/p/${hero.slug}`} className="btn btn-secondary">
+                  Inspect hero specimen
+                </Link>
+              ) : null}
+            </div>
+
+            <div data-motion="hero-ledger" className="mt-10 max-w-xl rounded-sm bg-bone hairline-box">
+              <div className="grid grid-cols-3 divide-x divide-[var(--hairline)]">
+                <div className="p-4">
+                  <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-umber">Studio</p>
+                  <p className="mt-1 font-mono text-[11px] font-bold text-ink">
+                    {settings.town}, {settings.region}
+                  </p>
+                </div>
+                <div className="p-4">
+                  <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-umber">Holdings</p>
+                  <p className="mt-1 font-mono text-[11px] font-bold text-ink">
+                    {manifest.length} {manifest.length === 1 ? "piece" : "pieces"} · 1 of 1 each
+                  </p>
+                </div>
+                <div className="p-4">
+                  <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-umber">Acquisition</p>
+                  <p className="mt-1 font-mono text-[11px] font-bold text-ink">Direct enquiry</p>
+                </div>
+              </div>
             </div>
           </div>
-        </section>
-      ) : null}
-    </main>
-  );
-}
 
-function CollectionTile({ collection }: { collection: PublicCollection }) {
-  return (
-    <figure>
-      <Link href={`/c/${collection.slug}`} className="photo-frame crop relative block no-underline" style={{ position: "relative" }}>
-        {collection.imageUrl ? (
-          <Image
-            src={collection.imageUrl}
-            alt=""
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 40vw"
-          />
-        ) : null}
-        <span className="paper-label">{collection.name}</span>
-      </Link>
-      {collection.intro ? <figcaption className="mt-3 text-ink-soft">{collection.intro}</figcaption> : null}
-    </figure>
-  );
-}
+          <div className="lg:col-span-5" data-motion="hero-specimen">
+            {hero ? <HeroSpecimen product={hero} /> : null}
+          </div>
+        </div>
+      </section>
 
-function Rail({ title, products }: { title: string; products: PublicProduct[] }) {
-  const id = title.toLowerCase().replace(/\s+/g, "-");
-  return (
-    <section className="border-t border-line px-4 py-12 md:px-8" aria-labelledby={id}>
-      <h2 id={id} className="text-3xl text-ink">
-        {title}
-      </h2>
-      <div className="hang mt-8">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} href={`/p/${product.slug}`} />
-        ))}
+      <div data-reveal className="px-4 md:px-8">
+        <div className="mx-auto max-w-[1440px]">
+          <ManifestGrid products={manifest} />
+        </div>
       </div>
-    </section>
+
+      <section id="studio-note" data-reveal className="hairline-b px-4 py-16 sm:py-24 md:px-8">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-terracotta">
+            A note from the studio
+          </p>
+          <blockquote className="mt-6 font-serif text-2xl italic leading-relaxed text-ink sm:text-3xl">
+            “{settings.story}”
+          </blockquote>
+          <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.22em] text-umber">
+            {settings.ownerName} · {settings.town}, {settings.region}
+          </p>
+        </div>
+      </section>
+
+      <div data-reveal className="px-4 md:px-8">
+        <CustodialAccordion />
+      </div>
+
+      <section id="inquiry-section" data-reveal className="px-4 py-16 sm:py-20 md:px-8">
+        <div className="mx-auto max-w-2xl rounded-sm bg-bone p-6 hairline-box sm:p-10">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-terracotta">
+            SEC-04 // Direct studio line
+          </p>
+          <h2 className="mt-2 font-serif text-3xl font-medium text-ink sm:text-4xl">
+            Write to the studio
+          </h2>
+          <p className="mt-3 max-w-lg text-sm leading-relaxed text-umber">
+            Ask about a piece, arrange a private inspection in {settings.town}, or commission a
+            work. Messages go straight to the family — nothing is bought on this site.
+          </p>
+          <EnquiryForm />
+        </div>
+      </section>
+    </main>
   );
 }

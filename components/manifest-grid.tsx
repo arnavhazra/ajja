@@ -1,19 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { ProductCard } from "./product-card";
 import type { PublicProduct } from "@/lib/types";
 
-export function ManifestGrid({
-  products,
-  savedIds,
-  onToggleSave,
-}: {
-  products: PublicProduct[];
-  savedIds: string[];
-  onToggleSave: (id: string) => void;
-}) {
+export function ManifestGrid({ products }: { products: PublicProduct[] }) {
   const [filter, setFilter] = useState<"all" | "paintings" | "woodwork">("all");
 
   const paintingsCount = products.filter(
@@ -105,12 +96,7 @@ export function ManifestGrid({
       {/* Staggered 3-Column Editorial Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 items-start">
         {filteredProducts.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            isSaved={savedIds.includes(product.id)}
-            onSave={onToggleSave}
-          />
+          <ProductCard key={product.id} product={product} />
         ))}
       </div>
 

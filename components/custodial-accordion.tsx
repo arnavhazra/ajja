@@ -46,7 +46,7 @@ export function CustodialAccordion() {
   };
 
   return (
-    <section className="py-16 sm:py-20 hairline-b max-w-4xl mx-auto">
+    <section id="transfer" className="py-16 sm:py-20 hairline-b max-w-4xl mx-auto">
       <div className="text-center mb-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-terracotta mb-2">
           CUSTODIAL TRANSPARENCY & LOGISTICS

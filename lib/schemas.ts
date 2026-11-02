@@ -8,6 +8,7 @@ export const enquirySchema = z.object({
     .min(3, "Add a phone number or email.")
     .max(200)
     .refine((value) => value.includes("@") || value.replace(/\D/g, "").length >= 7, "Add a phone number or email."),
+  subject: z.string().trim().max(300).optional().default(""),
   message: z.string().trim().min(1, "Write a short message.").max(2000),
   giftNote: z.string().trim().max(500).optional().default(""),
   quantity: z.preprocess(

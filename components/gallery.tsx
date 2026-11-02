@@ -31,9 +31,14 @@ export function Gallery({ images, title }: { images: PublicImage[]; title: strin
     return () => node.removeEventListener("close", onClose);
   }, []);
 
-  if (!image) return <div className="photo-frame crop relative grid place-items-center text-ink-soft" style={{ position: "relative" }}>Studio study</div>;
+  const displayTitle = title && !/^title not written yet$/i.test(title) ? title : "Studio piece";
 
-  const displayTitle = title && !/^title not written yet$/i.test(title) ? title : "Studio Study";
+  if (!image)
+    return (
+      <div className="relative grid aspect-[4/5] place-items-center rounded-sm bg-bone-dark font-mono text-[10px] uppercase tracking-[0.2em] text-umber">
+        {displayTitle}
+      </div>
+    );
 
   function move(step: number) {
     setIndex((current) => (current + step + images.length) % images.length);
@@ -42,7 +47,7 @@ export function Gallery({ images, title }: { images: PublicImage[]; title: strin
 
   return (
     <div>
-      <div className="photo-frame crop relative" style={{ position: "relative" }}>
+      <div className="archival-vignette relative aspect-[4/5] w-full overflow-hidden rounded-sm bg-bone-dark hairline-box">
         <Image
           src={image.url}
           alt={image.alt || `${displayTitle}, photograph ${index + 1}`}
@@ -54,22 +59,29 @@ export function Gallery({ images, title }: { images: PublicImage[]; title: strin
           placeholder={image.blurData ? "blur" : "empty"}
           blurDataURL={image.blurData ?? undefined}
         />
-        <button type="button" className="btn btn-quiet absolute bottom-3 right-3 bg-paper" onClick={() => setOpen(true)}>
+        <button
+          type="button"
+          className="absolute bottom-3 right-3 rounded-sm bg-linen/90 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-ink hairline-box transition-colors hover:bg-ink hover:text-linen"
+          onClick={() => setOpen(true)}
+        >
           Larger photo
         </button>
       </div>
-      {images.length > 1 ? <p className="nums mt-3 px-4 text-ink-soft">{index + 1} of {images.length}</p> : null}
       {images.length > 1 ? (
-        <div className="mt-3 flex gap-2 overflow-x-auto px-4 pb-1">
+        <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-umber">
+          {index + 1} of {images.length}
+        </p>
+      ) : null}
+      {images.length > 1 ? (
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
           {images.map((item, itemIndex) => (
             <button
               key={item.id}
               type="button"
               className={cn(
-                "photo-frame relative size-16 shrink-0 overflow-hidden transition-opacity duration-200 ease-out",
+                "relative size-16 shrink-0 overflow-hidden rounded-sm hairline-box transition-opacity duration-200 ease-out",
                 itemIndex === index ? "opacity-100" : "opacity-60",
               )}
-              style={{ position: "relative" }}
               aria-label={`Photo ${itemIndex + 1}`}
               aria-current={itemIndex === index}
               onClick={() => setIndex(itemIndex)}
@@ -81,7 +93,7 @@ export function Gallery({ images, title }: { images: PublicImage[]; title: strin
       ) : null}
       <dialog
         ref={dialog}
-        className="sheet m-auto max-h-[100dvh] w-[min(100%,960px)] bg-paper p-4"
+        className="m-auto max-h-[100dvh] w-[min(100%,960px)] rounded-sm bg-linen p-4 hairline-box shadow-[0_30px_80px_rgba(30,27,24,0.35)]"
         aria-label={displayTitle}
         onKeyDown={(event) => {
           if (event.key === "ArrowRight") move(1);
@@ -89,7 +101,7 @@ export function Gallery({ images, title }: { images: PublicImage[]; title: strin
         }}
       >
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <p className="nums text-ink-soft">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-umber">
             {index + 1} of {images.length}
           </p>
           <button type="button" className="btn btn-secondary" onClick={() => move(-1)}>

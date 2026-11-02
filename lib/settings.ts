@@ -54,14 +54,14 @@ export const defaultSettings: ShopSettings = {
   hours: [],
   announcement: "",
   announcementLive: false,
-  heroHeadline: "Paintings, woodwork, and pieces made by hand.",
+  heroHeadline: "Objects shaped by patience, poured pigment, and timber.",
   heroText:
-    "I work in Collegeville, Pennsylvania. If a piece speaks to you, send a message. I will tell you the price and whether it is still here.",
+    "A family studio in Collegeville, Pennsylvania. Every piece is photographed as it is and held in the studio until collected. Nothing is bought on this site — you ask, we answer.",
   heroImage: "",
   heroFocalX: 0.5,
   heroFocalY: 0.45,
   story:
-    "I make poured paintings, woodwork, and other handwork. Each piece is one of a kind. I list a piece here only after I have written its name and price.",
+    "Every piece here is one of a kind, made by hand in Collegeville. The photographs are the listing — a piece with no price is simply a piece you ask about.",
   ownerPhoto: "",
   paymentNote: "Payment is arranged with me directly. This website does not take payment.",
   responseNote: "",

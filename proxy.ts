@@ -1,28 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { optimizeHomeHtml } from "@/lib/home-html.mjs";
 
 export async function proxy(request: NextRequest) {
-  const homeDocument =
-    request.method === "GET" &&
-    request.nextUrl.pathname === "/" &&
-    !request.nextUrl.searchParams.has("_rsc") &&
-    request.headers.get("x-ajja-lcp") !== "1" &&
-    (request.headers.get("accept") || "").includes("text/html");
-  if (homeDocument) {
-    const headers = new Headers(request.headers);
-    headers.set("x-ajja-lcp", "1");
-    const upstream = await fetch(request.nextUrl, { headers, redirect: "manual" });
-    const type = upstream.headers.get("content-type") || "";
-    if (type.includes("text/html")) {
-      const html = optimizeHomeHtml(await upstream.text());
-      const out = new Headers(upstream.headers);
-      out.delete("content-length");
-      out.delete("content-encoding");
-      return new NextResponse(html, { status: upstream.status, headers: out });
-    }
-    return new NextResponse(upstream.body, { status: upstream.status, headers: upstream.headers });
-  }
-
   const { pathname } = request.nextUrl;
   const rewritten = request.headers.get("x-ajja-rewritten") === "1";
   if (!rewritten && (pathname === "/desk" || pathname.startsWith("/desk/"))) {

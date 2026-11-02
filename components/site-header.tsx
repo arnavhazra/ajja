@@ -1,87 +1,62 @@
 import Link from "next/link";
-import { TextControls } from "./text-controls";
+import { SavedWorksButton } from "./saved-works-button";
 import type { ShopSettings } from "@/lib/settings";
-import { digits } from "@/lib/whatsapp";
 
-const PRIMARY = [
-  { href: "/shop", label: "Shop" },
-  { href: "/studio", label: "Studio" },
-  { href: "/visit", label: "Visit" },
-  { href: "/about", label: "Our story" },
+const NAV = [
+  { href: "/#manifest-grid", label: "Archive" },
+  { href: "/#studio-note", label: "Studio" },
+  { href: "/#transfer", label: "Transfer" },
+  { href: "/#inquiry-section", label: "Inquire" },
 ];
-
-const MENU = [
-  ...PRIMARY,
-  { href: "/search", label: "Search" },
-  { href: "/saved", label: "Saved" },
-];
-
-function contactAction(settings: ShopSettings) {
-  const whatsapp = digits(settings.whatsapp);
-  if (whatsapp) return { href: `https://wa.me/${whatsapp}`, label: "WhatsApp" };
-  const phone = digits(settings.phone);
-  if (phone) return { href: `tel:${phone}`, label: "Call" };
-  return null;
-}
 
 export function SiteHeader({ settings }: { settings: ShopSettings }) {
-  const contact = contactAction(settings);
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-paper">
-      {settings.announcementLive && settings.announcement ? (
-        <p className="border-b border-line bg-paper-2 px-4 py-3 text-center text-ink">{settings.announcement}</p>
-      ) : null}
-      <div className="flex items-center gap-4 px-4 py-2.5 md:gap-8 md:px-8">
-        <div className="min-w-0 flex-1">
-          <Link href="/" className="block min-h-12 no-underline">
-            <span className="font-display text-2xl md:text-3xl tracking-tight text-ink">{settings.businessName}</span>
-            <span className="block text-sm text-ink-soft">
-              {settings.town}, {settings.region}
-            </span>
-          </Link>
-        </div>
-        <nav className="nav-inline flex items-center gap-6" aria-label="Shop">
-          {PRIMARY.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="inline-flex min-h-12 items-center text-ink no-underline font-medium transition-opacity duration-150 ease-out hover:opacity-70"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="flex flex-1 items-center justify-end gap-2 md:gap-3">
-          <details className="nav-inline relative">
-            <summary className="control cursor-pointer px-4">Text</summary>
-            <div className="absolute right-0 z-50 mt-2 border border-line bg-paper p-3 shadow-soft">
-              <TextControls />
-            </div>
-          </details>
-          {contact ? (
-            <a className="btn btn-primary" href={contact.href}>
-              {contact.label}
-            </a>
-          ) : null}
-          <details className="nav-menu">
-            <summary className="control cursor-pointer px-4">Menu</summary>
-            <nav className="absolute inset-x-4 top-full z-50 mt-2 flex flex-col gap-1 border border-line bg-paper p-3 shadow-soft" aria-label="Shop">
-              {MENU.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="inline-flex min-h-12 items-center px-2 text-ink no-underline"
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <div className="mt-2 border-t border-line pt-3">
-                <TextControls />
-              </div>
-            </nav>
-          </details>
+    <>
+      <div className="hairline-b bg-linen px-4 py-2 md:px-8">
+        <div className="mx-auto flex max-w-[1440px] items-center justify-between font-mono text-[9px] uppercase tracking-[0.24em] text-umber">
+          <p>
+            {settings.town}, {settings.region} · Private Studio
+          </p>
+          <p className="hidden sm:block">By appointment</p>
         </div>
       </div>
-    </header>
+      {settings.announcementLive && settings.announcement ? (
+        <p className="hairline-b bg-bone px-4 py-2.5 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-ink">
+          {settings.announcement}
+        </p>
+      ) : null}
+      <header className="sticky top-0 z-40 hairline-b bg-linen/95 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-[1440px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 md:px-8">
+          <div className="flex items-baseline gap-3">
+            <Link
+              href="/"
+              className="font-serif text-2xl font-medium tracking-tight text-ink md:text-3xl"
+            >
+              {settings.businessName}
+            </Link>
+            <span className="rounded-sm bg-ink px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-linen">
+              Archive
+            </span>
+          </div>
+          <nav
+            className="order-3 flex w-full items-center gap-5 overflow-x-auto md:order-none md:w-auto md:flex-1 md:justify-center"
+            aria-label="Archive"
+          >
+            {NAV.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="inline-flex min-h-[44px] shrink-0 items-center font-mono text-[10px] uppercase tracking-[0.22em] text-umber transition-colors hover:text-terracotta"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+          <div className="ml-auto flex items-center md:ml-0">
+            <SavedWorksButton />
+          </div>
+        </div>
+      </header>
+    </>
   );
 }

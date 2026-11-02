@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Plus_Jakarta_Sans, Space_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import { MotionRoot } from "@/components/motion-root";
 import { getSettings } from "@/lib/public-data";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
@@ -41,13 +42,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       lang="en"
-      className={`${cormorant.variable} ${jakarta.variable} ${spaceMono.variable} h-full scroll-smooth`}
+      className={`${cormorant.variable} ${jakarta.variable} ${spaceMono.variable} h-full`}
     >
       <body className="min-h-dvh flex flex-col font-sans bg-linen text-ink selection:bg-terracotta selection:text-linen">
         <a className="skip-link" href="#content">
           Skip to content
         </a>
         {children}
+        <div className="paper-grain" aria-hidden="true" />
+        <MotionRoot />
         <Analytics />
       </body>
     </html>

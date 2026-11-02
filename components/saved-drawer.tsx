@@ -1,30 +1,37 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { formatMoney } from "@/lib/money";
-import type { PublicProduct } from "@/lib/types";
+import { pieceTitle } from "./product-card";
+
+export type SavedItem = {
+  slug: string;
+  title: string;
+  priceMinor: number | null;
+  currency: string;
+  status: string;
+  categoryName: string | null;
+  medium: string | null;
+  image: { url: string; alt: string; focalX: number; focalY: number } | null;
+};
 
 export function SavedDrawer({
-  products,
-  savedIds,
+  items,
+  savedSlugs,
+  loading,
   isOpen,
   onClose,
   onToggleSave,
 }: {
-  products: PublicProduct[];
-  savedIds: string[];
+  items: SavedItem[];
+  savedSlugs: string[];
+  loading: boolean;
   isOpen: boolean;
   onClose: () => void;
-  onToggleSave: (id: string) => void;
+  onToggleSave: (slug: string) => void;
 }) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   // Prevent body scroll when drawer is open
   useEffect(() => {
     if (isOpen) {
@@ -37,17 +44,25 @@ export function SavedDrawer({
     };
   }, [isOpen]);
 
-  if (!mounted) return null;
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
 
-  const savedProducts = products.filter((p) => savedIds.includes(p.id));
+  const savedItems = items.filter((p) => savedSlugs.includes(p.slug));
+  const missingCount = savedSlugs.length - savedItems.length;
 
   const handleInquireAll = () => {
     onClose();
     const inquiryInput = document.getElementById("inquirySubject") as HTMLInputElement | null;
     const formSection = document.getElementById("inquiry-section");
-    if (inquiryInput && savedProducts.length) {
-      const summary = savedProducts
-        .map((p) => p.title || p.attributes?.medium || `Piece #${p.slug.slice(-6).toUpperCase()}`)
+    if (inquiryInput && savedItems.length) {
+      const summary = savedItems
+        .map((p) => pieceTitle(p.title, p.categoryName, p.medium ? { medium: p.medium } : {}))
         .join(", ");
       inquiryInput.value = `Saved pieces inquiry: ${summary}`;
     }
@@ -81,7 +96,7 @@ export function SavedDrawer({
                 STUDIO SELECTION
               </p>
               <h2 className="font-serif text-2xl text-ink font-medium">
-                Saved Works ({savedProducts.length})
+                Saved Works ({savedSlugs.length})
               </h2>
             </div>
             <button
@@ -97,7 +112,11 @@ export function SavedDrawer({
 
           {/* List */}
           <div className="p-6 space-y-4 max-h-[calc(100vh-280px)] overflow-y-auto">
-            {savedProducts.length === 0 ? (
+            {loading ? (
+              <p className="py-12 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-umber">
+                Reading the ledger…
+              </p>
+            ) : savedSlugs.length === 0 ? (
               <div className="py-12 text-center text-umber space-y-3">
                 <p className="font-serif text-xl text-ink">No pieces saved yet.</p>
                 <p className="text-xs">
@@ -105,56 +124,64 @@ export function SavedDrawer({
                 </p>
               </div>
             ) : (
-              savedProducts.map((piece) => {
-                const img = piece.images[0];
-                const price = piece.priceMinor != null ? formatMoney(piece.priceMinor, piece.currency) : "Inquire for price";
-                const title = piece.title || piece.attributes?.medium || (piece.categoryName === "Woodwork" ? "Handcrafted Woodwork" : "Poured Painting");
+              <>
+                {savedItems.map((piece) => {
+                  const img = piece.image;
+                  const price = piece.priceMinor != null ? formatMoney(piece.priceMinor, piece.currency) : "Inquire for price";
+                  const title = pieceTitle(piece.title, piece.categoryName, piece.medium ? { medium: piece.medium } : {});
 
-                return (
-                  <div
-                    key={piece.id}
-                    className="p-3 bg-linen hairline-box rounded-sm flex items-center gap-3.5 relative group"
-                  >
-                    <div className="w-16 h-16 rounded-sm bg-bone-dark overflow-hidden shrink-0 relative">
-                      {img ? (
-                        <Image
-                          src={img.url}
-                          alt={img.alt || title}
-                          fill
-                          sizes="64px"
-                          className="object-cover"
-                        />
-                      ) : null}
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <Link
-                        href={`/p/${piece.slug}`}
-                        onClick={onClose}
-                        className="font-serif text-base text-ink font-medium truncate block hover:text-terracotta transition-colors"
-                      >
-                        {title}
-                      </Link>
-                      <p className="font-mono text-[10px] text-umber">
-                        #{piece.slug.slice(-6).toUpperCase()} • {piece.categoryName || "Studio Piece"}
-                      </p>
-                      <p className="font-mono text-xs font-bold text-ink mt-0.5">
-                        {price}
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => onToggleSave(piece.id)}
-                      className="text-umber hover:text-sold font-mono text-xs p-1"
-                      title="Remove from saved"
-                      aria-label={`Remove ${title}`}
+                  return (
+                    <div
+                      key={piece.slug}
+                      className="p-3 bg-linen hairline-box rounded-sm flex items-center gap-3.5 relative group"
                     >
-                      ✕
-                    </button>
-                  </div>
-                );
-              })
+                      <div className="w-16 h-16 rounded-sm bg-bone-dark overflow-hidden shrink-0 relative">
+                        {img ? (
+                          <Image
+                            src={img.url}
+                            alt={img.alt || title}
+                            fill
+                            sizes="64px"
+                            className="object-cover"
+                          />
+                        ) : null}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <Link
+                          href={`/p/${piece.slug}`}
+                          onClick={onClose}
+                          className="font-serif text-base text-ink font-medium truncate block hover:text-terracotta transition-colors"
+                        >
+                          {title}
+                        </Link>
+                        <p className="font-mono text-[10px] text-umber">
+                          #{piece.slug.slice(-6).toUpperCase()} • {piece.categoryName || "Studio Piece"}
+                          {piece.status === "sold" ? " • Sold" : ""}
+                        </p>
+                        <p className="font-mono text-xs font-bold text-ink mt-0.5">
+                          {price}
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => onToggleSave(piece.slug)}
+                        className="text-umber hover:text-terracotta font-mono text-xs p-1 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        title="Remove from saved"
+                        aria-label={`Remove ${title}`}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  );
+                })}
+                {missingCount > 0 && !loading ? (
+                  <p className="font-mono text-[10px] text-umber leading-relaxed">
+                    {missingCount} saved {missingCount === 1 ? "piece is" : "pieces are"} no longer in the archive.
+                  </p>
+                ) : null}
+              </>
             )}
           </div>
         </div>
@@ -165,13 +192,13 @@ export function SavedDrawer({
             Direct studio connection: Inquire below to arrange private inspection or studio collection in Collegeville, PA.
           </div>
 
-          {savedProducts.length > 0 ? (
+          {savedItems.length > 0 ? (
             <button
               type="button"
               onClick={handleInquireAll}
               className="w-full py-3.5 px-4 bg-terracotta hover:bg-terracotta-dark text-linen font-mono text-xs uppercase tracking-widest rounded-sm transition-colors cursor-pointer text-center"
             >
-              [Inquire on Saved Works ({savedProducts.length})]
+              [Inquire on Saved Works ({savedItems.length})]
             </button>
           ) : (
             <button

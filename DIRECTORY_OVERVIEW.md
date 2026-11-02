@@ -168,17 +168,11 @@ ajja/
 
 All public routes reside in the `(shop)` route group, sharing a common layout that renders the header, main content, and footer.
 
-- **`app/(shop)/page.tsx`**: Studio homepage. Features a fast-painting home hero image, introductory studio copy, featured artworks, category discovery banners, and direct contact options.
-- **`app/(shop)/shop/page.tsx`**: Browse catalog. Provides a responsive grid of available pieces with live category filters, price sorting, and instant search.
-- **`app/(shop)/p/[slug]/page.tsx`**: Single piece detail view. Renders high-resolution photographs with focal point alignment, dimensions, medium, condition notes, integer-cents pricing, enquire button, WhatsApp link, and Schema.org Product JSON-LD.
-- **`app/(shop)/c/[slug]/page.tsx`**: Category storefront (e.g., Paintings, Woodwork, Handwork). Displays pieces belonging to a specific studio discipline.
-- **`app/(shop)/studio/page.tsx` & `studio/[slug]/page.tsx`**: Studio overview and editorial collections, highlighting the studio's craft philosophy and process.
-- **`app/(shop)/saved/page.tsx`**: Personal saved list. Art pieces bookmarked by the user (stored in `localStorage` and resolved via `/api/saved`).
-- **`app/(shop)/search/page.tsx`**: Dedicated search experience matching piece titles, descriptions, and materials.
-- **`app/(shop)/sold/page.tsx`**: Archive of past works that have found homes, maintaining an artistic record.
-- **`app/(shop)/visit/page.tsx`**: Studio visiting information for Collegeville, Pennsylvania, including location map links and visiting guidelines.
-- **`app/(shop)/about/page.tsx`**: Background narrative on the studio founders, artistic techniques, and history.
+- **`app/(shop)/page.tsx`**: Archive homepage. An asymmetric hero (manifesto, provenance ledger, and the hero specimen with a 2.5× grain loupe), the filterable studio manifest, a studio note, the custodial accordion, and the enquiry form.
+- **`app/(shop)/p/[slug]/page.tsx`**: Single piece dossier. Renders high-resolution photographs with focal point alignment, verified medium, Collegeville studio custody, enquire form, save toggle, WhatsApp link, and Schema.org Product JSON-LD.
 - **`app/(shop)/policies/page.tsx` & `privacy/page.tsx`**: Honest, plain-language buying policies, studio pickup instructions, and privacy assurances.
+
+Retired routes (`/shop`, `/studio`, `/about`, `/visit`, `/c/:slug`, `/search`, `/sold`, `/saved`) are permanent 308 redirects in `next.config.ts`. Saved pieces live in a drawer backed by `localStorage` (`ajja-saved`) and resolved through `/api/saved`.
 
 ### `app/desk` — Private Administrative Desk
 
@@ -203,7 +197,7 @@ The "Desk" is the administrative back-office where the studio owner manages piec
 
 ### `app/api` — Server API Endpoints
 
-- **`api/saved/route.ts`**: Receives an array of UUIDs from the visitor's browser `localStorage` and returns current product titles, thumbnails, prices, and availability status.
+- **`api/saved/route.ts`**: Receives piece slugs from the visitor's browser `localStorage` and returns current titles, thumbnails, prices, media, and availability status for the saved drawer.
 - **`api/events/route.ts`**: High-throughput beacon for capturing anonymous product views and search phrases using salted daily hashes (`dayHash`).
 - **`api/cron/publish/route.ts`**: Scheduled maintenance executed daily via Vercel Cron. Publishes scheduled pieces, removes soft-deleted trash older than 30 days (along with Blob assets), and purges aged enquiry records.
 - **`api/desk/upload-token/route.ts`**: Generates pre-signed client upload tokens for direct-to-Vercel Blob asset transfers, verifying desk session authorization prior to issuance.

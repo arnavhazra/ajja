@@ -4,17 +4,13 @@ import { useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { formatMoney } from "@/lib/money";
+import { pieceTitle } from "./product-card";
+import { useSaved } from "./saved-context";
 import type { PublicProduct } from "@/lib/types";
 
-export function HeroSpecimen({
-  product,
-  onSave,
-  isSaved,
-}: {
-  product: PublicProduct;
-  onSave?: (id: string) => void;
-  isSaved?: boolean;
-}) {
+export function HeroSpecimen({ product }: { product: PublicProduct }) {
+  const { isSaved, toggleSave } = useSaved();
+  const saved = isSaved(product.slug);
   const [loupeActive, setLoupeActive] = useState(false);
   const [loupePos, setLoupePos] = useState({ x: 0, y: 0, bgX: 50, bgY: 50 });
   const [loupeLocked, setLoupeLocked] = useState(false);
@@ -22,8 +18,8 @@ export function HeroSpecimen({
 
   const image = product.images[0];
   const price = product.priceMinor != null ? formatMoney(product.priceMinor, product.currency) : null;
-  const title = product.title || "Floral Plume Poured Canvas";
-  const medium = product.attributes?.medium || "Poured pigment on stretched canvas";
+  const title = pieceTitle(product.title, product.categorySlug, product.attributes);
+  const medium = product.attributes?.medium || "Studio piece";
 
   const updateLoupe = useCallback((clientX: number, clientY: number) => {
     const container = containerRef.current;
@@ -95,7 +91,7 @@ export function HeroSpecimen({
             }`}
             title="Toggle 2.5x Magnifying Grain Loupe"
           >
-            {loupeLocked ? "[🔍 LOUPE PINNED]" : "[🔍 2.5× LOUPE]"}
+            {loupeLocked ? "[LOUPE PINNED]" : "[2.5× LOUPE]"}
           </button>
           <span className="px-2 py-0.5 bg-moss/15 text-moss font-bold rounded-sm">EDITION 1 OF 1</span>
         </div>
@@ -126,7 +122,7 @@ export function HeroSpecimen({
         {/* Floating Caption Badge */}
         <div className="absolute top-3 left-3 bg-linen/90 backdrop-blur-sm px-2.5 py-1 rounded-sm hairline-box pointer-events-none z-10">
           <span className="font-mono text-[9px] uppercase tracking-widest text-ink">
-            FIG 01. POURED PIGMENT ON CANVAS (HOVER FOR GRAIN LOUPE)
+            FIG 01. {medium} — hover for grain loupe
           </span>
         </div>
 
@@ -155,10 +151,9 @@ export function HeroSpecimen({
             {price ?? "Inquire for price"}
           </span>
         </div>
-        <p className="text-xs sm:text-sm text-umber leading-relaxed">
-          {product.description ||
-            "Vertical stretched canvas with full floral blossom plume in warm sunlit ochre, lavender lilac, and sap green."}
-        </p>
+        {product.description ? (
+          <p className="text-xs sm:text-sm text-umber leading-relaxed">{product.description}</p>
+        ) : null}
       </div>
 
       {/* Monospaced Metadata Block Underneath */}
@@ -173,7 +168,7 @@ export function HeroSpecimen({
         <div className="grid grid-cols-3 gap-2 pt-2.5 mt-2.5 hairline-t text-[10px]">
           <div>
             <span className="block text-umber/70 uppercase">MEDIUM</span>
-            <span className="text-ink">Fluid Pigment</span>
+            <span className="text-ink">{medium}</span>
           </div>
           <div>
             <span className="block text-umber/70 uppercase">STUDIO</span>
@@ -181,7 +176,9 @@ export function HeroSpecimen({
           </div>
           <div>
             <span className="block text-umber/70 uppercase">CUSTODY</span>
-            <span className="text-moss font-bold">In Studio Vault</span>
+            <span className="text-moss font-bold">
+              {product.status === "sold" ? "Acquired" : "In the studio"}
+            </span>
           </div>
         </div>
       </div>
@@ -194,19 +191,18 @@ export function HeroSpecimen({
         >
           [Inspect Piece Details]
         </Link>
-        {onSave ? (
-          <button
-            type="button"
-            onClick={() => onSave(product.id)}
-            className={`py-2.5 px-5 font-mono text-xs uppercase tracking-widest rounded-sm transition-colors cursor-pointer ${
-              isSaved
-                ? "bg-ink text-linen hover:bg-terracotta"
-                : "bg-terracotta hover:bg-terracotta-dark text-linen"
-            }`}
-          >
-            {isSaved ? "[Saved in Bag ✓]" : "[+ Save Piece]"}
-          </button>
-        ) : null}
+        <button
+          type="button"
+          onClick={() => toggleSave(product.slug)}
+          aria-pressed={saved}
+          className={`py-2.5 px-5 font-mono text-xs uppercase tracking-widest rounded-sm transition-colors cursor-pointer ${
+            saved
+              ? "bg-ink text-linen hover:bg-terracotta"
+              : "bg-terracotta hover:bg-terracotta-dark text-linen"
+          }`}
+        >
+          {saved ? "[Saved ✓]" : "[+ Save Piece]"}
+        </button>
       </div>
     </div>
   );

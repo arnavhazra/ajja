@@ -9,8 +9,8 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     description: settings.heroText,
     start_url: "/",
     display: "standalone",
-    background_color: "#f3eee4",
-    theme_color: "#0e4d34",
+    background_color: "#F7F4EE",
+    theme_color: "#1E1B18",
     lang: "en",
     icons: [
       { src: "/icon", sizes: "32x32", type: "image/png" },
