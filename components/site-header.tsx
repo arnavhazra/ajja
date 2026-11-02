@@ -46,7 +46,7 @@ export function SiteHeader({ settings }: { settings: ShopSettings }) {
               <Link
                 key={link.href}
                 href={link.href}
-                className="inline-flex min-h-[44px] shrink-0 items-center font-mono text-[10px] uppercase tracking-[0.22em] text-umber transition-colors hover:text-terracotta"
+                className="nav-link inline-flex min-h-[44px] shrink-0 items-center font-mono text-[10px] uppercase tracking-[0.22em] text-umber transition-colors hover:text-terracotta"
               >
                 {link.label}
               </Link>

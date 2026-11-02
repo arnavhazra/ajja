@@ -56,8 +56,8 @@ export function ManifestGrid({ products }: { products: PublicProduct[] }) {
           <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-terracotta mb-2">
             FOLIO 02 // CATALOGUE RAISONNÉ & CURRENT HOLDINGS
           </p>
-          <h2 className="font-serif text-4xl sm:text-5xl text-ink font-normal tracking-tight">
-            Current Studio Manifest
+          <h2 className="font-serif text-4xl sm:text-5xl text-ink font-normal tracking-tight" data-mask>
+            <span className="mask-line"><span className="mask-line-inner">Current Studio Manifest</span></span>
           </h2>
         </div>
 
@@ -77,6 +77,7 @@ export function ManifestGrid({ products }: { products: PublicProduct[] }) {
           <button
             type="button"
             onClick={() => applyFilter("all")}
+            aria-pressed={filter === "all"}
             className={`px-3 py-1 rounded-sm font-mono text-[11px] uppercase transition-colors cursor-pointer ${
               filter === "all"
                 ? "bg-ink text-linen"
@@ -88,6 +89,7 @@ export function ManifestGrid({ products }: { products: PublicProduct[] }) {
           <button
             type="button"
             onClick={() => applyFilter("paintings")}
+            aria-pressed={filter === "paintings"}
             className={`px-3 py-1 rounded-sm font-mono text-[11px] uppercase transition-colors cursor-pointer ${
               filter === "paintings"
                 ? "bg-ink text-linen"
@@ -99,6 +101,7 @@ export function ManifestGrid({ products }: { products: PublicProduct[] }) {
           <button
             type="button"
             onClick={() => applyFilter("woodwork")}
+            aria-pressed={filter === "woodwork"}
             className={`px-3 py-1 rounded-sm font-mono text-[11px] uppercase transition-colors cursor-pointer ${
               filter === "woodwork"
                 ? "bg-ink text-linen"
@@ -117,9 +120,9 @@ export function ManifestGrid({ products }: { products: PublicProduct[] }) {
 
       {/* Staggered 3-Column Editorial Grid */}
       <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 items-start">
-        {filteredProducts.map((product) => (
+        {filteredProducts.map((product, i) => (
           <div key={product.id} data-flip-id={product.id}>
-            <ProductCard product={product} />
+            <ProductCard product={product} index={i + 1} />
           </div>
         ))}
       </div>

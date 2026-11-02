@@ -70,7 +70,12 @@ export function SiteFooter({ settings }: { settings: ShopSettings }) {
           </nav>
         </div>
       </div>
-      <p className="mx-auto mt-10 max-w-[1440px] font-mono text-[9px] uppercase tracking-[0.24em] text-umber">
+      <div className="mx-auto mt-12 max-w-[1440px] overflow-hidden hairline-t pt-6">
+        <p aria-hidden="true" className="select-none text-center font-serif text-[clamp(4.5rem,16vw,13rem)] font-medium leading-[0.85] tracking-tight text-ink/[0.07]">
+          {settings.businessName}
+        </p>
+      </div>
+      <p className="mx-auto mt-6 max-w-[1440px] font-mono text-[9px] uppercase tracking-[0.24em] text-umber">
         Typeset in Cormorant Garamond &amp; Space Mono · Collegeville, Pennsylvania
       </p>
     </footer>

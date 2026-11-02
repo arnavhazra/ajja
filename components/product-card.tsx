@@ -27,9 +27,11 @@ export function pieceTitle(
 export function ProductCard({
   product,
   href,
+  index,
 }: {
   product: PublicProduct;
   href?: string;
+  index?: number;
 }) {
   const targetHref = href || `/p/${product.slug}`;
   const image = product.images[0];
@@ -57,6 +59,11 @@ export function ProductCard({
       <div>
         <Link href={targetHref} className="block">
           <div className={`art-card-img-wrap ${aspectClass} w-full rounded-sm mb-3.5 archival-vignette relative overflow-hidden bg-bone-dark`}>
+            {typeof index === "number" ? (
+              <span className="card-index absolute left-2.5 top-2 z-10 rounded-sm bg-linen/90 px-1.5 py-0.5 hairline-box">
+                NO. {String(index).padStart(3, "0")}
+              </span>
+            ) : null}
             {image ? (
               <Image
                 src={image.url}
@@ -64,6 +71,7 @@ export function ProductCard({
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className="art-card-img object-cover"
+                data-parallax
                 style={{ objectPosition: `${image.focalX * 100}% ${image.focalY * 100}%` }}
                 placeholder={image.blurData ? "blur" : "empty"}
                 blurDataURL={image.blurData ?? undefined}
@@ -104,7 +112,10 @@ export function ProductCard({
           href={targetHref}
           className="py-1.5 px-3 rounded-sm bg-linen hover:bg-ink hover:text-linen text-ink hairline-box transition-colors text-center"
         >
-          [Inspect Piece]
+          <span className="inline-flex items-center gap-1.5">
+            Inspect
+            <span aria-hidden="true" className="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
+          </span>
         </Link>
 
         <SaveButton slug={product.slug} className="py-1.5 px-3 rounded-sm hairline-box bg-linen hover:bg-bone-dark" />

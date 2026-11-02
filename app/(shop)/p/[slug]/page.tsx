@@ -91,11 +91,11 @@ async function ProductBody({ params }: { params: Promise<{ slug: string }> }) {
           </p>
         </div>
       </div>
-      <div className="mx-auto mt-4 grid max-w-[1440px] items-start gap-10 px-4 md:grid-cols-12 md:px-8">
-        <div className="md:col-span-7">
+      <div data-motion="dossier" className="mx-auto mt-4 grid max-w-[1440px] items-start gap-10 px-4 md:grid-cols-12 md:px-8">
+        <div className="md:col-span-7" data-motion="dossier-gallery">
           <Gallery images={product.images} title={title} />
         </div>
-        <div className="grid content-start gap-6 md:col-span-5">
+        <div className="grid content-start gap-6 md:col-span-5" data-motion="dossier-meta">
           <div>
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-terracotta">
               Fig 01 · {product.categoryName || "Studio piece"}
@@ -152,7 +152,7 @@ async function ProductBody({ params }: { params: Promise<{ slug: string }> }) {
 
           <div className="flex flex-wrap items-center gap-3">
             {product.status !== "sold" ? (
-              <a href="#enquire" className="btn btn-terracotta">
+              <a href="#enquire" className="btn btn-terracotta" data-magnetic="0.3">
                 Enquire about this piece
               </a>
             ) : null}

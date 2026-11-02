@@ -16,13 +16,33 @@ function HeroHeadline({ text }: { text: string }) {
     >
       <span aria-hidden="true">
         {words.map((word, i) => (
-          <span key={i} className="hero-word inline-block will-change-transform">
-            {word}
-            {i < words.length - 1 ? " " : ""}
+          <span key={i} className="hero-word mask-line">
+            <span className="hero-word-inner mask-line-inner">
+              {word}
+              {i < words.length - 1 ? " " : ""}
+            </span>
           </span>
         ))}
       </span>
     </h1>
+  );
+}
+
+function MaskedWords({ text, className }: { text: string; className?: string }) {
+  const words = text.split(/\s+/).filter(Boolean);
+  return (
+    <span aria-label={text} className={className} data-mask>
+      <span aria-hidden="true">
+        {words.map((word, i) => (
+          <span key={i} className="mask-line">
+            <span className="mask-line-inner">
+              {word}
+              {i < words.length - 1 ? " " : ""}
+            </span>
+          </span>
+        ))}
+      </span>
+    </span>
   );
 }
 
@@ -36,6 +56,14 @@ export default async function HomePage() {
 
   return (
     <main>
+      <div data-motion="intro" className="intro-veil" aria-hidden="true">
+        <span data-motion="intro-stamp" className="intro-stamp">
+          <span className="font-serif text-3xl font-medium text-ink">Ajja</span>
+          <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-umber">
+            Archive Folio · Collegeville
+          </span>
+        </span>
+      </div>
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -79,11 +107,11 @@ export default async function HomePage() {
               </p>
             ) : null}
             <div data-motion="hero-ctas" className="mt-8 flex flex-wrap gap-3">
-              <a href="#manifest-grid" className="btn btn-primary">
+              <a href="#manifest-grid" className="btn btn-primary" data-magnetic="0.3">
                 Explore the archive
               </a>
               {hero ? (
-                <Link href={`/p/${hero.slug}`} className="btn btn-secondary">
+                <Link href={`/p/${hero.slug}`} className="btn btn-secondary" data-magnetic="0.3">
                   Inspect hero specimen
                 </Link>
               ) : null}
@@ -117,6 +145,27 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <div className="marquee" aria-hidden="true">
+        <div className="marquee-track">
+          {[0, 1].map((copy) => (
+            <span key={copy} className="contents">
+              {[
+                "Original poured paintings",
+                "Handcrafted woodwork",
+                "Collegeville, Pennsylvania",
+                "Every piece one of one",
+                "Direct studio enquiry",
+                "No cart · No checkout",
+              ].map((item) => (
+                <span key={item} className="marquee-item">
+                  {item}
+                </span>
+              ))}
+            </span>
+          ))}
+        </div>
+      </div>
+
       <div data-reveal className="px-4 md:px-8">
         <div className="mx-auto max-w-[1440px]">
           <ManifestGrid products={manifest} />
@@ -129,7 +178,7 @@ export default async function HomePage() {
             A note from the studio
           </p>
           <blockquote className="mt-6 font-serif text-2xl italic leading-relaxed text-ink sm:text-3xl">
-            “{settings.story}”
+            <MaskedWords text={`\u201C${settings.story}\u201D`} />
           </blockquote>
           <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.22em] text-umber">
             {settings.ownerName} · {settings.town}, {settings.region}
@@ -147,7 +196,7 @@ export default async function HomePage() {
             SEC-04 // Direct studio line
           </p>
           <h2 className="mt-2 font-serif text-3xl font-medium text-ink sm:text-4xl">
-            Write to the studio
+            <MaskedWords text="Write to the studio" />
           </h2>
           <p className="mt-3 max-w-lg text-sm leading-relaxed text-umber">
             Ask about a piece, arrange a private inspection in {settings.town}, or commission a
