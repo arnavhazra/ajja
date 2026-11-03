@@ -3,6 +3,7 @@ import { CustodialAccordion } from "@/components/custodial-accordion";
 import { EnquiryForm } from "@/components/enquiry-form";
 import { HeroSpecimen } from "@/components/hero-specimen";
 import { JsonLd } from "@/components/json-ld";
+import { FolioWalk } from "@/components/folio-walk";
 import { ManifestGrid } from "@/components/manifest-grid";
 import { getSettings, loadManifest } from "@/lib/public-data";
 import { siteUrl } from "@/lib/site-url";
@@ -179,6 +180,8 @@ export default async function HomePage() {
           ))}
         </div>
       </div>
+
+      <FolioWalk products={manifest} />
 
       <div data-reveal className="px-4 md:px-8">
         <div className="mx-auto max-w-[1440px]">

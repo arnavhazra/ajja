@@ -20,8 +20,17 @@ export function PageVeil() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const veil = veilRef.current;
     if (!veil) return;
-    const lift = () =>
-      gsap.to(veil, { autoAlpha: 0, duration: 0.45, ease: "power2.out", delay: 0.12, overwrite: "auto" });
+    const lift = () => {
+      gsap.set(veil, { transformOrigin: "top center" });
+      gsap.to(veil, {
+        scaleY: 0,
+        duration: 0.55,
+        ease: "power3.inOut",
+        delay: 0.15,
+        overwrite: "auto",
+        onComplete: () => gsap.set(veil, { autoAlpha: 0 }),
+      });
+    };
     const onClick = (event: MouseEvent) => {
       const anchor = (event.target as HTMLElement).closest<HTMLAnchorElement>("a[href]");
       if (!anchor) return;
@@ -37,7 +46,8 @@ export function PageVeil() {
         return;
       }
       if (url.origin !== window.location.origin || url.pathname === window.location.pathname) return;
-      gsap.to(veil, { autoAlpha: 1, duration: 0.32, ease: "power2.in", overwrite: "auto" });
+      gsap.set(veil, { autoAlpha: 1, transformOrigin: "bottom center" });
+      gsap.to(veil, { scaleY: 1, duration: 0.4, ease: "power3.in", overwrite: "auto" });
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(lift, 1600);
     };
@@ -57,7 +67,15 @@ export function PageVeil() {
     }
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    gsap.to(veil, { autoAlpha: 0, duration: 0.55, ease: "power2.out", delay: 0.1, overwrite: "auto" });
+    gsap.set(veil, { transformOrigin: "top center" });
+    gsap.to(veil, {
+      scaleY: 0,
+      duration: 0.6,
+      ease: "power3.inOut",
+      delay: 0.1,
+      overwrite: "auto",
+      onComplete: () => gsap.set(veil, { autoAlpha: 0 }),
+    });
   }, [pathname]);
 
   return (

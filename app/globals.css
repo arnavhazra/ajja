@@ -500,7 +500,8 @@ html.custom-cursor select {
   justify-content: center;
   background: var(--linen);
   visibility: hidden;
-  opacity: 0;
+  transform: scaleY(0);
+  transform-origin: bottom center;
   pointer-events: none;
 }
 
