@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { DragPhoto } from "@/components/desk/drag-photo";
 import { Flash, one } from "@/components/desk/flash";
 import { PhotoUpload } from "@/components/desk/upload";
-import { ProductCard } from "@/components/product-card";
+import { PieceCard } from "@/components/shop/piece-card";
 import {
   coverImage,
   cropImage,
@@ -74,6 +74,8 @@ async function Editor({
     categoryName: group?.name ?? null,
     categorySlug: group?.slug ?? null,
     createdAt: product.createdAt.toISOString(),
+    pigment: "#2a44c4",
+    pigmentInk: "#ffffff",
     images: images.map((image) => ({
       id: image.id,
       url: image.url,
@@ -192,12 +194,12 @@ async function Editor({
         <aside className="grid gap-4">
           <div className="max-w-[390px] border border-line p-3">
             <p>Phone</p>
-            <ProductCard product={preview} />
+            <PieceCard product={preview} />
           </div>
           <div className="border border-line p-3">
             <p>Desktop</p>
             <div className="max-w-xl">
-              <ProductCard product={preview} />
+              <PieceCard product={preview} />
             </div>
           </div>
           <div className="flex flex-wrap gap-2">

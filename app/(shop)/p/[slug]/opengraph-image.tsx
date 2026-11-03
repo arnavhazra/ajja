@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { pieceTitle } from "@/components/product-card";
+import { pieceTitle } from "@/lib/piece-title";
 import { formatMoney } from "@/lib/money";
 import { loadProduct } from "@/lib/public-data";
 
@@ -20,8 +20,8 @@ export default async function ProductImage({ params }: { params: Promise<{ slug:
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-end",
-        background: "#f3eee4",
-        color: "#1a1410",
+        background: product?.pigment ?? "#2a44c4",
+        color: product?.pigmentInk ?? "#ffffff",
         padding: 64,
         fontFamily: "Georgia",
       }}

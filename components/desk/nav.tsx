@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DeskNavLinks } from "@/components/desk/nav-links";
 import { leaveDesk } from "@/lib/desk-actions";
 import { deskPrefix } from "@/lib/desk-path";
 
@@ -14,35 +15,35 @@ const LINKS = [
   ["/files", "Bring in / Save a copy"],
   ["/poster", "Poster"],
   ["/history", "Change history"],
-];
+  ["/account", "Account"],
+] as const;
 
 export async function DeskNav({ email }: { email: string }) {
   const prefix = await deskPrefix();
   return (
-    <header className="no-print">
-      <div className="desk-top">
-        <div className="desk-bar">
-          <p className="display text-3xl">Desk</p>
-          <div className="flex flex-wrap items-center gap-2">
-            <Link className="btn btn-secondary" href={`${prefix}/help`}>
-              Help
-            </Link>
-            <form action={leaveDesk}>
-              <button className="btn btn-quiet" type="submit">
-                Sign out
-              </button>
-            </form>
-          </div>
-        </div>
-        <p className="desk-signed-in text-ink-soft">{email}</p>
+    <header className="desk-side no-print">
+      <div className="desk-bar">
+        <p className="display text-3xl">
+          Ajja<span className="text-cobalt">.</span> <span className="desk-tag">Desk</span>
+        </p>
+        <Link className="desk-link desk-view" href="/" target="_blank" rel="noreferrer">
+          View the shop
+        </Link>
       </div>
-      <nav className="desk-nav" aria-label="Desk">
-        {LINKS.map(([href, label]) => (
-          <Link key={label} className="btn btn-quiet" href={`${prefix}${href}`}>
-            {label}
+      <DeskNavLinks prefix={prefix} links={LINKS} />
+      <div className="desk-foot">
+        <p className="desk-signed-in truncate text-sm text-ink-soft">{email}</p>
+        <div className="flex flex-wrap gap-2">
+          <Link className="btn btn-secondary min-h-11 px-4 text-sm" href={`${prefix}/help`}>
+            Help
           </Link>
-        ))}
-      </nav>
+          <form action={leaveDesk}>
+            <button className="btn btn-quiet min-h-11 px-4 text-sm" type="submit">
+              Sign out
+            </button>
+          </form>
+        </div>
+      </div>
     </header>
   );
 }

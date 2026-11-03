@@ -7,6 +7,7 @@ import { categories, productImages, products, redirects } from "./db/schema";
 import { withDefaults } from "./settings";
 import { siteSettings } from "./db/schema";
 import type { PublicImage, PublicProduct } from "./types";
+import { pigmentFromDataUri, type Pigment } from "./pigment";
 
 function mapImage(image: typeof productImages.$inferSelect): PublicImage {
   return {
@@ -26,6 +27,7 @@ function mapProduct(
   row: typeof products.$inferSelect,
   images: PublicImage[],
   category: { name: string; slug: string } | null,
+  pigment: Pigment,
 ): PublicProduct {
   const attributes = row.attributes && typeof row.attributes === "object" ? (row.attributes as Record<string, string>) : {};
   return {
@@ -48,6 +50,8 @@ function mapProduct(
     categoryName: category?.name ?? null,
     categorySlug: category?.slug ?? null,
     images,
+    pigment: pigment.hex,
+    pigmentInk: pigment.ink,
     createdAt: row.createdAt.toISOString(),
   };
 }
@@ -66,7 +70,10 @@ async function hydrate(rows: (typeof products.$inferSelect)[]) {
     list.push(mapImage(image));
     grouped.set(image.productId, list);
   }
-  return rows.map((row) => mapProduct(row, grouped.get(row.id) ?? [], row.categoryId ? catMap.get(row.categoryId) ?? null : null));
+  const pigments = await Promise.all(rows.map((row) => pigmentFromDataUri(grouped.get(row.id)?.[0]?.blurData ?? null)));
+  return rows.map((row, index) =>
+    mapProduct(row, grouped.get(row.id) ?? [], row.categoryId ? catMap.get(row.categoryId) ?? null : null, pigments[index]),
+  );
 }
 
 function listed() {

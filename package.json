@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "seed": "node scripts/seed.mjs"
+    "seed": "node scripts/seed.mjs",
+    "admin:password": "node scripts/set-admin-password.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",

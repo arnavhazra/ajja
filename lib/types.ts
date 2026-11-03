@@ -30,5 +30,7 @@ export type PublicProduct = {
   categoryName: string | null;
   categorySlug: string | null;
   images: PublicImage[];
+  pigment: string;
+  pigmentInk: string;
   createdAt: string;
 };

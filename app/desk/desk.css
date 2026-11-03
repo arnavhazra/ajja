@@ -14,39 +14,196 @@
   opacity: 0.55;
 }
 
-.desk-top {
+.desk-shell {
+  display: grid;
+}
+
+.desk-side {
   position: sticky;
   top: 0;
   z-index: 30;
-  background: var(--paper-3);
+  display: grid;
+  gap: 0.75rem;
+  background: var(--plate);
   border-bottom: 1px solid var(--line);
-  padding: max(1rem, env(safe-area-inset-top)) 1rem 0.9rem;
+  padding: max(0.9rem, env(safe-area-inset-top)) 1rem 0.75rem;
 }
 
 .desk-bar {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
 }
 
-.desk-signed-in {
-  margin: 0.75rem 0 0;
+.desk-tag {
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-style: italic;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ink-soft);
 }
 
 .desk-nav {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  gap: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin: 0 -1rem;
   padding: 0 1rem;
+}
+
+.desk-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.desk-link {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  white-space: nowrap;
+  border-radius: 999px;
+  padding: 0 0.9rem;
+  font-size: 0.925rem;
+  color: var(--ink-soft);
+  transition: background-color 160ms ease-out, color 160ms ease-out;
+}
+
+.desk-link:hover {
+  background: var(--plate-deep);
+  color: var(--ink);
+}
+
+.desk-link[aria-current="page"] {
+  background: var(--ink);
+  color: var(--gesso);
+}
+
+.desk-view {
+  border: 1px solid var(--line-strong);
+}
+
+.desk-foot {
+  display: none;
+}
+
+.desk-main {
+  min-width: 0;
+  padding: 1.5rem 1rem 4rem;
+}
+
+@media (min-width: 64rem) {
+  .desk-shell {
+    grid-template-columns: 16rem minmax(0, 1fr);
+  }
+
+  .desk-side {
+    height: 100dvh;
+    align-content: start;
+    grid-template-rows: auto 1fr auto;
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+    padding: 1.5rem 1rem;
+  }
+
+  .desk-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .desk-nav {
+    flex-direction: column;
+    overflow: visible;
+    margin: 0.5rem 0 0;
+    padding: 0;
+  }
+
+  .desk-foot {
+    display: grid;
+    gap: 0.75rem;
+    border-top: 1px solid var(--line);
+    padding-top: 1rem;
+  }
+
+  .desk-main {
+    padding: 2.5rem 3rem 5rem;
+  }
+}
+
+.desk-row {
+  display: grid;
+  grid-template-columns: auto 4rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem 1rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 1rem;
+}
+
+.desk-row > :last-child {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 64rem) {
+  .desk-row {
+    grid-template-columns: auto 4rem minmax(0, 1fr) auto;
+  }
+
+  .desk-row > :last-child {
+    grid-column: auto;
+    justify-content: flex-end;
+  }
+}
+
+.desk-thumb {
+  display: grid;
+  width: 4rem;
+  height: 4rem;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 0.6rem;
+  background: var(--plate-deep);
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+}
+
+.desk-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.desk-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  padding: 0.1rem 0.6rem;
+  font-size: 0.8rem;
+}
+
+.desk-pill[data-status="published"] {
+  border-color: transparent;
+  background: color-mix(in oklab, var(--ok) 16%, transparent);
+  color: var(--ok);
+}
+
+.desk-pill[data-status="sold"] {
+  border-color: transparent;
+  background: color-mix(in oklab, var(--sold) 14%, transparent);
+  color: var(--sold);
 }
 
 .desk-page {
   display: grid;
+  max-width: 72rem;
   gap: 2rem;
   align-content: start;
+}
+
+.desk-page h1 {
+  font-weight: 700;
+  letter-spacing: -0.035em;
 }
 
 .desk-page > section {
@@ -64,10 +221,11 @@
 .desk-note {
   max-width: 68ch;
   margin: 0;
-  padding: 1rem 1.15rem;
-  background: var(--paper-3);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-control);
+  padding: 0.85rem 1.1rem;
+  background: var(--plate);
+  border-left: 3px solid var(--cobalt);
+  border-radius: 0.5rem;
+  color: var(--ink-soft);
 }
 
 .desk-review {
@@ -87,4 +245,11 @@
   width: 1.35rem;
   height: 1.35rem;
   accent-color: var(--accent);
+}
+
+.desk-signin {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 2.5rem 1rem;
 }

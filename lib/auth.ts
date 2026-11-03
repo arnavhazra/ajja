@@ -5,6 +5,7 @@ import { cookies, headers } from "next/headers";
 import { desc, eq } from "drizzle-orm";
 import { getDb } from "./db";
 import { adminUsers, auditLog, loginCodes, sessions } from "./db/schema";
+import { checkPassword, hashPassword } from "./password";
 import { verifyTotp } from "./totp";
 
 export const SESSION_COOKIE = "ajja_session";
@@ -151,6 +152,53 @@ export async function verifyStaff(emailRaw: string, password: string, token: str
   }
   await startSession(email, "developer");
   return { ok: true as const, message: "Signed in." };
+}
+
+const LOCK_AFTER = 5;
+const LOCK_MINUTES = 15;
+let decoyHash: Promise<string> | null = null;
+
+/** Email + password from the admin_users table. Locks the account for 15 minutes after 5 wrong tries. */
+export async function verifyPassword(emailRaw: string, password: string) {
+  const email = emailRaw.trim().toLowerCase();
+  const fail = { ok: false as const, message: "That email and password did not match." };
+  const db = getDb();
+  const [user] = await db.select().from(adminUsers).where(eq(adminUsers.email, email)).limit(1);
+  if (!user?.passwordHash) {
+    decoyHash ??= hashPassword("decoy-password");
+    await checkPassword(password, await decoyHash);
+    return fail;
+  }
+  if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()) {
+    return { ok: false as const, message: `Too many tries. Wait ${LOCK_MINUTES} minutes.` };
+  }
+  if (!(await checkPassword(password, user.passwordHash))) {
+    const attempts = user.failedAttempts + 1;
+    const locked = attempts >= LOCK_AFTER;
+    await db
+      .update(adminUsers)
+      .set({ failedAttempts: locked ? 0 : attempts, lockedUntil: locked ? new Date(Date.now() + LOCK_MINUTES * 60 * 1000) : null })
+      .where(eq(adminUsers.id, user.id));
+    return locked ? { ok: false as const, message: `Too many tries. Wait ${LOCK_MINUTES} minutes.` } : fail;
+  }
+  await db.update(adminUsers).set({ failedAttempts: 0, lockedUntil: null }).where(eq(adminUsers.id, user.id));
+  await startSession(email, user.role);
+  return { ok: true as const, message: "Signed in." };
+}
+
+export async function changePassword(userId: string, current: string, next: string) {
+  const db = getDb();
+  const [user] = await db.select().from(adminUsers).where(eq(adminUsers.id, userId)).limit(1);
+  if (!user) return { ok: false as const, message: "Please sign in again." };
+  if (user.passwordHash && !(await checkPassword(current, user.passwordHash))) {
+    return { ok: false as const, message: "Your current password did not match." };
+  }
+  await db
+    .update(adminUsers)
+    .set({ passwordHash: await hashPassword(next), passwordChangedAt: new Date(), failedAttempts: 0, lockedUntil: null })
+    .where(eq(adminUsers.id, user.id));
+  await db.insert(auditLog).values({ userId: user.id, action: "Changed password", entity: "admin_user", entityId: user.id, meta: {} });
+  return { ok: true as const, message: "Password changed." };
 }
 
 export async function signOut() {

@@ -11,15 +11,15 @@ export default async function PoliciesPage() {
     ["Returns", settings.policies.returns],
   ];
   return (
-    <main className="max-w-3xl px-4 py-8 md:px-8">
-      <header className="border-b border-line pb-6">
-        <h1 className="text-4xl text-ink md:text-5xl">Policies</h1>
+    <main className="shell max-w-4xl py-16 md:py-24">
+      <header className="border-b border-line pb-10">
+        <h1 className="display text-[clamp(3rem,8vw,7rem)]">Policies</h1>
       </header>
       <div className="mt-2">
         {sections.map(([title, body]) => (
-          <section key={title} className="border-b border-line py-6">
-            <h2 className="text-2xl text-ink">{title}</h2>
-            <p className="measure mt-3">{body}</p>
+          <section key={title} className="border-b border-line py-10">
+            <h2 className="display-wide text-3xl">{title}</h2>
+            <p className="prose-serif measure mt-4 text-ink-soft">{body}</p>
           </section>
         ))}
       </div>

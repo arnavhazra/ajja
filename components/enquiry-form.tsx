@@ -7,57 +7,64 @@ import { sendEnquiry } from "@/lib/public-actions";
 
 export function EnquiryForm({ productId, productName }: { productId?: string; productName?: string }) {
   const [state, action, pending] = useActionState(sendEnquiry, { ok: false, message: "" });
-  return (
-    <form id="message" action={action} className="grid gap-5 pt-6 hairline-t">
-      <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-terracotta font-bold">
-          Studio correspondence
-        </p>
-        <h2 className="mt-1 font-serif text-2xl text-ink">Send a message</h2>
-        {productName ? <p className="mt-1 text-sm text-umber">Regarding {productName}.</p> : null}
+  if (state.ok) {
+    return (
+      <div role="status" className="grid min-h-80 content-center gap-4 rounded-[2px] bg-gesso p-8 md:p-10">
+        <span aria-hidden="true" className="size-4 rounded-full bg-pour" />
+        <p className="display-wide text-3xl">Thank you. Your note is with the studio.</p>
+        <p className="text-ink-soft">{state.message}</p>
+        <EventBeacon type="form" productId={productId} />
       </div>
+    );
+  }
+  return (
+    <form id="message" action={action} className="grid gap-5 rounded-[2px] bg-gesso p-6 md:p-10">
+      {productName ? (
+        <p className="display-wide text-2xl">
+          About <span className="text-pour">{productName}</span>
+        </p>
+      ) : null}
+      <div className="grid gap-5 sm:grid-cols-2">
+        <label className="grid gap-1.5">
+          <span className="field-label">Your name</span>
+          <input className="field" name="name" autoComplete="name" required maxLength={120} />
+        </label>
+        <label className="grid gap-1.5">
+          <span className="field-label">Phone or email</span>
+          <input className="field" name="contact" autoComplete="email" required maxLength={160} />
+        </label>
+      </div>
+      <input type="hidden" name="subject" value={productName ? `Enquiry: ${productName}` : "Question for the studio"} />
       <label className="grid gap-1.5">
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-umber">Your name</span>
-        <input id="inquiryName" className="field" name="name" autoComplete="name" required />
-      </label>
-      <label className="grid gap-1.5">
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-umber">Phone or email</span>
-        <input id="inquiryContact" className="field" name="contact" autoComplete="tel" required />
-      </label>
-      <label className="grid gap-1.5">
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-umber">Piece or subject</span>
-        <input
-          id="inquirySubject"
-          className="field"
-          name="subject"
-          defaultValue={productName ? `Enquiry: ${productName}` : ""}
-        />
-      </label>
-      <label className="grid gap-1.5">
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-umber">Message</span>
+        <span className="field-label">Message</span>
         <textarea
-          id="inquiryMessage"
           className="field"
           name="message"
           required
-          defaultValue={productName ? `I am asking about ${productName}.` : ""}
+          maxLength={2000}
+          defaultValue={productName ? `I would like to ask about ${productName}.` : ""}
+          placeholder={productName ? undefined : "Which piece, and what would you like to know?"}
         />
       </label>
-      <label className="grid gap-1.5">
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-umber">Gift note, if this is a gift</span>
-        <textarea className="field" name="giftNote" />
-      </label>
+      <details className="group">
+        <summary className="inline-flex min-h-11 cursor-pointer list-none items-center text-sm text-ink-soft [&::-webkit-details-marker]:hidden">
+          <span className="ink-link">Is it a gift? Add a note</span>
+        </summary>
+        <textarea className="field mt-2" name="giftNote" maxLength={500} aria-label="Gift note" />
+      </details>
       <input type="hidden" name="productId" value={productId ?? ""} />
       <input className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" name="company" />
       {state.message ? (
-        <p role="status" className={cn("border-l-2 pl-3 text-sm", state.ok ? "border-moss text-moss" : "border-sold text-sold")}>
+        <p role="alert" className={cn("border-l-2 border-sold pl-3 text-sm text-sold")}>
           {state.message}
         </p>
       ) : null}
-      {state.ok ? <EventBeacon type="form" productId={productId} /> : null}
-      <button className="btn btn-terracotta w-fit" type="submit" disabled={pending}>
-        {pending ? "Sending…" : "Send a message"}
-      </button>
+      <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+        <p className="field-hint max-w-xs">Nothing is paid on this website.</p>
+        <button className="btn btn-pour" type="submit" disabled={pending}>
+          {pending ? "Sending…" : "Send"}
+        </button>
+      </div>
     </form>
   );
 }

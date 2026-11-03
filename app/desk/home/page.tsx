@@ -17,7 +17,11 @@ async function HomeEditor({ searchParams }: { searchParams: Promise<Record<strin
   await requireDesk();
   const params = await searchParams;
   const [settings, quotes, studio] = await Promise.all([getSettings(), loadQuotes(), loadStudio()]);
-  const photos = studio.flatMap((piece) => piece.images.map((image) => ({ url: image.url, label: piece.title.trim() || "Untitled photograph" })));
+  const photos = [
+    ...new Map(
+      studio.flatMap((piece) => piece.images.map((image) => [image.url, { url: image.url, label: piece.title.trim() || "Untitled photograph" }] as const)),
+    ).values(),
+  ];
   return (
     <main className="desk-page max-w-3xl">
       <Flash note={one(params.note)} undo="" back="/home" />
@@ -139,8 +143,8 @@ async function HomeEditor({ searchParams }: { searchParams: Promise<Record<strin
             return (
               <div key={day} className="grid gap-2 md:grid-cols-[8rem_1fr_1fr_auto] md:items-center">
                 <p>{day}</p>
-                <input className="field" type="time" name={`open-${day}`} defaultValue={row?.open ?? ""} />
-                <input className="field" type="time" name={`close-${day}`} defaultValue={row?.close ?? ""} />
+                <input className="field" type="time" aria-label={`${day} opens`} name={`open-${day}`} defaultValue={row?.open ?? ""} />
+                <input className="field" type="time" aria-label={`${day} closes`} name={`close-${day}`} defaultValue={row?.close ?? ""} />
                 <label className="flex min-h-12 items-center gap-2">
                   <input type="checkbox" name={`closed-${day}`} defaultChecked={row?.closed ?? false} />
                   Closed
@@ -153,13 +157,13 @@ async function HomeEditor({ searchParams }: { searchParams: Promise<Record<strin
           <legend className="text-2xl">Questions</legend>
           {settings.faqs.map((faq, index) => (
             <div key={`${faq.q}-${index}`} className="grid gap-2">
-              <input className="field" name="faqQ" defaultValue={faq.q} />
-              <textarea className="field" name="faqA" defaultValue={faq.a} />
+              <input className="field" name="faqQ" aria-label={`Question ${index + 1}`} defaultValue={faq.q} />
+              <textarea className="field" name="faqA" aria-label={`Answer ${index + 1}`} defaultValue={faq.a} />
             </div>
           ))}
           <div className="grid gap-2">
-            <input className="field" name="faqQ" placeholder="New question" />
-            <textarea className="field" name="faqA" placeholder="Answer" />
+            <input className="field" name="faqQ" aria-label="New question" placeholder="New question" />
+            <textarea className="field" name="faqA" aria-label="New answer" placeholder="Answer" />
           </div>
         </fieldset>
         <label className="grid gap-1">

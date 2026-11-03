@@ -6,11 +6,11 @@ export const metadata: Metadata = { title: "Privacy" };
 export default async function PrivacyPage() {
   const settings = await getSettings();
   return (
-    <main className="max-w-3xl px-4 py-8 md:px-8">
-      <header className="border-b border-line pb-6">
-        <h1 className="text-4xl text-ink md:text-5xl">Privacy</h1>
+    <main className="shell max-w-4xl py-16 md:py-24">
+      <header className="border-b border-line pb-10">
+        <h1 className="display text-[clamp(3rem,8vw,7rem)]">Privacy</h1>
       </header>
-      <div className="measure mt-6 grid gap-4">
+      <div className="prose-serif measure mt-10 grid gap-5 text-ink-soft">
         <p>This shop does not ask you to make an account.</p>
         <p>
           If you send a message, the name, phone or email, and message are saved so they can be answered. Messages are kept for{" "}

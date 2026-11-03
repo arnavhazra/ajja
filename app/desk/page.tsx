@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { Flash, one } from "@/components/desk/flash";
-import { completeSignIn, completeStaffSignIn, sendSignInCode, toggleChecklist } from "@/lib/desk-actions";
+import { completePasswordSignIn, completeSignIn, completeStaffSignIn, sendSignInCode, toggleChecklist } from "@/lib/desk-actions";
 import { loadDashboard } from "@/lib/desk-data";
 import { deskPrefix } from "@/lib/desk-path";
 import { getSession } from "@/lib/auth";
@@ -22,9 +22,16 @@ async function Home({ searchParams }: { searchParams: Promise<Record<string, str
   const note = one(params.note);
   if (!session) {
     return (
-      <main className="desk-page mx-auto max-w-md px-4 py-10">
-        <Flash note={note} undo="" back="/" />
-        {one(params.staff) === "1" ? <StaffForm /> : <OwnerForm />}
+      <main className="desk-signin">
+        <div className="desk-page w-full max-w-md">
+          <Flash note={note} undo="" back="/" />
+          {one(params.staff) === "1" ? <StaffForm /> : one(params.code) === "1" ? <OwnerForm /> : <PasswordForm />}
+          <p className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-soft">
+            <Link className="ink-link inline-flex min-h-11 items-center" href="?">Password</Link>
+            <Link className="ink-link inline-flex min-h-11 items-center" href="?code=1">Email me a code</Link>
+            <Link className="ink-link inline-flex min-h-11 items-center" href="?staff=1">Staff with app code</Link>
+          </p>
+        </div>
       </main>
     );
   }
@@ -84,6 +91,26 @@ function CheckItem({ prefix, label, href, done, itemKey }: { prefix: string; lab
       <Link className="inline-flex min-h-12 items-center" href={`${prefix}${href}`}>
         {label}
       </Link>
+    </form>
+  );
+}
+
+function PasswordForm() {
+  return (
+    <form action={completePasswordSignIn} className="grid gap-4">
+      <p className="display text-5xl">Ajja</p>
+      <h1 className="text-2xl font-[600]">Sign in to the desk</h1>
+      <label className="grid gap-1.5">
+        <span className="field-label">Email</span>
+        <input className="field" name="email" type="email" autoComplete="username" required />
+      </label>
+      <label className="grid gap-1.5">
+        <span className="field-label">Password</span>
+        <input className="field" name="password" type="password" autoComplete="current-password" required />
+      </label>
+      <button className="btn btn-primary" type="submit">
+        Sign in
+      </button>
     </form>
   );
 }

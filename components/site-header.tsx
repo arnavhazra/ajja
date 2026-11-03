@@ -1,62 +1,101 @@
-import Link from "next/link";
-import { SavedWorksButton } from "./saved-works-button";
-import type { ShopSettings } from "@/lib/settings";
+"use client";
 
-const NAV = [
-  { href: "/#manifest-grid", label: "Archive" },
-  { href: "/#studio-note", label: "Studio" },
-  { href: "/#transfer", label: "Transfer" },
-  { href: "/#inquiry-section", label: "Inquire" },
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/cn";
+
+const LINKS = [
+  { href: "/#works", label: "Works" },
+  { href: "/#studio", label: "Studio" },
+  { href: "/#buying", label: "Buying" },
+  { href: "/#visit", label: "Visit" },
 ];
 
-export function SiteHeader({ settings }: { settings: ShopSettings }) {
+export function SiteHeader({ name }: { name: string }) {
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const dialog = menuRef.current;
+    if (!dialog) return;
+    if (open && !dialog.open) dialog.showModal();
+    if (!open && dialog.open) dialog.close();
+  }, [open]);
+
   return (
-    <>
-      <div className="hairline-b bg-linen px-4 py-2 md:px-8">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between font-mono text-[9px] uppercase tracking-[0.24em] text-umber">
-          <p>
-            {settings.town}, {settings.region} · Private Studio
-          </p>
-          <p className="hidden sm:block">By appointment</p>
-        </div>
-      </div>
-      {settings.announcementLive && settings.announcement ? (
-        <p className="hairline-b bg-bone px-4 py-2.5 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-ink">
-          {settings.announcement}
-        </p>
-      ) : null}
-      <header className="sticky top-0 z-40 hairline-b bg-linen/95 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-[1440px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 md:px-8">
-          <div className="flex items-baseline gap-3">
-            <Link
-              href="/"
-              className="font-serif text-2xl font-medium tracking-tight text-ink md:text-3xl"
-            >
-              {settings.businessName}
+    <header
+      className={cn(
+        "no-print sticky top-0 z-40 transition-[background-color,box-shadow] duration-300",
+        scrolled ? "bg-gesso/90 shadow-[0_1px_0_var(--line)] backdrop-blur-md" : "bg-transparent",
+      )}
+    >
+      <div className="shell flex h-16 items-center justify-between gap-6 md:h-20">
+        <Link href="/" className="display text-[2rem] leading-none md:text-[2.25rem]" aria-label={`${name}, home`}>
+          {name}
+          <span aria-hidden="true" className="ml-0.5 inline-block size-2 rounded-full bg-pour align-baseline" />
+        </Link>
+        <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
+          {LINKS.map((link) => (
+            <Link key={link.href} href={link.href} className="inline-flex min-h-11 items-center px-3 text-[0.95rem]">
+              <span className="ink-link">{link.label}</span>
             </Link>
-            <span className="rounded-sm bg-ink px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-linen">
-              Archive
-            </span>
+          ))}
+          <Link href="/#visit" className="btn btn-primary ml-3 min-h-11 px-5 text-sm">
+            Ask about a piece
+          </Link>
+        </nav>
+        <button
+          type="button"
+          className="btn btn-secondary min-h-11 px-4 text-sm max-md:inline-flex md:!hidden"
+          aria-expanded={open}
+          aria-controls="site-menu"
+          onClick={() => setOpen(true)}
+        >
+          Menu
+        </button>
+      </div>
+      <dialog
+        id="site-menu"
+        ref={menuRef}
+        className="sheet md:hidden"
+        aria-label="Menu"
+        onClose={() => setOpen(false)}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) setOpen(false);
+        }}
+      >
+        <div className="safe-bottom grid gap-2 p-5">
+          <div className="flex items-center justify-between">
+            <span className="display text-3xl">{name}</span>
+            <button type="button" className="btn btn-quiet min-h-11" onClick={() => setOpen(false)}>
+              Close
+            </button>
           </div>
-          <nav
-            className="order-3 flex w-full items-center gap-5 overflow-x-auto md:order-none md:w-auto md:flex-1 md:justify-center"
-            aria-label="Archive"
-          >
-            {NAV.map((link) => (
+          <nav aria-label="Menu links" className="mt-2 grid">
+            {LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="nav-link inline-flex min-h-[44px] shrink-0 items-center font-mono text-[10px] uppercase tracking-[0.22em] text-umber transition-colors hover:text-terracotta"
+                onClick={() => setOpen(false)}
+                className="display-wide flex min-h-14 items-center border-b border-line text-3xl"
               >
                 {link.label}
               </Link>
             ))}
           </nav>
-          <div className="ml-auto flex items-center md:ml-0">
-            <SavedWorksButton />
-          </div>
+          <Link href="/#visit" onClick={() => setOpen(false)} className="btn btn-primary mt-4 w-full">
+            Ask about a piece
+          </Link>
         </div>
-      </header>
-    </>
+      </dialog>
+    </header>
   );
 }
