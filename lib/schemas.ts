@@ -42,3 +42,16 @@ export const pieceSchema = z.object({
   showInStudio: z.boolean().default(true),
   internalNotes: z.string().trim().max(5000).default(""),
 });
+
+export const passwordSignInSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Enter an email address.").max(200),
+  password: z.string().min(1, "Enter your password.").max(200),
+});
+
+export const passwordChangeSchema = z
+  .object({
+    current: z.string().max(200).default(""),
+    next: z.string().min(12, "Use at least 12 characters.").max(200),
+    confirm: z.string().max(200),
+  })
+  .refine((value) => value.next === value.confirm, { message: "The two new passwords are different.", path: ["confirm"] });

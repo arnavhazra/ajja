@@ -4,9 +4,9 @@ globs: "**/*.{tsx,css}"
 alwaysApply: false
 ---
 
-Follow DESIGN.md. Use the Linen Archive Folio CSS tokens.
+Follow DESIGN.md. Use the Wet Edge CSS tokens (gesso, plate, ink, cobalt, per-piece pour).
 
-Display serif is Cormorant Garamond, body sans is Plus Jakarta Sans, monospaced metadata is Space Mono.
+Display and UI type is Bricolage Grotesque. Prose and captions are Newsreader.
 
 Tap targets stay at least 44px. Prices use tabular numbers.
 

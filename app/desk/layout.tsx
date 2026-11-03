@@ -7,7 +7,7 @@ export const metadata = { robots: { index: false, follow: false }, title: "Desk"
 
 export default function DeskLayout({ children }: { children: React.ReactNode }) {
   return (
-    <Suspense fallback={<p className="p-4">Loading…</p>}>
+    <Suspense fallback={<main className="p-4">Loading…</main>}>
       <DeskFrame>{children}</DeskFrame>
     </Suspense>
   );
@@ -15,11 +15,11 @@ export default function DeskLayout({ children }: { children: React.ReactNode }) 
 
 async function DeskFrame({ children }: { children: React.ReactNode }) {
   const session = await getSession();
-  if (!session) return <div className="desk min-h-dvh bg-paper">{children}</div>;
+  if (!session) return <div id="content" className="desk min-h-dvh bg-paper">{children}</div>;
   return (
-    <div className="desk min-h-dvh bg-paper">
+    <div className="desk desk-shell min-h-dvh bg-paper">
       <DeskNav email={session.email} />
-      <div className="px-4 py-6">{children}</div>
+      <div id="content" className="desk-main">{children}</div>
     </div>
   );
 }

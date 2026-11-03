@@ -1,63 +1,50 @@
-import type { Metadata } from "next";
-import { Cormorant_Garamond, Plus_Jakarta_Sans, Space_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Bricolage_Grotesque, Newsreader } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
-import { Suspense } from "react";
-import { CustomCursor } from "@/components/custom-cursor";
 import { MotionRoot } from "@/components/motion-root";
-import { PageVeil } from "@/components/page-veil";
 import { getSettings } from "@/lib/public-data";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
-const cormorant = Cormorant_Garamond({
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  axes: ["opsz", "wdth"],
+  display: "swap",
+  variable: "--font-bricolage",
+});
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
   style: ["normal", "italic"],
+  axes: ["opsz"],
   display: "swap",
-  variable: "--font-cormorant",
+  variable: "--font-newsreader",
 });
 
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-  variable: "--font-jakarta",
-});
-
-const spaceMono = Space_Mono({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  display: "swap",
-  variable: "--font-mono",
-});
+export const viewport: Viewport = {
+  themeColor: "#ecede8",
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings();
   return {
     metadataBase: new URL(siteUrl()),
-    title: { default: `${settings.businessName} · Atelier & Archive`, template: `%s · ${settings.businessName}` },
-    description: "Original poured paintings and fine handcrafted woodwork from Collegeville, Pennsylvania.",
+    title: { default: `${settings.businessName} — poured paintings from ${settings.town}`, template: `%s — ${settings.businessName}` },
+    description: `Original poured paintings and handmade pieces from a family studio in ${settings.town}, ${settings.region}. Ask about any piece directly.`,
     applicationName: settings.businessName,
   };
 }
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${cormorant.variable} ${jakarta.variable} ${spaceMono.variable} h-full`}
-    >
-      <body className="min-h-dvh flex flex-col font-sans bg-linen text-ink selection:bg-terracotta selection:text-linen">
+    <html lang="en" className={`${bricolage.variable} ${newsreader.variable} h-full`}>
+      <body className="flex min-h-dvh flex-col bg-gesso font-sans text-ink">
         <a className="skip-link" href="#content">
           Skip to content
         </a>
         {children}
-        <div className="paper-grain" aria-hidden="true" />
+        <div className="grain" aria-hidden="true" />
         <MotionRoot />
-        <CustomCursor />
-        <Suspense>
-          <PageVeil />
-        </Suspense>
         <Analytics />
       </body>
     </html>

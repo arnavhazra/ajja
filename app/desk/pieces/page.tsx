@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Flash, one } from "@/components/desk/flash";
 import { bulkApply, moveFeatured, restorePiece, saveInline } from "@/lib/desk-actions";
@@ -6,6 +7,7 @@ import { loadDeskPieces, requireDesk } from "@/lib/desk-data";
 import { deskPrefix } from "@/lib/desk-path";
 import { minorToDollars } from "@/lib/money";
 import { statusLabel } from "@/lib/status";
+import { pieceTitle } from "@/lib/piece-title";
 import { getDb } from "@/lib/db";
 import { categories } from "@/lib/db/schema";
 import { asc } from "drizzle-orm";
@@ -27,6 +29,7 @@ async function Pieces({ searchParams }: { searchParams: Promise<Record<string, s
     getDb().select().from(categories).orderBy(asc(categories.sortOrder)),
     deskPrefix(),
   ]);
+  const groupName = new Map(groups.map((group) => [group.id, group.name]));
   return (
     <main className="desk-page">
       <Flash note={one(params.note)} undo={one(params.undo)} back="/pieces" />
@@ -93,17 +96,24 @@ async function Pieces({ searchParams }: { searchParams: Promise<Record<string, s
       <div className="desk-stack">
         {rows.length === 0 ? <p>No pieces in this list.</p> : null}
         {rows.map((row) => (
-          <article key={row.id} className="grid gap-3 border-b border-line pb-4 md:grid-cols-[auto_1fr_auto]">
+          <article key={row.id} className="desk-row">
             <label className="flex min-h-12 items-center gap-2">
               <input form="bulk" type="checkbox" name="id" value={row.id} />
-              Select
+              <span className="sr-only">Select</span>
             </label>
-            <div>
-              <Link className="text-2xl" href={`${prefix}/pieces/${row.id}`}>
-                {row.title.trim() || "Studio Study"}
+            <Link className="desk-thumb" href={`${prefix}/pieces/${row.id}`} tabIndex={-1} aria-hidden="true">
+              {row.image ? <Image src={row.image.url} alt="" width={128} height={128} sizes="64px" /> : <span>No photo</span>}
+            </Link>
+            <div className="min-w-0">
+              <Link className="block truncate text-lg font-[600] hover:underline" href={`${prefix}/pieces/${row.id}`}>
+                {pieceTitle(row.title, groupName.get(row.categoryId ?? "") ?? null, row.attributes)}
               </Link>
-              <p>{statusLabel(row.status)}</p>
-              {row.image ? <p className="text-ink-soft">Photo added</p> : <p>No photo yet</p>}
+              <p className="flex flex-wrap items-center gap-2 text-sm text-ink-soft">
+                <span className="desk-pill" data-status={row.status}>{statusLabel(row.status)}</span>
+                {row.featured ? <span className="desk-pill">Featured</span> : null}
+                {row.image ? null : <span>No photo yet</span>}
+                {row.title.trim() ? null : <span>No title yet</span>}
+              </p>
             </div>
             <div className="flex flex-wrap gap-2">
               {trash ? (

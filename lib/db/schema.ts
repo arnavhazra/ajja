@@ -15,6 +15,10 @@ export const adminUsers = pgTable("admin_users", {
   id: uuid("id").primaryKey().defaultRandom(),
   email: text("email").notNull().unique(),
   role: text("role").notNull(),
+  passwordHash: text("password_hash"),
+  failedAttempts: integer("failed_attempts").notNull().default(0),
+  lockedUntil: timestamp("locked_until", { withTimezone: true }),
+  passwordChangedAt: timestamp("password_changed_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

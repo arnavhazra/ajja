@@ -58,17 +58,25 @@ Categories Paintings, Woodwork, and Handwork are labels he can rename. The photo
 
 ## Desk
 
-The desk is the exact `ADMIN_PATH`, rewritten onto `app/desk`. A direct visit to `/desk` is the public 404.
+The desk is the exact `ADMIN_PATH` (no leading slash in the variable), rewritten onto `app/desk`. A direct visit to `/desk` is the public 404.
 
-Owner sign-in emails a 6-digit code. That send waits on `OWNER_EMAIL` and `RESEND_API_KEY` (and `EMAIL_FROM`, which the sender also requires). Until those are set, the shop cannot email a code.
+Main sign-in is email + password, checked against `admin_users.password_hash` (scrypt). Five wrong tries lock that account for 15 minutes. Change the password at the desk screen **Account**.
 
-Staff door: the same secret path plus `?staff=1`. It asks for the staff email, password, and a TOTP code (`DEV_ADMIN_EMAIL`, `DEV_ADMIN_PASSWORD`, `DEV_ADMIN_TOTP_SECRET`). Owner screens do not link to it.
+Create an account or reset a password from a terminal with the production `DATABASE_URL` in the environment:
+
+```
+pnpm admin:password owner@example.com
+```
+
+It prints a new random password once. Set `NEW_ADMIN_PASSWORD` to choose one instead. The columns come from `drizzle/0002_admin_password.sql`.
+
+Other doors, linked under the form: **Email me a code** (`?code=1`) waits on `OWNER_EMAIL`, `RESEND_API_KEY`, and `EMAIL_FROM`. **Staff with app code** (`?staff=1`) asks for `DEV_ADMIN_EMAIL`, `DEV_ADMIN_PASSWORD`, and a TOTP code from `DEV_ADMIN_TOTP_SECRET`.
 
 Cheat sheet: the secret desk path plus `/help/print` (`app/desk/help/print/page.tsx`).
 
 The hero headline in settings is “Paintings, woodwork, and pieces made by hand.” The desk keeps `copyNeedsApproval` and shows “Needs your approval.” That line is on the desk. The public site does not show it.
 
-The home hero is a plain image so the browser can paint it without the image optimizer. That choice is there to meet the LCP budget. The label is a 280ms CSS fade, removed under `prefers-reduced-motion`. The `motion` package is installed and not imported.
+The home hero photograph is a priority `<Image>`; the WebGL ripple loads on top only for fine pointers without reduced motion. See `DESIGN.md`.
 
 ## Backups
 

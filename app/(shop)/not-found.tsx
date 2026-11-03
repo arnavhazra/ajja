@@ -1,5 +1,5 @@
-import { MissingFolio } from "@/components/not-found-view";
+import { MissingPage } from "@/components/not-found-view";
 
 export default function NotFound() {
-  return <MissingFolio />;
+  return <MissingPage />;
 }

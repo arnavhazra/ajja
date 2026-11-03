@@ -25,13 +25,13 @@ export function ShareButton({ label }: { label: string }) {
     <span className="inline-flex items-center gap-2">
       <button
         type="button"
-        className="inline-flex min-h-[44px] items-center rounded-sm bg-linen px-4 font-mono text-[10px] uppercase tracking-[0.2em] text-ink hairline-box transition-colors hover:bg-ink hover:text-linen"
+        className="btn btn-secondary"
         onClick={() => void share()}
       >
         Share
       </button>
       {note ? (
-        <span role="status" className="font-mono text-[10px] uppercase tracking-[0.2em] text-terracotta">
+        <span role="status" className="text-sm text-ink-soft">
           {note}
         </span>
       ) : null}

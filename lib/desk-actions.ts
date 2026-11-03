@@ -6,7 +6,7 @@ import { and, asc, eq, isNull, sql } from "drizzle-orm";
 import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import sharp from "sharp";
-import { requestCode, requireSession, signOut, verifyCode, verifyStaff } from "./auth";
+import { changePassword, requestCode, requireSession, signOut, verifyCode, verifyPassword, verifyStaff } from "./auth";
 import { parseCsv } from "./csv";
 import { getDb } from "./db";
 import {
@@ -25,7 +25,7 @@ import {
 import { deskPrefix } from "./desk-path";
 import { assertBlobUrl, storeImage } from "./images";
 import { dollarsToMinor } from "./money";
-import { pieceSchema } from "./schemas";
+import { passwordChangeSchema, passwordSignInSchema, pieceSchema } from "./schemas";
 import { defaultSettings, type ShopSettings, withDefaults } from "./settings";
 import { pieceSlug, slugify } from "./slug";
 import { parseNewYork } from "./time";
@@ -194,6 +194,28 @@ export async function completeSignIn(formData: FormData) {
   if (!result.ok) return go("", result.message);
   const prefix = await deskPrefix();
   redirect(prefix || "/");
+}
+
+export async function completePasswordSignIn(formData: FormData) {
+  const parsed = passwordSignInSchema.safeParse({ email: formData.get("email"), password: formData.get("password") });
+  if (!parsed.success) return go("", parsed.error.issues[0]?.message ?? "Those details did not work.");
+  const result = await verifyPassword(parsed.data.email, parsed.data.password);
+  if (!result.ok) return go("", result.message);
+  const prefix = await deskPrefix();
+  redirect(prefix || "/");
+}
+
+export async function updatePassword(formData: FormData) {
+  const session = await requireSession();
+  const parsed = passwordChangeSchema.safeParse({
+    current: formData.get("current") ?? "",
+    next: formData.get("next"),
+    confirm: formData.get("confirm"),
+  });
+  if (!parsed.success) return go("/account", parsed.error.issues[0]?.message ?? "That password did not work.");
+  if (!session.userId) return go("/account", "Please sign in again.");
+  const result = await changePassword(session.userId, parsed.data.current, parsed.data.next);
+  return go("/account", result.message);
 }
 
 export async function completeStaffSignIn(formData: FormData) {
