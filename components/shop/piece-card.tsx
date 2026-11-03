@@ -27,7 +27,7 @@ export function PieceCard({ product, index, priority = false, sizes = "(min-widt
       className={cn("piece-link group block", className)}
       style={{ "--pour": product.pigment, "--pour-ink": product.pigmentInk } as CSSProperties}
     >
-      <div className="plate" style={{ aspectRatio: ratio }}>
+      <div className="plate relative overflow-hidden" style={{ aspectRatio: ratio }}>
         {cover ? (
           <Image
             src={cover.url}

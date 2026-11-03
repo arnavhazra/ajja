@@ -7,6 +7,7 @@ export function SiteFooter({ settings }: { settings: ShopSettings }) {
     settings.email ? { href: `mailto:${settings.email}`, label: settings.email } : null,
     settings.phone ? { href: `tel:${digits(settings.phone)}`, label: settings.phone } : null,
     settings.whatsapp ? { href: `https://wa.me/${digits(settings.whatsapp)}`, label: "WhatsApp" } : null,
+    settings.whatsappChannel ? { href: settings.whatsappChannel, label: "WhatsApp channel" } : null,
     settings.instagram ? { href: settings.instagram, label: "Instagram" } : null,
     settings.facebook ? { href: settings.facebook, label: "Facebook" } : null,
   ].filter((item): item is { href: string; label: string } => item !== null);
@@ -36,9 +37,11 @@ export function SiteFooter({ settings }: { settings: ShopSettings }) {
               {item.label}
             </a>
           ))}
-          <a className="inline-flex min-h-11 items-center text-gesso/85 hover:text-gesso" href={settings.mapUrl} rel="noopener" target="_blank">
-            Map of {settings.town}
-          </a>
+          {settings.mapUrl ? (
+            <a className="inline-flex min-h-11 items-center text-gesso/85 hover:text-gesso" href={settings.mapUrl} rel="noopener" target="_blank">
+              Map of {settings.town}
+            </a>
+          ) : null}
         </div>
       </div>
       <div className="shell" aria-hidden="true">

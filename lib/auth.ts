@@ -2,7 +2,7 @@ import "server-only";
 
 import { createHash, randomInt, timingSafeEqual } from "node:crypto";
 import { cookies, headers } from "next/headers";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, ne } from "drizzle-orm";
 import { getDb } from "./db";
 import { adminUsers, auditLog, loginCodes, sessions } from "./db/schema";
 import { checkPassword, hashPassword } from "./password";
@@ -156,17 +156,24 @@ export async function verifyStaff(emailRaw: string, password: string, token: str
 
 const LOCK_AFTER = 5;
 const LOCK_MINUTES = 15;
-let decoyHash: Promise<string> | null = null;
 
 /** Email + password from the admin_users table. Locks the account for 15 minutes after 5 wrong tries. */
 export async function verifyPassword(emailRaw: string, password: string) {
   const email = emailRaw.trim().toLowerCase();
   const fail = { ok: false as const, message: "That email and password did not match." };
+  if (!allowedEmails().includes(email)) return fail;
   const db = getDb();
   const [user] = await db.select().from(adminUsers).where(eq(adminUsers.email, email)).limit(1);
   if (!user?.passwordHash) {
-    decoyHash ??= hashPassword("decoy-password");
-    await checkPassword(password, await decoyHash);
+    if (user) {
+      const attempts = user.failedAttempts + 1;
+      const locked = attempts >= LOCK_AFTER;
+      await db
+        .update(adminUsers)
+        .set({ failedAttempts: locked ? 0 : attempts, lockedUntil: locked ? new Date(Date.now() + LOCK_MINUTES * 60 * 1000) : null })
+        .where(eq(adminUsers.id, user.id));
+      if (locked) return { ok: false as const, message: `Too many tries. Wait ${LOCK_MINUTES} minutes.` };
+    }
     return fail;
   }
   if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()) {
@@ -190,13 +197,29 @@ export async function changePassword(userId: string, current: string, next: stri
   const db = getDb();
   const [user] = await db.select().from(adminUsers).where(eq(adminUsers.id, userId)).limit(1);
   if (!user) return { ok: false as const, message: "Please sign in again." };
-  if (user.passwordHash && !(await checkPassword(current, user.passwordHash))) {
-    return { ok: false as const, message: "Your current password did not match." };
+  if (user.passwordHash) {
+    if (!(await checkPassword(current, user.passwordHash))) {
+      return { ok: false as const, message: "Your current password did not match." };
+    }
+  } else if (user.role === "developer" || user.email === process.env.DEV_ADMIN_EMAIL?.trim().toLowerCase()) {
+    const expected = process.env.DEV_ADMIN_PASSWORD ?? "";
+    if (!expected || !same(current, expected)) {
+      return { ok: false as const, message: "Your current password did not match." };
+    }
   }
   await db
     .update(adminUsers)
     .set({ passwordHash: await hashPassword(next), passwordChangedAt: new Date(), failedAttempts: 0, lockedUntil: null })
     .where(eq(adminUsers.id, user.id));
+
+  // Invalidate other desk sessions for this user upon password change
+  const currentSession = await getSession();
+  if (currentSession?.userId === user.id) {
+    await db.delete(sessions).where(and(eq(sessions.userId, user.id), ne(sessions.id, currentSession.id)));
+  } else {
+    await db.delete(sessions).where(eq(sessions.userId, user.id));
+  }
+
   await db.insert(auditLog).values({ userId: user.id, action: "Changed password", entity: "admin_user", entityId: user.id, meta: {} });
   return { ok: true as const, message: "Password changed." };
 }

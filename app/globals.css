@@ -285,6 +285,10 @@ textarea.field {
 }
 
 /* ---------- Media ---------- */
+.crop {
+  aspect-ratio: 4 / 5;
+}
+
 .plate {
   position: relative;
   overflow: hidden;

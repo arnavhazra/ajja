@@ -26,7 +26,7 @@ async function Review({ searchParams }: { searchParams: Promise<Record<string, s
       </div>
       {item ? (
         <article className="desk-review">
-          <figure className="photo-frame crop relative grid w-full max-w-2xl place-items-center">
+          <figure className="photo-frame crop aspect-[4/5] relative grid w-full max-w-2xl place-items-center">
             {item.images[0] ? (
               <Image
                 src={item.images[0].url}

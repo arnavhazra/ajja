@@ -30,7 +30,7 @@ export function PieceViewer({ images, title }: { images: PublicImage[]; title: s
       <button
         type="button"
         onClick={() => dialogRef.current?.showModal()}
-        className="plate block w-full cursor-zoom-in"
+        className="plate relative block w-full overflow-hidden cursor-zoom-in"
         style={{ aspectRatio: ratio }}
         aria-label={`View ${title} full screen`}
       >

@@ -25,7 +25,7 @@ async function Home({ searchParams }: { searchParams: Promise<Record<string, str
       <main className="desk-signin">
         <div className="desk-page w-full max-w-md">
           <Flash note={note} undo="" back="/" />
-          {one(params.staff) === "1" ? <StaffForm /> : one(params.code) === "1" ? <OwnerForm /> : <PasswordForm />}
+          {one(params.staff) === "1" ? <StaffForm /> : one(params.code) === "1" ? <OwnerForm defaultEmail={one(params.email) ?? ""} /> : <PasswordForm />}
           <p className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-soft">
             <Link className="ink-link inline-flex min-h-11 items-center" href="?">Password</Link>
             <Link className="ink-link inline-flex min-h-11 items-center" href="?code=1">Email me a code</Link>
@@ -115,7 +115,7 @@ function PasswordForm() {
   );
 }
 
-function OwnerForm() {
+function OwnerForm({ defaultEmail = "" }: { defaultEmail?: string }) {
   return (
     <>
       <form action={sendSignInCode} className="grid gap-3">
@@ -123,7 +123,7 @@ function OwnerForm() {
         <p className="desk-note">Use the email address for this shop. A 6-digit code will arrive if that address is allowed.</p>
         <label className="grid gap-1">
           Email
-          <input className="field" name="email" type="email" autoComplete="username" required />
+          <input className="field" name="email" type="email" autoComplete="username" defaultValue={defaultEmail} required />
         </label>
         <button className="btn btn-primary" type="submit">
           Email me a code
@@ -132,7 +132,7 @@ function OwnerForm() {
       <form action={completeSignIn} className="grid gap-3">
         <label className="grid gap-1">
           Email
-          <input className="field" name="email" type="email" autoComplete="username" required />
+          <input className="field" name="email" type="email" autoComplete="username" defaultValue={defaultEmail} required />
         </label>
         <label className="grid gap-1">
           Code

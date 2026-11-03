@@ -185,13 +185,19 @@ async function dropBlobIfUnused(url: string) {
 }
 
 export async function sendSignInCode(formData: FormData) {
-  const result = await requestCode(String(formData.get("email") ?? ""));
-  return go("", result.message);
+  const email = String(formData.get("email") ?? "").trim();
+  const result = await requestCode(email);
+  const query = `/?code=1${email ? `&email=${encodeURIComponent(email)}` : ""}`;
+  return go(query, result.message);
 }
 
 export async function completeSignIn(formData: FormData) {
-  const result = await verifyCode(String(formData.get("email") ?? ""), String(formData.get("code") ?? ""));
-  if (!result.ok) return go("", result.message);
+  const email = String(formData.get("email") ?? "").trim();
+  const result = await verifyCode(email, String(formData.get("code") ?? ""));
+  if (!result.ok) {
+    const query = `/?code=1${email ? `&email=${encodeURIComponent(email)}` : ""}`;
+    return go(query, result.message);
+  }
   const prefix = await deskPrefix();
   redirect(prefix || "/");
 }
