@@ -10,6 +10,9 @@ import { MotionScan } from "@/components/motion-scan";
 import { ShareButton } from "@/components/share-button";
 import { PieceCard } from "@/components/shop/piece-card";
 import { PieceViewer } from "@/components/shop/piece-viewer";
+import { DynamicPrice } from "@/components/shop/dynamic-price";
+import { FolioActionButton } from "@/components/shop/folio-action-button";
+import { ScaleVisualizer } from "@/components/shop/scale-visualizer";
 import { formatMoney } from "@/lib/money";
 import { pieceKind, pieceTitle } from "@/lib/piece-title";
 import { getSettings, loadProduct, loadRelated } from "@/lib/public-data";
@@ -113,7 +116,7 @@ async function ProductBody({ params }: { params: Promise<{ slug: string }> }) {
               </p>
               <h1 className="display mt-4 text-[clamp(2.75rem,5.6vw,5.5rem)]">{title}</h1>
               <p className="nums mt-5 text-2xl">
-                {sold ? <span className="text-sold">Sold</span> : (price ?? "Ask for the price")}
+                <DynamicPrice priceMinor={product.priceMinor} fallback={price ?? "Ask for the price"} sold={sold} />
               </p>
             </div>
             {product.description || attributes.details ? (
@@ -130,11 +133,34 @@ async function ProductBody({ params }: { params: Promise<{ slug: string }> }) {
                 </div>
               ))}
             </dl>
+            {product.images[0] ? (
+              <div data-reveal="">
+                <ScaleVisualizer
+                  image={product.images[0]}
+                  title={title}
+                  sizeText={attributes.size || attributes.dimensions}
+                  kind={kind ?? undefined}
+                />
+              </div>
+            ) : null}
             <div className="flex flex-wrap gap-3" data-reveal="">
+              {attributes.stripe_url || attributes.stripe_payment_link ? (
+                <a
+                  href={attributes.stripe_url || attributes.stripe_payment_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary"
+                >
+                  Acquire Directly (Stripe 🔒)
+                </a>
+              ) : null}
               {!sold ? (
                 <a href="#enquire" className="btn btn-pour">
                   Ask about this piece
                 </a>
+              ) : null}
+              {!sold ? (
+                <FolioActionButton product={product} title={title} kind={kind ?? undefined} />
               ) : null}
               {whatsapp && !sold ? (
                 <a className="btn btn-secondary" href={whatsapp}>
@@ -177,10 +203,11 @@ async function ProductBody({ params }: { params: Promise<{ slug: string }> }) {
       ) : null}
 
       {!sold ? (
-        <div className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-line bg-gesso/95 px-4 pt-3 backdrop-blur md:hidden">
-          <a className="btn btn-pour w-full" href="#enquire">
-            Ask about this piece
+        <div className="safe-bottom fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-line bg-gesso/95 p-3 backdrop-blur md:hidden">
+          <a className="btn btn-pour flex-1 text-center" href="#enquire">
+            Ask about piece
           </a>
+          <FolioActionButton product={product} title={title} kind={kind ?? undefined} className="flex-none" />
         </div>
       ) : null}
       <MotionScan />

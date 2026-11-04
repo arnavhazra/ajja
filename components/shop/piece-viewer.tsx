@@ -4,8 +4,12 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 import type { PublicImage } from "@/lib/types";
+import { MacroLoupeImage } from "./macro-loupe";
 
-/** Large photograph, thumbnails, and a full-screen view where the pointer or a drag moves around the surface. */
+/**
+ * Large photograph with 2.6x Optical Macro Loupe, thumbnails,
+ * and a full-screen view where pointer/drag navigates fine pigment detail.
+ */
 export function PieceViewer({ images, title }: { images: PublicImage[]; title: string }) {
   const [index, setIndex] = useState(0);
   const [origin, setOrigin] = useState({ x: 50, y: 50 });
@@ -27,28 +31,16 @@ export function PieceViewer({ images, title }: { images: PublicImage[]; title: s
 
   return (
     <div className="grid gap-3">
-      <button
-        type="button"
-        onClick={() => dialogRef.current?.showModal()}
-        className="plate relative block w-full overflow-hidden cursor-zoom-in"
-        style={{ aspectRatio: ratio }}
-        aria-label={`View ${title} full screen`}
-      >
-        <Image
-          key={image.id}
-          src={image.url}
-          alt={image.alt || title}
-          fill
-          priority
-          sizes="(min-width: 768px) 58vw, 100vw"
-          placeholder={image.blurData ? "blur" : "empty"}
-          blurDataURL={image.blurData ?? undefined}
-          className="object-cover"
-          style={{ objectPosition: `${(image.focalX ?? 0.5) * 100}% ${(image.focalY ?? 0.5) * 100}%` }}
-        />
-      </button>
+      <MacroLoupeImage
+        image={image}
+        title={title}
+        ratio={ratio}
+        priority={index === 0}
+        onOpenDialog={() => dialogRef.current?.showModal()}
+      />
+
       {images.length > 1 ? (
-        <ul className="no-scrollbar flex gap-2 overflow-x-auto" aria-label="Photographs">
+        <ul className="no-scrollbar flex gap-2 overflow-x-auto pt-1" aria-label="Photographs">
           {images.map((item, i) => (
             <li key={item.id} className="shrink-0">
               <button
@@ -57,7 +49,7 @@ export function PieceViewer({ images, title }: { images: PublicImage[]; title: s
                 aria-label={`Photograph ${i + 1} of ${images.length}`}
                 aria-current={i === index}
                 className={cn(
-                  "relative block size-16 overflow-hidden rounded-[2px] outline-offset-2 transition-opacity md:size-20",
+                  "relative block size-16 overflow-hidden rounded-[2px] outline-offset-2 transition-opacity md:size-20 cursor-pointer",
                   i === index ? "ring-2 ring-pour" : "opacity-60 hover:opacity-100",
                 )}
               >
@@ -67,6 +59,7 @@ export function PieceViewer({ images, title }: { images: PublicImage[]; title: s
           ))}
         </ul>
       ) : null}
+
       <dialog
         ref={dialogRef}
         aria-label={`${title}, full screen`}
@@ -104,15 +97,15 @@ export function PieceViewer({ images, title }: { images: PublicImage[]; title: s
             <div className="pointer-events-auto flex gap-2">
               {images.length > 1 ? (
                 <>
-                  <button type="button" className="btn min-h-11 bg-night/70 px-4 text-gesso backdrop-blur" onClick={() => setIndex((i) => (i - 1 + images.length) % images.length)}>
+                  <button type="button" className="btn min-h-11 bg-night/70 px-4 text-gesso backdrop-blur cursor-pointer" onClick={() => setIndex((i) => (i - 1 + images.length) % images.length)}>
                     Previous
                   </button>
-                  <button type="button" className="btn min-h-11 bg-night/70 px-4 text-gesso backdrop-blur" onClick={() => setIndex((i) => (i + 1) % images.length)}>
+                  <button type="button" className="btn min-h-11 bg-night/70 px-4 text-gesso backdrop-blur cursor-pointer" onClick={() => setIndex((i) => (i + 1) % images.length)}>
                     Next
                   </button>
                 </>
               ) : null}
-              <button type="button" className="btn min-h-11 bg-gesso px-4 text-ink" onClick={() => dialogRef.current?.close()}>
+              <button type="button" className="btn min-h-11 bg-gesso px-4 text-ink cursor-pointer" onClick={() => dialogRef.current?.close()}>
                 Close
               </button>
             </div>

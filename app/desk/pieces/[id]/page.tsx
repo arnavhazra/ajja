@@ -67,6 +67,11 @@ async function Editor({
     priceMinor: product.priceMinor,
     hasPhoto: images.length > 0,
   });
+  const standardKeys = new Set(["size", "details", "stripe_url", "stripe_payment_link", "medium", "dimensions", ...fields.map((f) => f.key)]);
+  const customText = Object.entries(attributes)
+    .filter(([k]) => !standardKeys.has(k))
+    .map(([k, v]) => `${k}: ${v}`)
+    .join("\n");
   const preview: PublicProduct = {
     id: product.id,
     slug: product.slug,
@@ -190,8 +195,20 @@ async function Editor({
             Tags, separated by commas
             <input className="field" name="tags" defaultValue={(product.tags ?? []).join(", ")} />
           </label>
+          <label className="grid gap-1">
+            Medium / Technique
+            <input className="field" name="field:medium" placeholder="e.g. Poured pigment on birch panel, Carved aged teak" defaultValue={attributes.medium ?? ""} />
+          </label>
+          <label className="grid gap-1">
+            Dimensions
+            <input className="field" name="field:dimensions" placeholder="e.g. 24 × 36 in (61 × 91 cm)" defaultValue={attributes.dimensions || attributes.size || ""} />
+          </label>
+          <label className="grid gap-1">
+            Stripe Payment Link (for instant checkout without inquiry)
+            <input className="field font-mono text-sm" name="field:stripe_url" placeholder="https://buy.stripe.com/..." defaultValue={attributes.stripe_url || attributes.stripe_payment_link || ""} />
+          </label>
           {fields.map((field) =>
-            field.key ? (
+            field.key && field.key !== "medium" && field.key !== "dimensions" ? (
               <label key={field.key} className="grid gap-1">
                 {field.label || field.key}
                 <input className="field" name={`field:${field.key}`} defaultValue={attributes[field.key] ?? ""} />
@@ -199,8 +216,8 @@ async function Editor({
             ) : null,
           )}
           <label className="grid gap-1">
-            Extra lines, written as Name: value
-            <textarea className="field" name="custom" />
+            Extra attributes, written as Name: value
+            <textarea className="field" name="custom" defaultValue={customText} placeholder="provenance: Private collection&#10;frame: Raw maple shadowbox" />
           </label>
           <label className="grid gap-1">
             Status
