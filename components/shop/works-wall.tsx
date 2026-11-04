@@ -31,9 +31,9 @@ export function WorksWall({ products }: Props) {
       }
     }
 
-    const list: Filter[] = [{ key: "all", label: "All Works", count: products.length }];
+    const list: Filter[] = [{ key: "all", label: "All", count: products.length }];
     if (groups.size > 0) list.push(...groups.values());
-    if (sold > 0) list.push({ key: "sold", label: "Reserved Archive", count: sold });
+    if (sold > 0) list.push({ key: "sold", label: "Sold", count: sold });
     return list;
   }, [products]);
 
@@ -49,53 +49,47 @@ export function WorksWall({ products }: Props) {
   return (
     <section id="works" className="py-14 sm:py-20 hairline-b bg-linen">
       <div className="shell">
-        {/* Section Header & Active Subtitle */}
+        {/* Section header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-6 hairline-b">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-terracotta mb-2 font-bold">
-              FOLIO 02 // CATALOGUE RAISONNÉ &amp; CURRENT HOLDINGS
+              In the studio now
             </p>
             <h2 className="font-serif text-4xl sm:text-5xl text-ink font-normal tracking-tight">
-              Current Studio Manifest
+              The works
             </h2>
           </div>
 
           <div className="max-w-md">
             <p className="text-xs sm:text-sm text-umber leading-relaxed font-sans">
-              Displayed in uncropped native aspect ratios—square (1:1), vertical (3:4), and horizontal (4:3). Click any work to inspect fine surface detail and in-room scale.
+              Each piece is photographed as it is. Choose a work to see it closer, or ask the studio about it.
             </p>
           </div>
         </div>
 
-        {/* Filter Bar Sub-Controls */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-umber mr-2">
-              FILTER ARCHIVE:
-            </span>
-            {filters.map((filter) => {
-              const isActive = active === filter.key;
-              return (
-                <button
-                  key={filter.key}
-                  type="button"
-                  onClick={() => setActive(filter.key)}
-                  className={`px-3 py-1 rounded-sm font-mono text-[11px] uppercase cursor-pointer transition-colors ${
-                    isActive
-                      ? "bg-ink text-linen font-bold shadow-sm"
-                      : "bg-bone text-umber hover:text-ink hairline-box"
-                  }`}
-                >
-                  {isActive ? "● " : ""}{filter.label} ({filter.count})
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="flex items-center gap-2 font-mono text-[10px] text-umber">
-            <span className="inline-block size-2 rounded-full bg-terracotta" />
-            <span>CLICK ANY SPECIMEN FOR IN-ROOM SCALE &amp; DOSSIER</span>
-          </div>
+        {/* Filters */}
+        <div className="flex flex-wrap items-center gap-2 mb-8">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-umber mr-2">
+            Show:
+          </span>
+          {filters.map((filter) => {
+            const isActive = active === filter.key;
+            return (
+              <button
+                key={filter.key}
+                type="button"
+                aria-pressed={isActive}
+                onClick={() => setActive(filter.key)}
+                className={`px-3 py-1 rounded-sm font-mono text-[11px] uppercase cursor-pointer transition-colors ${
+                  isActive
+                    ? "bg-ink text-linen font-bold shadow-sm"
+                    : "bg-bone text-umber hover:text-ink hairline-box"
+                }`}
+              >
+                {isActive ? "● " : ""}{filter.label} ({filter.count})
+              </button>
+            );
+          })}
         </div>
 
         {/* Staggered 3-Column Editorial Grid */}
@@ -110,30 +104,24 @@ export function WorksWall({ products }: Props) {
           ))}
         </div>
 
-        {/* Bespoke Architectural Commission Callout Banner */}
+        {/* Custom work callout */}
         <div className="mt-14 bg-bone hairline-box rounded-sm p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="max-w-2xl">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-terracotta font-bold">
-                BESPOKE PATRONAGE
-              </span>
-              <span className="text-umber/40">•</span>
-              <span className="font-mono text-[10px] uppercase tracking-widest text-umber">
-                3 COMMISSIONS PER SEASON
-              </span>
-            </div>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-terracotta font-bold mb-1.5">
+              Custom work
+            </p>
             <h3 className="font-serif text-2xl sm:text-3xl text-ink mb-1">
-              Seeking specific architectural dimensions or timber species?
+              Need a different size, or a piece made for you?
             </h3>
             <p className="text-sm text-umber font-sans leading-relaxed">
-              Ajja undertakes three custom woodworking or canvas commissions each cycle using naturally fallen rosewood, teak, and jackfruit logs seasoned in our studio yard.
+              Tell the studio what you have in mind — a size, a wood, a place it will live — and we will tell you what is possible.
             </p>
           </div>
           <Link
             href="/#inquire"
             className="px-6 py-3.5 bg-ink text-linen font-mono text-xs uppercase tracking-widest rounded-sm hover:bg-terracotta transition-colors whitespace-nowrap shadow-sm"
           >
-            [Inquire on Commission]
+            Ask about a commission
           </Link>
         </div>
       </div>

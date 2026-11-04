@@ -5,84 +5,78 @@ export function SiteFooter({ settings }: { settings: ShopSettings }) {
   return (
     <footer className="bg-bone hairline-t text-umber py-16 sm:py-20 no-print">
       <div className="shell grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 sm:gap-12 mb-14">
-        {/* Brand & Manifesto */}
+        {/* Brand */}
         <div className="space-y-4">
-          <div className="flex items-baseline gap-2">
-            <span className="font-serif text-3xl font-semibold tracking-tight text-ink">
-              {settings.businessName.toUpperCase()}
-            </span>
-            <span className="font-mono text-[9px] uppercase tracking-widest text-terracotta border border-terracotta/40 px-1 py-0.5 rounded-sm">
-              ARCHIVE
-            </span>
-          </div>
+          <span className="font-serif text-3xl font-semibold tracking-tight text-ink">
+            {settings.businessName}
+          </span>
           <p className="text-xs text-umber font-sans leading-relaxed">
-            A family sanctuary of analog slow craft. Every artifact shaped by hand with natural river timber, mineral earth, and pure beeswax.
+            {settings.story}
           </p>
-          <div className="font-mono text-[10px] tracking-wider uppercase text-umber pt-2">
-            <p>Bench: {settings.town}, {settings.region}</p>
-            <p>Roots: Chamundi Foothills, Mysore (Est. 1964)</p>
-          </div>
+          <p className="font-mono text-[10px] tracking-wider uppercase text-umber pt-2">
+            {settings.town}, {settings.region}
+          </p>
         </div>
 
-        {/* Navigation / Holdings */}
+        {/* Sections */}
         <div className="space-y-3 font-mono text-xs">
-          <p className="font-bold uppercase tracking-widest text-ink text-[11px] mb-3">ARCHIVE FOLIOS</p>
+          <p className="font-bold uppercase tracking-widest text-ink text-[11px] mb-3">The site</p>
           <ul className="space-y-2">
             <li>
               <Link href="/#works" className="hover:text-ink transition-colors">
-                Series XI: Poured Pigment Panels
+                All works
               </Link>
             </li>
             <li>
-              <Link href="/#works" className="hover:text-ink transition-colors">
-                Carved Hardwood Vessels &amp; Stools
+              <Link href="/#studio" className="hover:text-ink transition-colors">
+                The studio
               </Link>
             </li>
             <li>
-              <Link href="/#works" className="hover:text-ink transition-colors">
-                Poured Pigment Canvases
+              <Link href="/#buying" className="hover:text-ink transition-colors">
+                Buying, delivery &amp; care
               </Link>
             </li>
             <li>
               <Link href="/#inquire" className="hover:text-ink transition-colors text-terracotta">
-                Architectural Commissions
+                Ask about a piece or a commission
               </Link>
             </li>
           </ul>
         </div>
 
-        {/* Custodial Policies */}
+        {/* Care */}
         <div className="space-y-3 font-mono text-xs">
-          <p className="font-bold uppercase tracking-widest text-ink text-[11px] mb-3">CUSTODY &amp; DISPATCH</p>
+          <p className="font-bold uppercase tracking-widest text-ink text-[11px] mb-3">Good to know</p>
           <ul className="space-y-2">
             <li>
-              <Link href="/#acquisition" className="hover:text-ink transition-colors">
-                Archival Crating &amp; Transit
+              <Link href="/#buying" className="hover:text-ink transition-colors">
+                Packing &amp; delivery
               </Link>
             </li>
             <li>
-              <Link href="/#acquisition" className="hover:text-ink transition-colors">
-                Certificate of Studio Record
-              </Link>
-            </li>
-            <li>
-              <Link href="/#acquisition" className="hover:text-ink transition-colors">
-                Bench Care &amp; Re-Waxing
+              <Link href="/#buying" className="hover:text-ink transition-colors">
+                Studio visits
               </Link>
             </li>
             <li>
               <Link href="/policies" className="hover:text-ink transition-colors">
-                Studio Terms &amp; Policies
+                Buying, collection &amp; returns
+              </Link>
+            </li>
+            <li>
+              <Link href="/privacy" className="hover:text-ink transition-colors">
+                Privacy
               </Link>
             </li>
           </ul>
         </div>
 
-        {/* Contact & Hours */}
+        {/* Contact */}
         <div className="space-y-3 font-mono text-xs">
-          <p className="font-bold uppercase tracking-widest text-ink text-[11px] mb-3">STUDIO INQUIRIES</p>
+          <p className="font-bold uppercase tracking-widest text-ink text-[11px] mb-3">Ask the studio</p>
           <p className="text-xs text-umber font-sans">
-            Studio visits by appointment in Collegeville, PA.
+            Studio visits by appointment in {settings.town}, {settings.region}.
           </p>
           {settings.email ? (
             <p className="font-mono text-xs text-ink font-semibold pt-1">
@@ -96,21 +90,15 @@ export function SiteFooter({ settings }: { settings: ShopSettings }) {
               href="/#inquire"
               className="inline-block px-3 py-1.5 bg-linen hairline-box rounded-sm text-[10px] uppercase tracking-wider text-ink hover:bg-terracotta hover:text-linen transition-colors"
             >
-              [Direct Bench Inquiry ↗]
+              Send a note ↗
             </Link>
           </div>
         </div>
       </div>
 
       <div className="shell pt-8 hairline-t flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[10px] uppercase tracking-widest text-umber">
-        <p>© 1964–2026 {settings.businessName.toUpperCase()} ATELIER &amp; ARCHIVE. ALL SPECIMEN NUMBERS PERPETUALLY REGULATED.</p>
-        <p className="flex items-center gap-2">
-          <span>ONE OF ONE EDITIONS ONLY</span>
-          <span>•</span>
-          <Link href="/privacy" className="hover:text-ink transition-colors underline">
-            Privacy
-          </Link>
-        </p>
+        <p>© {settings.businessName}. Made by hand.</p>
+        <p>One of each — ask before it&apos;s gone.</p>
       </div>
     </footer>
   );

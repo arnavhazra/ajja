@@ -46,9 +46,9 @@ export function FolioActionButton({
           : "btn-secondary",
         className,
       )}
-      aria-label={inFolio ? `Remove ${title} from folio` : `Add ${title} to folio`}
+      aria-label={inFolio ? `Remove ${title} from saved` : `Save ${title}`}
     >
-      {inFolio ? "✓ In Collector's Folio" : "+ Add to Folio"}
+      {inFolio ? "✓ Saved" : "Save"}
     </button>
   );
 }

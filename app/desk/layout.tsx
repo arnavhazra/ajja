@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { DeskNav } from "@/components/desk/nav";
+import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import { getSession } from "@/lib/auth";
 import "./desk.css";
 
@@ -7,7 +8,13 @@ export const metadata = { robots: { index: false, follow: false }, title: "Desk"
 
 export default function DeskLayout({ children }: { children: React.ReactNode }) {
   return (
-    <Suspense fallback={<main className="p-4">Loading…</main>}>
+    <Suspense
+      fallback={
+        <main className="p-4">
+          <DeskRowsSkeleton rows={6} />
+        </main>
+      }
+    >
       <DeskFrame>{children}</DeskFrame>
     </Suspense>
   );

@@ -31,15 +31,14 @@ export function PieceCard({
 
   const cover = product.images[0];
   const title = pieceTitle(product.title, product.categorySlug, product.attributes);
-  const kind = pieceKind(product.categoryName, product.attributes) || "Studio Artifact";
-  const dimensions = product.attributes.dimensions || product.attributes.size || "Dimensions on request";
+  const kind = pieceKind(product.categoryName, product.attributes) || "Studio piece";
+  const dimensions = product.attributes.dimensions || product.attributes.size || "";
   const sold = product.status === "sold";
   const inFolio = hasItem(product.id);
 
   const dynamicPrice = format(product.priceMinor);
-  const price = sold ? "Reserved" : (dynamicPrice ?? (formatMoney(product.priceMinor, product.currency) ?? "Ask for price"));
+  const price = sold ? "Sold" : (dynamicPrice ?? (formatMoney(product.priceMinor, product.currency) ?? "Ask for price"));
   const ratio = cover?.width && cover?.height ? `${cover.width} / ${cover.height}` : "4 / 5";
-  const specimenCode = product.slug.toUpperCase();
 
   const handleFolioClick = (e: MouseEvent) => {
     e.preventDefault();
@@ -65,24 +64,28 @@ export function PieceCard({
 
   return (
     <article className={cn("group flex flex-col bg-bone hairline-box rounded-sm p-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-1", className)}>
-      {/* Specimen Header Strip */}
+      {/* Kind & status strip */}
       <div className="flex items-center justify-between pb-2.5 mb-2.5 hairline-b font-mono text-[10px] tracking-widest uppercase">
-        <span className="font-semibold text-ink">SPECIMEN // {specimenCode}</span>
-        <span className={cn("px-1.5 py-0.5 rounded-sm font-bold", sold ? "bg-sold/15 text-sold" : "bg-moss/15 text-moss")}>
-          {sold ? "RESERVED" : "1 OF 1"}
-        </span>
+        <span className="font-semibold text-ink truncate">{kind}</span>
+        {sold ? (
+          <span className="px-1.5 py-0.5 rounded-sm font-bold bg-sold/15 text-sold">Sold</span>
+        ) : product.quantity === 1 ? (
+          <span className="px-1.5 py-0.5 rounded-sm font-bold bg-moss/15 text-moss">One of one</span>
+        ) : null}
       </div>
 
-      {/* Artwork Photograph Container */}
-      <div
-        className="relative w-full overflow-hidden rounded-sm bg-boneDark cursor-pointer select-none hairline-box group"
+      {/* Photograph */}
+      <Link
+        href={`/p/${product.slug}`}
+        tabIndex={-1}
+        aria-hidden="true"
+        className="relative block w-full overflow-hidden rounded-sm bg-boneDark select-none hairline-box"
         style={{ aspectRatio: ratio }}
-        onClick={handleDossierClick}
       >
         {cover ? (
           <Image
             src={cover.url}
-            alt={cover.alt || title}
+            alt=""
             fill
             sizes={sizes}
             priority={priority}
@@ -92,16 +95,9 @@ export function PieceCard({
             style={{ objectPosition: `${(cover.focalX ?? 0.5) * 100}% ${(cover.focalY ?? 0.5) * 100}%` }}
           />
         ) : null}
+      </Link>
 
-        {/* Quick Loupe Examine Overlay hint */}
-        <div className="absolute inset-0 bg-ink/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-          <span className="bg-linen/95 px-3 py-1.5 rounded-sm font-mono text-[10px] uppercase tracking-widest text-ink shadow-md hairline-box">
-            [Examine Dossier]
-          </span>
-        </div>
-      </div>
-
-      {/* Specimen Metadata & Title */}
+      {/* Title, price, facts */}
       <div className="pt-3.5 flex-1 flex flex-col justify-between">
         <div>
           <div className="flex items-baseline justify-between gap-2 mb-1">
@@ -116,21 +112,21 @@ export function PieceCard({
             </span>
           </div>
 
-          <div className="flex items-center gap-2 font-mono text-[11px] text-umber pt-1">
-            <span className="truncate">{kind}</span>
-            <span>•</span>
-            <span className="truncate">{dimensions}</span>
-          </div>
+          {dimensions ? (
+            <div className="flex items-center gap-2 font-mono text-[11px] text-umber pt-1">
+              <span className="truncate">{dimensions}</span>
+            </div>
+          ) : null}
         </div>
 
-        {/* Specimen Action Strip */}
+        {/* Actions */}
         <div className="pt-4 mt-3 hairline-t flex items-center gap-2">
           <button
             type="button"
             onClick={handleDossierClick}
             className="flex-1 py-2 px-3 bg-linen hover:bg-boneDark text-ink font-mono text-[11px] uppercase tracking-wider hairline-box rounded-sm transition-colors text-center cursor-pointer"
           >
-            Examine Dossier
+            Quick look
           </button>
 
           {!sold ? (
@@ -143,9 +139,9 @@ export function PieceCard({
                   ? "bg-moss text-linen"
                   : "bg-terracotta hover:bg-terracottaDark text-linen",
               )}
-              aria-label={inFolio ? `Remove ${title} from folio` : `Add ${title} to folio`}
+              aria-label={inFolio ? `Remove ${title} from saved` : `Save ${title}`}
             >
-              {inFolio ? "✓ Reserved" : "+ Reserve"}
+              {inFolio ? "✓ Saved" : "Save"}
             </button>
           ) : null}
         </div>

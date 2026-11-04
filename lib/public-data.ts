@@ -122,6 +122,18 @@ export async function loadProduct(slug: string) {
   return { product, redirect: null };
 }
 
+export async function hasPricedProducts() {
+  "use cache";
+  cacheTag("catalog");
+  cacheLife("minutes");
+  const [row] = await getDb()
+    .select({ id: products.id })
+    .from(products)
+    .where(and(listed(), sql`${products.priceMinor} is not null`))
+    .limit(1);
+  return Boolean(row);
+}
+
 export async function loadStudio() {
   "use cache";
   cacheTag("studio");

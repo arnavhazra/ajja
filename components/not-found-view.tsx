@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
-import { getSettings } from "@/lib/public-data";
+import { getSettings, hasPricedProducts } from "@/lib/public-data";
 
 export function MissingPage() {
   return (
@@ -13,7 +13,7 @@ export function MissingPage() {
         <Link className="btn btn-primary" href="/#works">
           See the works
         </Link>
-        <Link className="btn btn-secondary" href="/#visit">
+        <Link className="btn btn-secondary" href="/#inquire">
           Ask the studio
         </Link>
       </div>
@@ -22,10 +22,10 @@ export function MissingPage() {
 }
 
 export async function NotFoundView() {
-  const settings = await getSettings();
+  const [settings, hasPrices] = await Promise.all([getSettings(), hasPricedProducts()]);
   return (
     <>
-      <SiteHeader name={settings.businessName} />
+      <SiteHeader name={settings.businessName} hasPrices={hasPrices} />
       <div id="content" className="flex-1">
         <MissingPage />
       </div>

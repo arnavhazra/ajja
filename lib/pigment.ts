@@ -20,6 +20,7 @@ function luminance(r: number, g: number, b: number) {
 
 export function pickPigment(pixels: Uint8Array | Buffer, channels: number): Pigment {
   let best: { score: number; r: number; g: number; b: number } | null = null;
+  let muted: { score: number; r: number; g: number; b: number } | null = null;
   for (let i = 0; i + 2 < pixels.length; i += channels) {
     const r = pixels[i];
     const g = pixels[i + 1];
@@ -29,8 +30,10 @@ export function pickPigment(pixels: Uint8Array | Buffer, channels: number): Pigm
     const saturation = max === 0 ? 0 : (max - min) / max;
     const value = max / 255;
     const score = saturation * 0.7 + (1 - Math.abs(value - 0.62)) * 0.3;
+    if (value > 0.12 && (!muted || score > muted.score)) muted = { score, r, g, b };
     if (saturation > 0.28 && value > 0.22 && (!best || score > best.score)) best = { score, r, g, b };
   }
+  if (!best) best = muted;
   if (!best) return FALLBACK;
   const lum = luminance(best.r, best.g, best.b);
   const ink = (lum + 0.05) / 0.05 > 1.05 / (lum + 0.05) * 1.35 ? "#18222c" : "#ffffff";

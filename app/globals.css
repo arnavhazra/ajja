@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 /*
-  AJJA — Atelier & Archive Visual System
+  AJJA — Shop visual system
   Museum linen ground, warm bone plates, Payne's ink, raw terracotta, and aged moss.
-  Editorial Cormorant Garamond serif + Space Mono archival specs.
+  Editorial Cormorant Garamond serif + Space Mono specs.
 */
 :root {
   --bg-linen: #F7F4EE;
@@ -11,8 +11,8 @@
   --bg-bone-dark: #E5DEC9;
   --ink: #1E1B18;
   --umber: #6B6258;
-  --terracotta: #C2593F;
-  --terracotta-dark: #A3442D;
+  --terracotta: #A3442D;
+  --terracotta-dark: #8A3524;
   --moss: #3E5C47;
   --hairline: rgba(30, 27, 24, 0.12);
   --hairline-strong: rgba(30, 27, 24, 0.28);
@@ -29,6 +29,7 @@
   --pour-ink: var(--bg-linen);
   --ok: var(--moss);
   --sold: #8A2F2F;
+  --warn: #96620F;
   --night: #1E1B18;
 
   --paper: var(--bg-linen);
@@ -64,6 +65,7 @@
   --color-pour-ink: var(--pour-ink);
   --color-ok: var(--moss);
   --color-sold: var(--sold);
+  --color-warn: var(--warn);
   --color-night: var(--night);
 
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;

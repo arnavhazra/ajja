@@ -45,10 +45,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(siteUrl()),
     title: {
-      default: `${settings.businessName} — Atelier & Archive | Master Woodwork & Poured Paintings`,
+      default: `${settings.businessName} — handmade pieces from ${settings.town}, ${settings.region}`,
       template: `%s — ${settings.businessName}`,
     },
-    description: `Original poured paintings, hand-gouged Nilgiri teak vessels, and studio artifacts from ${settings.town}, ${settings.region} and Mysore. Strictly one of each.`,
+    description: `Paintings and woodwork made by hand in ${settings.town}, ${settings.region}. See the pieces, then ask the studio — nothing is paid online.`,
     applicationName: settings.businessName,
   };
 }

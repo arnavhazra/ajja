@@ -37,6 +37,24 @@ export async function loadDeskPieces(input: { q?: string; status?: string; trash
   return rows.map((row) => ({ ...row, image: images.find((image) => image.productId === row.id) ?? null }));
 }
 
+export async function loadNavCounts() {
+  const db = getDb();
+  const [waiting] = await db.select({ count: count() }).from(enquiries).where(eq(enquiries.status, "new"));
+  const [drafts] = await db.select({ count: count() }).from(products).where(and(isNull(products.deletedAt), eq(products.status, "draft")));
+  return { waiting: waiting?.count ?? 0, review: drafts?.count ?? 0 };
+}
+
+export async function loadPieceNeighbors(id: string) {
+  const rows = await getDb()
+    .select({ id: products.id })
+    .from(products)
+    .where(isNull(products.deletedAt))
+    .orderBy(desc(products.updatedAt))
+    .limit(500);
+  const index = rows.findIndex((row) => row.id === id);
+  return { prevId: rows[index - 1]?.id ?? "", nextId: rows[index + 1]?.id ?? "" };
+}
+
 export async function loadDeskPiece(id: string) {
   const db = getDb();
   const [product] = await db.select().from(products).where(eq(products.id, id)).limit(1);

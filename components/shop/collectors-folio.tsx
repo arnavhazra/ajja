@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCurrency } from "./currency-provider";
-import { cn } from "@/lib/cn";
 
 export interface FolioItem {
   id: string;
@@ -136,36 +135,6 @@ export function useFolio() {
   return useContext(FolioContext);
 }
 
-export function FolioButton({ className }: { className?: string }) {
-  const { items, setIsOpen } = useFolio();
-  const count = items.length;
-
-  return (
-    <button
-      type="button"
-      onClick={() => setIsOpen(true)}
-      className={cn(
-        "group relative inline-flex min-h-9 items-center gap-1.5 rounded-full border border-line bg-gesso/70 px-3 text-xs font-mono backdrop-blur-sm transition-all duration-200 hover:border-line-strong cursor-pointer",
-        count > 0 && "border-pour/50 bg-pour/5",
-        className,
-      )}
-      aria-label={`Collector's folio, ${count} pieces shortlisted`}
-    >
-      <span className="font-semibold uppercase tracking-wider text-ink">Folio</span>
-      <span
-        className={cn(
-          "inline-flex size-5 items-center justify-center rounded-full text-[10px] font-bold transition-transform",
-          count > 0
-            ? "bg-pour text-pour-ink scale-100"
-            : "bg-plate text-ink-soft scale-90",
-        )}
-      >
-        {count}
-      </span>
-    </button>
-  );
-}
-
 function FolioDrawer() {
   const { items, isOpen, setIsOpen, removeItem, clear } = useFolio();
   const { format } = useCurrency();
@@ -189,9 +158,9 @@ function FolioDrawer() {
     const pieceList = items
       .map((it) => `• ${it.title}${it.priceMinor ? ` (${format(it.priceMinor)})` : ""} — /p/${it.slug}`)
       .join("\n");
-    const prefilled = `Hello Ajja,\n\nI would like to inquire about acquiring the following shortlisted works:\n\n${pieceList}\n\nPlease let me know about studio availability, provenance, and framing/shipping arrangements.`;
+    const prefilled = `Hello,\n\nI would like to ask about these pieces:\n\n${pieceList}\n\nPlease let me know if they are still available, and about delivery or collection.`;
 
-    // Try finding the textarea on current page or navigate to /#visit
+    // Find the message field on this page, or go to the enquiry form on the home page
     try {
       sessionStorage.setItem("ajja:enquiry-prefill", prefilled);
     } catch {}
@@ -205,13 +174,13 @@ function FolioDrawer() {
           sessionStorage.removeItem("ajja:enquiry-prefill");
         } catch {}
       } else {
-        router.push("/#visit");
+        router.push("/#inquire");
       }
     }, 100);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label="Collector's Folio">
+    <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label="Saved pieces">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-night/50 backdrop-blur-sm transition-opacity"
@@ -223,9 +192,9 @@ function FolioDrawer() {
       <div className="relative flex h-full w-full max-w-md flex-col bg-gesso shadow-2xl safe-bottom border-l border-line">
         <div className="flex items-center justify-between border-b border-line px-6 py-4">
           <div>
-            <h2 className="display-wide text-xl">Collector&apos;s Folio</h2>
+            <h2 className="display-wide text-xl">Saved pieces</h2>
             <p className="caption text-xs text-ink-soft">
-              {items.length === 1 ? "1 piece shortlisted" : `${items.length} pieces shortlisted`}
+              {items.length === 1 ? "1 piece saved" : `${items.length} pieces saved`}
             </p>
           </div>
           <button
@@ -241,9 +210,9 @@ function FolioDrawer() {
           {items.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center">
               <span className="inline-block size-3 rounded-full bg-pour/40 mb-3" />
-              <p className="font-serif italic text-lg text-ink-soft">Your studio folio is empty.</p>
+              <p className="font-serif italic text-lg text-ink-soft">Nothing saved yet.</p>
               <p className="text-xs text-ink-soft max-w-xs mt-1">
-                Click &ldquo;+ Folio&rdquo; on any piece across the studio to curate works for a combined inquiry or acquisition.
+                Tap &ldquo;Save&rdquo; on any piece to keep it here, then ask about them all in one note.
               </p>
             </div>
           ) : (
@@ -281,7 +250,7 @@ function FolioDrawer() {
                             rel="noopener noreferrer"
                             className="text-[11px] font-mono text-cobalt hover:underline"
                           >
-                            Stripe Pay ↗
+                            Pay link ↗
                           </a>
                         ) : null}
                         <button
@@ -303,8 +272,8 @@ function FolioDrawer() {
         {items.length > 0 ? (
           <div className="border-t border-line bg-plate/40 p-6 space-y-4">
             <div className="flex items-baseline justify-between">
-              <span className="caption text-sm">Estimated Total</span>
-              <span className="nums text-xl font-bold">{formattedTotal ?? "Custom inquiry"}</span>
+              <span className="caption text-sm">Total of priced pieces</span>
+              <span className="nums text-xl font-bold">{formattedTotal ?? "—"}</span>
             </div>
             <div className="space-y-2">
               <button
@@ -312,14 +281,14 @@ function FolioDrawer() {
                 onClick={handleInquireAll}
                 className="btn btn-pour w-full text-center min-h-11 cursor-pointer"
               >
-                Inquire on Shortlisted Works ({items.length})
+                Ask about these pieces ({items.length})
               </button>
               <button
                 type="button"
                 onClick={clear}
                 className="w-full text-center text-xs text-ink-soft hover:text-ink cursor-pointer py-1"
               >
-                Clear folio
+                Clear saved pieces
               </button>
             </div>
           </div>

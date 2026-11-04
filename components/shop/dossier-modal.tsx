@@ -22,7 +22,7 @@ export function useDossier() {
   return useContext(DossierContext);
 }
 
-export function DossierProvider({ children }: { children: React.ReactNode }) {
+export function DossierProvider({ children, location = "" }: { children: React.ReactNode; location?: string }) {
   const [activeProduct, setActiveProduct] = useState<PublicProduct | null>(null);
   const [viewMode, setViewMode] = useState<"daylight" | "macro" | "scale">("daylight");
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -45,9 +45,9 @@ export function DossierProvider({ children }: { children: React.ReactNode }) {
   const cover = activeProduct?.images[0];
   const title = activeProduct ? pieceTitle(activeProduct.title, activeProduct.categorySlug, activeProduct.attributes) : "";
   const kind = activeProduct ? pieceKind(activeProduct.categoryName, activeProduct.attributes) : "";
-  const dimensions = activeProduct?.attributes?.dimensions || activeProduct?.attributes?.size || "Dimensions on request";
-  const material = activeProduct?.attributes?.material || activeProduct?.attributes?.medium || kind || "Poured pigment on panel";
-  const makerNote = activeProduct?.description || activeProduct?.attributes?.details || "Handcrafted in the studio with unrepeatable pigment dispersion and seasoned timber.";
+  const dimensions = activeProduct?.attributes?.dimensions || activeProduct?.attributes?.size || "";
+  const material = activeProduct?.attributes?.material || activeProduct?.attributes?.medium || kind || "";
+  const makerNote = activeProduct?.description || activeProduct?.attributes?.details || "";
   const priceFormatted = activeProduct?.priceMinor ? format(activeProduct.priceMinor) : "Ask for price";
   const sold = activeProduct?.status === "sold";
   const inFolio = activeProduct ? hasItem(activeProduct.id) : false;
@@ -58,7 +58,7 @@ export function DossierProvider({ children }: { children: React.ReactNode }) {
 
       <dialog
         ref={dialogRef}
-        aria-label="Museum Artwork Dossier"
+        aria-label={`Quick look at ${title}`}
         className="fixed inset-0 m-auto h-auto max-h-[92vh] w-[95vw] max-w-5xl rounded-sm bg-linen p-0 text-ink shadow-2xl backdrop:bg-night/70 backdrop:backdrop-blur-sm hairline-box z-50 overflow-hidden"
         onClick={(e) => {
           if (e.target === dialogRef.current) closeDossier();
@@ -66,14 +66,20 @@ export function DossierProvider({ children }: { children: React.ReactNode }) {
       >
         {activeProduct ? (
           <div className="flex flex-col h-full max-h-[92vh]">
-            {/* Top Modal Header Plate */}
+            {/* Top bar */}
             <div className="flex items-center justify-between border-b border-line bg-bone px-6 py-3.5">
               <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-wider text-umber">
-                <span className="font-bold text-ink">SPECIMEN // {activeProduct.slug.toUpperCase()}</span>
+                <span className="font-bold text-ink truncate">{title}</span>
+                {kind ? (
+                  <>
+                    <span>•</span>
+                    <span className="truncate">{kind}</span>
+                  </>
+                ) : null}
                 <span>•</span>
-                <span>{kind}</span>
-                <span>•</span>
-                <span className="font-semibold text-terracotta">{sold ? "RESERVED" : "EDITION 1 OF 1"}</span>
+                <span className="font-semibold text-terracotta">
+                  {sold ? "Sold" : activeProduct.quantity === 1 ? "One of one" : "In the studio"}
+                </span>
               </div>
               <div className="flex items-center gap-4">
                 <span className="font-mono text-sm font-bold text-ink">{sold ? "Sold" : priceFormatted}</span>
@@ -81,7 +87,7 @@ export function DossierProvider({ children }: { children: React.ReactNode }) {
                   type="button"
                   onClick={closeDossier}
                   className="btn btn-quiet min-h-8 px-2 py-1 text-xs cursor-pointer"
-                  aria-label="Close dossier"
+                  aria-label="Close"
                 >
                   ✕
                 </button>
@@ -102,7 +108,7 @@ export function DossierProvider({ children }: { children: React.ReactNode }) {
                         viewMode === "daylight" ? "bg-ink text-linen font-bold" : "text-umber hover:text-ink hairline-box bg-bone"
                       }`}
                     >
-                      [1. Daylight View]
+                      Photo
                     </button>
                     <button
                       type="button"
@@ -111,7 +117,7 @@ export function DossierProvider({ children }: { children: React.ReactNode }) {
                         viewMode === "macro" ? "bg-ink text-linen font-bold" : "text-umber hover:text-ink hairline-box bg-bone"
                       }`}
                     >
-                      [2. 2.6× Macro Loupe]
+                      Close detail
                     </button>
                     <button
                       type="button"
@@ -120,7 +126,7 @@ export function DossierProvider({ children }: { children: React.ReactNode }) {
                         viewMode === "scale" ? "bg-ink text-linen font-bold" : "text-umber hover:text-ink hairline-box bg-bone"
                       }`}
                     >
-                      [3. Scale in Room]
+                      On a wall
                     </button>
                   </div>
 
@@ -156,16 +162,16 @@ export function DossierProvider({ children }: { children: React.ReactNode }) {
 
                     {viewMode === "macro" ? (
                       <div className="absolute top-3 left-3 bg-linen/90 px-2 py-0.5 rounded-sm font-mono text-[9px] uppercase tracking-wider text-ink hairline-box">
-                        2.6× Macro Surface Magnification
+                        Detail, enlarged
                       </div>
                     ) : null}
                   </div>
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-line flex items-center justify-between font-mono text-[10px] text-umber uppercase tracking-wider">
-                  <span>Aspect: {cover?.width && cover?.height ? `${cover.width}×${cover.height}` : "Studio Format"}</span>
+                  <span>{cover?.width && cover?.height ? `Photo ${cover.width}×${cover.height}` : "Studio photograph"}</span>
                   <Link href={`/p/${activeProduct.slug}`} onClick={closeDossier} className="hover:text-ink underline">
-                    Full Artwork Page ↗
+                    See the full page ↗
                   </Link>
                 </div>
               </div>
@@ -174,31 +180,35 @@ export function DossierProvider({ children }: { children: React.ReactNode }) {
               <div className="md:col-span-5 p-6 bg-bone flex flex-col justify-between">
                 <div>
                   <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-linen font-mono text-[10px] uppercase text-terracotta tracking-wider mb-2 hairline-box">
-                    <span>●</span> {activeProduct.status === "sold" ? "Archived Custody" : "In the Studio"}
+                    <span>●</span> {sold ? "Sold" : "In the studio"}
                   </div>
                   <h2 className="font-serif text-3xl font-medium text-ink leading-tight mb-2">{title}</h2>
                   <p className="font-mono text-sm font-bold text-ink mb-4">{priceFormatted}</p>
 
-                  <p className="text-xs text-umber leading-relaxed mb-6 font-sans">{makerNote}</p>
+                  {makerNote ? (
+                    <p className="text-xs text-umber leading-relaxed mb-6 font-sans">{makerNote}</p>
+                  ) : null}
 
-                  {/* Provenance Specifications Block */}
+                  {/* Facts */}
                   <div className="space-y-3 font-mono text-xs border-y border-line py-4 my-4">
-                    <div className="flex justify-between">
-                      <span className="text-umber uppercase tracking-wider text-[10px]">Medium / Material</span>
-                      <span className="text-ink font-medium text-right max-w-[60%]">{material}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-umber uppercase tracking-wider text-[10px]">Dimensions</span>
-                      <span className="text-ink font-medium">{dimensions}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-umber uppercase tracking-wider text-[10px]">Provenance</span>
-                      <span className="text-ink font-medium">Collegeville Studio</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-umber uppercase tracking-wider text-[10px]">Authenticity</span>
-                      <span className="text-moss font-semibold">Serial-Recorded Studio Ledger</span>
-                    </div>
+                    {material ? (
+                      <div className="flex justify-between">
+                        <span className="text-umber uppercase tracking-wider text-[10px]">Medium</span>
+                        <span className="text-ink font-medium text-right max-w-[60%]">{material}</span>
+                      </div>
+                    ) : null}
+                    {dimensions ? (
+                      <div className="flex justify-between">
+                        <span className="text-umber uppercase tracking-wider text-[10px]">Size</span>
+                        <span className="text-ink font-medium">{dimensions}</span>
+                      </div>
+                    ) : null}
+                    {location ? (
+                      <div className="flex justify-between">
+                        <span className="text-umber uppercase tracking-wider text-[10px]">Made in</span>
+                        <span className="text-ink font-medium">{location}</span>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
 
@@ -224,7 +234,7 @@ export function DossierProvider({ children }: { children: React.ReactNode }) {
                         inFolio ? "bg-moss text-linen border-moss" : "btn-pour"
                       }`}
                     >
-                      {inFolio ? "[✓ Reserved in Collector's Bag]" : `[+ Reserve Piece • ${priceFormatted}]`}
+                      {inFolio ? "✓ Saved" : `Save${priceFormatted !== "Ask for price" ? ` • ${priceFormatted}` : ""}`}
                     </button>
                   ) : null}
 
@@ -233,7 +243,7 @@ export function DossierProvider({ children }: { children: React.ReactNode }) {
                     onClick={closeDossier}
                     className="btn btn-secondary w-full text-center text-xs"
                   >
-                    [Inquire on Acquisition / Studio Visit]
+                    Ask about this piece
                   </Link>
                 </div>
               </div>

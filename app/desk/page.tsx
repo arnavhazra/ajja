@@ -21,15 +21,27 @@ async function Home({ searchParams }: { searchParams: Promise<Record<string, str
   const session = await getSession();
   const note = one(params.note);
   if (!session) {
+    const emailCodeReady = Boolean(process.env.OWNER_EMAIL && process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
+    const staffReady = Boolean(process.env.DEV_ADMIN_EMAIL && process.env.DEV_ADMIN_PASSWORD && process.env.DEV_ADMIN_TOTP_SECRET);
     return (
       <main className="desk-signin">
         <div className="desk-page w-full max-w-md">
           <Flash note={note} undo="" back="/" />
-          {one(params.staff) === "1" ? <StaffForm /> : one(params.code) === "1" ? <OwnerForm defaultEmail={one(params.email) ?? ""} /> : <PasswordForm />}
+          {one(params.staff) === "1" ? (
+            <StaffForm />
+          ) : one(params.code) === "1" ? (
+            <OwnerForm defaultEmail={one(params.email) ?? ""} />
+          ) : (
+            <PasswordForm />
+          )}
           <p className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-soft">
             <Link className="ink-link inline-flex min-h-11 items-center" href="?">Password</Link>
-            <Link className="ink-link inline-flex min-h-11 items-center" href="?code=1">Email me a code</Link>
-            <Link className="ink-link inline-flex min-h-11 items-center" href="?staff=1">Staff with app code</Link>
+            {emailCodeReady ? (
+              <Link className="ink-link inline-flex min-h-11 items-center" href="?code=1">Email me a code</Link>
+            ) : null}
+            {staffReady ? (
+              <Link className="ink-link inline-flex min-h-11 items-center" href="?staff=1">Staff with app code</Link>
+            ) : null}
           </p>
         </div>
       </main>

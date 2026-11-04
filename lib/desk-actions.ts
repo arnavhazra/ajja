@@ -25,7 +25,7 @@ import {
 import { deskPrefix } from "./desk-path";
 import { assertBlobUrl, storeImage } from "./images";
 import { dollarsToMinor } from "./money";
-import { passwordChangeSchema, passwordSignInSchema, pieceSchema } from "./schemas";
+import { inlineEditSchema, passwordChangeSchema, passwordSignInSchema, pieceSchema } from "./schemas";
 import { defaultSettings, type ShopSettings, withDefaults } from "./settings";
 import { pieceSlug, slugify } from "./slug";
 import { parseNewYork } from "./time";
@@ -500,11 +500,72 @@ export async function duplicatePiece(formData: FormData) {
 
 export async function undoChange(formData: FormData) {
   const session = await actor();
-  const id = String(formData.get("id") ?? "");
+  const ids = String(formData.get("id") ?? "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
   const back = String(formData.get("back") ?? "/pieces");
+  let restored = 0;
+  let lastProductId = "";
+  for (const id of ids) {
+    const productId = await restoreVersion(id);
+    if (productId) {
+      restored += 1;
+      lastProductId = productId;
+      await audit(session.userId, "Undid a change", "product", productId);
+    }
+  }
+  if (!restored) return go(back.startsWith("/") ? back : "/pieces", "Nothing to undo.");
+  refresh();
+  const path = back.startsWith("/") ? back : `/pieces/${lastProductId}`;
+  return go(path, restored === 1 ? "Change undone." : `${restored} changes undone.`);
+}
+
+export async function saveInlineField(input: { id: string; intent: string; value: string }) {
+  "use server";
+  const session = await actor();
+  const parsed = inlineEditSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, message: "Check this field.", undoId: "" };
+  const { id, intent, value } = parsed.data;
   const db = getDb();
-  const [version] = await db.select().from(productVersions).where(eq(productVersions.id, id)).limit(1);
-  if (!version?.productId) return go(back.startsWith("/") ? back : "/pieces", "Nothing to undo.");
+  const [current] = await db.select().from(products).where(eq(products.id, id)).limit(1);
+  if (!current) return { ok: false as const, message: "That piece is not here.", undoId: "" };
+  const undoId = await snapshot(id, "Quick edit", session.email);
+  if (intent === "title") {
+    let slug = current.slug;
+    if (value && (current.slug.startsWith("piece-") || current.title !== value)) {
+      const nextSlug = await uniqueSlug(value, current.id);
+      if (nextSlug !== current.slug) {
+        await db.insert(redirects).values({ fromPath: `/p/${current.slug}`, toPath: `/p/${nextSlug}` }).onConflictDoNothing();
+        slug = nextSlug;
+      }
+    }
+    await db.update(products).set({ title: value, slug, updatedAt: new Date() }).where(eq(products.id, id));
+  } else if (intent === "price") {
+    const price = money(value);
+    if (!price.ok) return { ok: false as const, message: price.message, undoId: "" };
+    await db.update(products).set({ priceMinor: price.value, updatedAt: new Date() }).where(eq(products.id, id));
+  } else if (intent === "status") {
+    if (!["draft", "scheduled", "published", "sold", "hidden"].includes(value)) {
+      return { ok: false as const, message: "Choose a status.", undoId: "" };
+    }
+    await db.update(products).set({ status: value, updatedAt: new Date() }).where(eq(products.id, id));
+  } else if (intent === "category") {
+    if (value) {
+      const [group] = await db.select({ id: categories.id }).from(categories).where(eq(categories.id, value)).limit(1);
+      if (!group) return { ok: false as const, message: "That group is not here.", undoId: "" };
+    }
+    await db.update(products).set({ categoryId: value || null, updatedAt: new Date() }).where(eq(products.id, id));
+  }
+  await audit(session.userId, "Quick edit", "product", id);
+  refresh();
+  return { ok: true as const, message: "Saved.", undoId };
+}
+
+async function restoreVersion(versionId: string) {
+  const db = getDb();
+  const [version] = await db.select().from(productVersions).where(eq(productVersions.id, versionId)).limit(1);
+  if (!version?.productId) return "";
   const snap = version.snapshot as Snapshot;
   await db
     .update(products)
@@ -520,30 +581,17 @@ export async function undoChange(formData: FormData) {
     await db.insert(productImages).values(snap.images.map((image) => ({ ...image, productId: version.productId! })));
   }
   await db.update(productVersions).set({ undoneAt: new Date() }).where(eq(productVersions.id, version.id));
-  await audit(session.userId, "Undid a change", "product", version.productId);
-  refresh();
-  const path = back.startsWith("/") ? back : `/pieces/${version.productId}`;
-  return go(path, "Change undone.");
+  return version.productId;
 }
 
-export async function saveInline(formData: FormData) {
+export async function undoInline(versionId: string) {
+  "use server";
   const session = await actor();
-  const id = String(formData.get("id"));
-  const intent = String(formData.get("intent"));
-  const db = getDb();
-  const undoId = await snapshot(id, "Quick edit", session.email);
-  if (intent === "price") {
-    const price = money(String(formData.get("price") ?? ""));
-    if (!price.ok) return go("/pieces", price.message);
-    await db.update(products).set({ priceMinor: price.value, updatedAt: new Date() }).where(eq(products.id, id));
-  } else if (intent === "status") {
-    const status = String(formData.get("status"));
-    if (!["draft", "scheduled", "published", "sold", "hidden"].includes(status)) return go("/pieces", "Choose a status.");
-    await db.update(products).set({ status, updatedAt: new Date() }).where(eq(products.id, id));
-  }
-  await audit(session.userId, "Quick edit", "product", id);
+  const productId = await restoreVersion(versionId);
+  if (!productId) return { ok: false as const, message: "Nothing to undo." };
+  await audit(session.userId, "Undid a change", "product", productId);
   refresh();
-  return go("/pieces", "Saved.", undoId);
+  return { ok: true as const, message: "Change undone." };
 }
 
 export async function moveFeatured(formData: FormData) {
@@ -574,9 +622,10 @@ export async function bulkApply(formData: FormData) {
   const db = getDb();
   let changed = 0;
   let skipped = 0;
+  const undoIds: string[] = [];
   for (const id of ids) {
-    const undoIgnored = await snapshot(id, "Bulk change", session.email);
-    void undoIgnored;
+    const undoId = await snapshot(id, "Bulk change", session.email);
+    if (undoId) undoIds.push(undoId);
     if (action === "hide" || action === "publish" || action === "sold" || action === "draft") {
       const status = action === "publish" ? "published" : action === "sold" ? "sold" : action === "hide" ? "hidden" : "draft";
       await db.update(products).set({ status, updatedAt: new Date() }).where(eq(products.id, id));
@@ -616,7 +665,7 @@ export async function bulkApply(formData: FormData) {
   await audit(session.userId, "Bulk change", "product", ids[0] ?? null, { action, count: String(changed) });
   refresh();
   const skippedNote = skipped ? ` ${skipped} had no price, so they were left alone.` : "";
-  return go("/pieces", `${changed} updated.${skippedNote}`, ids.length === 1 ? undefined : undefined);
+  return go("/pieces", `${changed} updated.${skippedNote}`, undoIds.length ? undoIds.join(",") : undefined);
 }
 
 export async function moveImage(formData: FormData) {

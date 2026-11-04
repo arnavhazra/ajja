@@ -1,25 +1,40 @@
 import Link from "next/link";
-import { DeskNavLinks } from "@/components/desk/nav-links";
+import { DeskNavLinks, type DeskNavSection } from "@/components/desk/nav-links";
 import { leaveDesk } from "@/lib/desk-actions";
+import { loadNavCounts } from "@/lib/desk-data";
 import { deskPrefix } from "@/lib/desk-path";
 
-const LINKS = [
-  ["", "Today"],
-  ["/pieces", "Pieces"],
-  ["/add", "Add a piece"],
-  ["/review", "Review"],
-  ["/groups", "Groups"],
-  ["/home", "Home page"],
-  ["/messages", "Messages"],
-  ["/insights", "How it's going"],
-  ["/files", "Bring in / Save a copy"],
-  ["/poster", "Poster"],
-  ["/history", "Change history"],
-  ["/account", "Account"],
-] as const;
-
 export async function DeskNav({ email }: { email: string }) {
-  const prefix = await deskPrefix();
+  const [prefix, counts] = await Promise.all([deskPrefix(), loadNavCounts()]);
+  const sections: DeskNavSection[] = [
+    {
+      title: "Work",
+      links: [
+        ["", "Today"],
+        ["/pieces", "Pieces"],
+        ["/add", "Add a piece"],
+        ["/review", "Review", counts.review],
+      ],
+    },
+    {
+      title: "Shop",
+      links: [
+        ["/home", "Home page"],
+        ["/groups", "Groups"],
+        ["/messages", "Messages", counts.waiting],
+        ["/poster", "Poster"],
+      ],
+    },
+    {
+      title: "Studio",
+      links: [
+        ["/insights", "Numbers"],
+        ["/files", "Files"],
+        ["/history", "History"],
+        ["/account", "Account"],
+      ],
+    },
+  ];
   return (
     <header className="desk-side no-print">
       <div className="desk-bar">
@@ -30,7 +45,7 @@ export async function DeskNav({ email }: { email: string }) {
           View the shop
         </Link>
       </div>
-      <DeskNavLinks prefix={prefix} links={LINKS} />
+      <DeskNavLinks prefix={prefix} sections={sections} />
       <div className="desk-foot">
         <p className="desk-signed-in truncate text-sm text-ink-soft">{email}</p>
         <div className="flex flex-wrap gap-2">

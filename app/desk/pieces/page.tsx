@@ -1,21 +1,28 @@
 import { Suspense } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Flash, one } from "@/components/desk/flash";
-import { bulkApply, moveFeatured, restorePiece, saveInline } from "@/lib/desk-actions";
+import { DeskRowsSkeleton } from "@/components/desk/skeleton";
+import { PiecesTable, type DeskPieceRow } from "@/components/desk/pieces-table";
 import { loadDeskPieces, requireDesk } from "@/lib/desk-data";
 import { deskPrefix } from "@/lib/desk-path";
-import { minorToDollars } from "@/lib/money";
-import { statusLabel } from "@/lib/status";
-import { pieceTitle } from "@/lib/piece-title";
 import { evaluatePieceReadiness } from "@/lib/piece-readiness";
+import { minorToDollars } from "@/lib/money";
+import { pieceTitle } from "@/lib/piece-title";
 import { getDb } from "@/lib/db";
 import { categories } from "@/lib/db/schema";
 import { asc } from "drizzle-orm";
 
+export const NEEDS = [
+  { key: "photo", label: "Needs a photo" },
+  { key: "title", label: "Needs a name" },
+  { key: "group", label: "Needs a group" },
+  { key: "size", label: "Needs a size" },
+  { key: "price", label: "Needs a price" },
+] as const;
+
 export default function PiecesPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   return (
-    <Suspense fallback={<p className="p-4">Loading…</p>}>
+    <Suspense fallback={<DeskRowsSkeleton />}>
       <Pieces searchParams={searchParams} />
     </Suspense>
   );
@@ -25,20 +32,68 @@ async function Pieces({ searchParams }: { searchParams: Promise<Record<string, s
   await requireDesk();
   const params = await searchParams;
   const trash = one(params.trash) === "1";
+  const need = one(params.need);
   const [rows, groups, prefix] = await Promise.all([
     loadDeskPieces({ q: one(params.q), status: one(params.status), trash }),
     getDb().select().from(categories).orderBy(asc(categories.sortOrder)),
     deskPrefix(),
   ]);
   const groupName = new Map(groups.map((group) => [group.id, group.name]));
+
+  const needsOf = (row: (typeof rows)[number]) => {
+    const readiness = evaluatePieceReadiness({
+      title: row.title,
+      categoryId: row.categoryId,
+      attributes: row.attributes,
+      priceMinor: row.priceMinor,
+      hasPhoto: Boolean(row.image),
+    });
+    const needs = readiness.missing.map((item) => item.toLowerCase());
+    if (row.priceMinor == null) needs.push("price");
+    return { readiness, needs };
+  };
+
+  const all = rows.map((row) => ({ row, ...needsOf(row) }));
+  const needCounts = new Map(NEEDS.map(({ key }) => [key, all.filter(({ needs }) => needs.includes(key)).length]));
+  const visible = need ? all.filter(({ needs }) => needs.includes(need)) : all;
+
+  const tableRows: DeskPieceRow[] = visible.map(({ row, readiness, needs }) => ({
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    displayTitle: pieceTitle(row.title, groupName.get(row.categoryId ?? "") ?? null, row.attributes as Record<string, string> | undefined),
+    status: row.status,
+    featured: row.featured,
+    price: minorToDollars(row.priceMinor),
+    categoryId: row.categoryId ?? "",
+    ready: readiness.isReady,
+    missing: readiness.missing,
+    needs,
+    imageUrl: row.image?.url ?? "",
+  }));
+
+  const href = (extra: Record<string, string>) => {
+    const merged = new URLSearchParams();
+    for (const [key, value] of Object.entries({
+      q: one(params.q),
+      status: one(params.status),
+      trash: trash ? "1" : "",
+      ...extra,
+    })) {
+      if (value) merged.set(key, value);
+    }
+    const query = merged.toString();
+    return `${prefix}/pieces${query ? `?${query}` : ""}`;
+  };
+
   return (
     <main className="desk-page">
       <Flash note={one(params.note)} undo={one(params.undo)} back="/pieces" />
       <div className="desk-lead">
         <h1 className="text-4xl">Pieces</h1>
-        <p className="desk-note">Search, change a price, or update several pieces at once.</p>
+        <p className="desk-note">Search, change a name, price, group, or status right here — changes save when you leave the field.</p>
       </div>
-      <form className="flex flex-wrap gap-2" method="get">
+      <form className="flex flex-wrap items-end gap-2" method="get">
         <label className="grid gap-1">
           Search
           <input className="field" name="q" defaultValue={one(params.q)} />
@@ -54,6 +109,7 @@ async function Pieces({ searchParams }: { searchParams: Promise<Record<string, s
             <option value="hidden">Hidden</option>
           </select>
         </label>
+        {need ? <input type="hidden" name="need" value={need} /> : null}
         <button className="btn btn-primary self-end" type="submit">
           Show
         </button>
@@ -61,147 +117,28 @@ async function Pieces({ searchParams }: { searchParams: Promise<Record<string, s
           {trash ? "Back to pieces" : "Trash"}
         </Link>
       </form>
-      <form id="bulk" action={bulkApply} className="flex flex-wrap items-end gap-2">
-        <label className="grid gap-1">
-          With selected
-          <select className="field" name="action" defaultValue="publish">
-            <option value="publish">Put on the site</option>
-            <option value="hide">Hide</option>
-            <option value="sold">Mark sold</option>
-            <option value="draft">Move to draft</option>
-            <option value="category">Change group</option>
-            <option value="percent">Change price by percent</option>
-            <option value="amount">Change price by dollars</option>
-            <option value="trash">Move to trash</option>
-          </select>
-        </label>
-        <label className="grid gap-1">
-          Percent or dollars
-          <input className="field" name="value" inputMode="decimal" />
-        </label>
-        <label className="grid gap-1">
-          Group
-          <select className="field" name="categoryId" defaultValue="">
-            <option value="">No group</option>
-            {groups.map((group) => (
-              <option key={group.id} value={group.id}>
-                {group.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button className="btn btn-secondary" type="submit">
-          Apply
-        </button>
-      </form>
-      <div className="desk-stack">
-        {rows.length === 0 ? <p>No pieces in this list.</p> : null}
-        {rows.map((row) => (
-          <article key={row.id} className="desk-row">
-            <label className="flex min-h-12 items-center gap-2">
-              <input form="bulk" type="checkbox" name="id" value={row.id} />
-              <span className="sr-only">Select</span>
-            </label>
-            <Link className="desk-thumb" href={`${prefix}/pieces/${row.id}`} tabIndex={-1} aria-hidden="true">
-              {row.image ? <Image src={row.image.url} alt="" width={128} height={128} sizes="64px" /> : <span>No photo</span>}
+      {!trash ? (
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Show pieces that need something">
+          <span className="text-sm text-ink-soft">Needs:</span>
+          {NEEDS.map(({ key, label }) => (
+            <Link
+              key={key}
+              className="desk-chip"
+              aria-current={need === key ? "true" : undefined}
+              href={need === key ? href({ need: "" }) : href({ need: key })}
+            >
+              {label}
+              <span className="nums">{needCounts.get(key) ?? 0}</span>
             </Link>
-            <div className="min-w-0">
-              <Link className="block truncate text-lg font-[600] hover:underline" href={`${prefix}/pieces/${row.id}`}>
-                {pieceTitle(row.title, groupName.get(row.categoryId ?? "") ?? null, row.attributes)}
-              </Link>
-              {(() => {
-                const readiness = evaluatePieceReadiness({
-                  title: row.title,
-                  categoryId: row.categoryId,
-                  attributes: row.attributes,
-                  priceMinor: row.priceMinor,
-                  hasPhoto: Boolean(row.image),
-                });
-                return (
-                  <p className="flex flex-wrap items-center gap-2 text-sm text-ink-soft">
-                    <span className="desk-pill" data-status={row.status}>{statusLabel(row.status)}</span>
-                    {row.featured ? <span className="desk-pill">Featured</span> : null}
-                    {!readiness.isReady ? (
-                      <span className="desk-pill border-sold text-sold text-xs">
-                        Needs {readiness.missing.join(", ")}
-                      </span>
-                    ) : null}
-                    {row.status === "published" ? (
-                      <a
-                        href={`/p/${row.slug}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs text-ink-soft hover:text-ink underline"
-                      >
-                        view live ↗
-                      </a>
-                    ) : null}
-                  </p>
-                );
-              })()}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {trash ? (
-                <form action={restorePiece}>
-                  <input type="hidden" name="id" value={row.id} />
-                  <button className="btn btn-secondary" type="submit">
-                    Restore
-                  </button>
-                </form>
-              ) : (
-                <>
-                  <form action={saveInline} className="flex gap-2">
-                    <input type="hidden" name="id" value={row.id} />
-                    <input type="hidden" name="intent" value="price" />
-                    <label className="sr-only" htmlFor={`price-${row.id}`}>
-                      Price
-                    </label>
-                    <input id={`price-${row.id}`} className="field w-28" name="price" defaultValue={minorToDollars(row.priceMinor)} inputMode="decimal" />
-                    <button className="btn btn-quiet" type="submit">
-                      Save price
-                    </button>
-                  </form>
-                  <form action={saveInline} className="flex gap-2">
-                    <input type="hidden" name="id" value={row.id} />
-                    <input type="hidden" name="intent" value="status" />
-                    <label className="sr-only" htmlFor={`status-${row.id}`}>
-                      Status
-                    </label>
-                    <select id={`status-${row.id}`} className="field" name="status" defaultValue={row.status}>
-                      <option value="draft">Draft</option>
-                      <option value="scheduled">Scheduled</option>
-                      <option value="published">On the site</option>
-                      <option value="sold">Sold</option>
-                      <option value="hidden">Hidden</option>
-                    </select>
-                    <button className="btn btn-quiet" type="submit">
-                      Save status
-                    </button>
-                  </form>
-                  {row.featured ? (
-                    <>
-                      <form action={moveFeatured}>
-                        <input type="hidden" name="id" value={row.id} />
-                        <input type="hidden" name="direction" value="up" />
-                        <button className="btn btn-quiet" type="submit">
-                          Featured up
-                        </button>
-                      </form>
-                      <form action={moveFeatured}>
-                        <input type="hidden" name="id" value={row.id} />
-                        <input type="hidden" name="direction" value="down" />
-                        <button className="btn btn-quiet" type="submit">
-                          Featured down
-                        </button>
-                      </form>
-                    </>
-                  ) : null}
-                </>
-              )}
-            </div>
-          </article>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : null}
+      <PiecesTable
+        rows={tableRows}
+        groups={groups.map((group) => ({ id: group.id, name: group.name }))}
+        prefix={prefix}
+        trash={trash}
+      />
     </main>
   );
 }

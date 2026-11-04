@@ -43,6 +43,12 @@ export const pieceSchema = z.object({
   internalNotes: z.string().trim().max(5000).default(""),
 });
 
+export const inlineEditSchema = z.object({
+  id: z.string().uuid(),
+  intent: z.enum(["title", "price", "status", "category"]),
+  value: z.string().trim().max(200).default(""),
+});
+
 export const passwordSignInSchema = z.object({
   email: z.string().trim().toLowerCase().email("Enter an email address.").max(200),
   password: z.string().min(1, "Enter your password.").max(200),

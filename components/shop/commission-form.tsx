@@ -7,9 +7,11 @@ import { EventBeacon } from "@/components/event-beacon";
 export function CommissionForm({
   productId,
   productName,
+  responseNote,
 }: {
   productId?: string;
   productName?: string;
+  responseNote?: string;
 }) {
   const [state, action, pending] = useActionState(sendEnquiry, { ok: false, message: "" });
 
@@ -17,9 +19,9 @@ export function CommissionForm({
     return (
       <div role="status" className="bg-bone hairline-box rounded-sm p-8 sm:p-12 text-center max-w-2xl mx-auto shadow-sm">
         <span className="inline-block size-3 rounded-full bg-moss mb-4" />
-        <h3 className="font-serif text-3xl font-medium text-ink mb-2">Note Transmitted to Studio Ledger</h3>
+        <h3 className="font-serif text-3xl font-medium text-ink mb-2">Thank you — your note is with the studio.</h3>
         <p className="text-sm text-umber leading-relaxed font-sans max-w-md mx-auto">
-          {state.message || "Thank you. Your inquiry has been delivered directly to the workshop bench. We will respond within 48 hours."}
+          {state.message || responseNote || "We will write back as soon as we can."}
         </p>
         <EventBeacon type="form" productId={productId} />
       </div>
@@ -31,20 +33,20 @@ export function CommissionForm({
       <div className="shell max-w-3xl mx-auto">
         <div className="text-center mb-10">
           <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-terracotta mb-2 font-bold">
-            DIRECT INQUIRY &amp; COMMISSION WAITLIST
+            Ask the studio
           </p>
           <h2 className="font-serif text-3xl sm:text-5xl text-ink font-normal mb-3">
-            Initiate Custody of a Work
+            Ask about a piece
           </h2>
           <p className="text-sm text-umber max-w-lg mx-auto font-sans leading-relaxed">
-            Please indicate which specimen or custom dimensions you wish to discuss. Inquiries are reviewed directly at the studio bench.
+            Tell us which piece, or describe what you would like made. Messages go straight to the studio.
           </p>
         </div>
 
         <form action={action} className="bg-bone hairline-box rounded-sm p-6 sm:p-10 shadow-sm space-y-5">
           {productName ? (
             <div className="p-3 bg-linen hairline-box rounded-sm font-mono text-xs text-ink flex items-center justify-between">
-              <span>Regarding Specimen:</span>
+              <span>About:</span>
               <strong className="text-terracotta">{productName}</strong>
             </div>
           ) : null}
@@ -52,28 +54,28 @@ export function CommissionForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <label className="block">
               <span className="block font-mono text-[10px] uppercase tracking-widest text-umber mb-1.5 font-bold">
-                PATRON FULL NAME *
+                Your name *
               </span>
               <input
                 type="text"
                 name="name"
                 required
                 maxLength={120}
-                placeholder="e.g. Eleanor Vance"
+                autoComplete="name"
                 className="w-full px-4 py-3 bg-linen hairline-box rounded-sm text-ink font-sans text-sm placeholder:text-umber/40 focus:outline-none focus:border-terracotta"
               />
             </label>
 
             <label className="block">
               <span className="block font-mono text-[10px] uppercase tracking-widest text-umber mb-1.5 font-bold">
-                EMAIL OR TELEPHONE *
+                Email or phone *
               </span>
               <input
                 type="text"
                 name="contact"
                 required
                 maxLength={160}
-                placeholder="e.g. eleanor@collection.art"
+                autoComplete="email"
                 className="w-full px-4 py-3 bg-linen hairline-box rounded-sm text-ink font-sans text-sm placeholder:text-umber/40 focus:outline-none focus:border-terracotta"
               />
             </label>
@@ -81,27 +83,27 @@ export function CommissionForm({
 
           <label className="block">
             <span className="block font-mono text-[10px] uppercase tracking-widest text-umber mb-1.5 font-bold">
-              INQUIRY SUBJECT
+              Subject
             </span>
             <input
               type="text"
               name="subject"
-              defaultValue={productName ? `Inquiry on ${productName}` : "Studio Acquisition / Commission Inquiry"}
+              defaultValue={productName ? `Asking about ${productName}` : "A question for the studio"}
               className="w-full px-4 py-3 bg-linen hairline-box rounded-sm text-ink font-sans text-sm focus:outline-none focus:border-terracotta"
             />
           </label>
 
           <label className="block">
             <span className="block font-mono text-[10px] uppercase tracking-widest text-umber mb-1.5 font-bold">
-              SPECIMEN DETAILS / QUESTIONS *
+              Your message *
             </span>
             <textarea
               name="message"
               required
               rows={4}
               maxLength={2500}
-              defaultValue={productName ? `I would like to inquire about acquiring ${productName}. Please let me know regarding shipping arrangements and framing.` : ""}
-              placeholder="State the archive catalogue numbers or your architectural requirements (desired dimensions, wood species, delivery destination)..."
+              defaultValue={productName ? `I would like to ask about ${productName}.` : ""}
+              placeholder="Which piece, or what would you like made — size, wood, where it will live?"
               className="w-full px-4 py-3 bg-linen hairline-box rounded-sm text-ink font-sans text-sm placeholder:text-umber/40 focus:outline-none focus:border-terracotta leading-relaxed"
             />
           </label>
@@ -117,14 +119,14 @@ export function CommissionForm({
 
           <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <p className="font-mono text-[10px] text-umber uppercase tracking-wider">
-              ● Nothing is paid on this site — your note goes straight to the bench.
+              Nothing is paid on this site — your note goes straight to the studio.
             </p>
             <button
               type="submit"
               disabled={pending}
               className="btn btn-primary px-8 py-3.5 shadow-sm"
             >
-              {pending ? "[Transmitting to Bench…]" : "[Transmit to Studio Ledger ↗]"}
+              {pending ? "Sending…" : "Send"}
             </button>
           </div>
         </form>
@@ -132,4 +134,3 @@ export function CommissionForm({
     </section>
   );
 }
-

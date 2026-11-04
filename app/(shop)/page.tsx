@@ -4,15 +4,40 @@ import { MotionScan } from "@/components/motion-scan";
 import { Hero } from "@/components/shop/hero";
 import { WorksWall } from "@/components/shop/works-wall";
 import { ColourIndex } from "@/components/shop/colour-index";
-import { AtelierSection } from "@/components/shop/atelier-section";
+import { StudioIntro } from "@/components/shop/studio-intro";
 import { AcquisitionFaq } from "@/components/shop/acquisition-faq";
 import { CommissionForm } from "@/components/shop/commission-form";
 import { getSettings, loadManifest } from "@/lib/public-data";
 import { siteUrl } from "@/lib/site-url";
 
+function ShopSkeleton() {
+  return (
+    <main className="shell min-h-[80svh] py-24" aria-busy="true" aria-label="Loading the shop">
+      <div className="grid animate-pulse gap-10 lg:grid-cols-2">
+        <div className="h-[60svh] bg-bone" />
+        <div className="grid content-start gap-4 py-8">
+          <div className="h-4 w-24 bg-bone-dark" />
+          <div className="h-12 w-3/4 bg-bone-dark" />
+          <div className="h-4 w-full bg-bone" />
+          <div className="h-4 w-2/3 bg-bone" />
+          <div className="mt-6 h-11 w-40 bg-bone-dark" />
+        </div>
+      </div>
+      <div className="mt-24 grid animate-pulse grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+        {Array.from({ length: 8 }, (_, i) => (
+          <div key={i} className="grid gap-3">
+            <div className="aspect-[4/5] bg-bone" />
+            <div className="h-4 w-3/4 bg-bone" />
+          </div>
+        ))}
+      </div>
+    </main>
+  );
+}
+
 export default function HomePage() {
   return (
-    <Suspense fallback={<main className="shell min-h-[80svh] py-24" aria-busy="true" />}>
+    <Suspense fallback={<ShopSkeleton />}>
       <Home />
     </Suspense>
   );
@@ -54,23 +79,17 @@ async function Home() {
         }}
       />
 
-      {/* 1. Asymmetric Curatorial Hero Exhibition */}
       <Hero settings={settings} lead={lead} count={available} />
 
-      {/* 2. Staggered Studio Manifest Grid & Bespoke Patronage Callout */}
       <WorksWall products={ordered} />
 
-      {/* 3. Studio Mineral Pigments Index Marquee */}
       <ColourIndex products={ordered.filter((product) => product.images.length > 0)} />
 
-      {/* 4. The Maker's Credo, Hands at the Bench, Signature & Mysore Guild Wax Seal */}
-      <AtelierSection detail={detail} />
+      <StudioIntro settings={settings} detail={detail} />
 
-      {/* 5. Deed of Transfer & Archival Crating Accordion FAQ */}
       <AcquisitionFaq />
 
-      {/* 6. Direct Inquiry & Commission Waitlist Form */}
-      <CommissionForm />
+      <CommissionForm responseNote={settings.responseNote} />
 
       <MotionScan />
     </main>
