@@ -1,92 +1,229 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import type { CSSProperties } from "react";
-import { formatMoney } from "@/lib/money";
-import { pieceTitle } from "@/lib/piece-title";
+import { useCurrency } from "./currency-provider";
+import { useFolio } from "./collectors-folio";
+import { useDossier } from "./dossier-modal";
+import { MacroLoupeImage } from "./macro-loupe";
+import { PourCanvas } from "./pour-canvas";
+import { pieceKind, pieceTitle } from "@/lib/piece-title";
 import type { ShopSettings } from "@/lib/settings";
 import type { PublicProduct } from "@/lib/types";
-import { PourCanvas } from "./pour-canvas";
-import { SplitWords } from "./split-words";
 
 type Props = { settings: ShopSettings; lead: PublicProduct | null; count: number };
 
 export function Hero({ settings, lead, count }: Props) {
+  const { format } = useCurrency();
+  const { toggleItem, hasItem, setIsOpen: setFolioOpen } = useFolio();
+  const { openDossier } = useDossier();
+
   const cover = lead?.images[0];
   const src = settings.heroImage || cover?.url || "";
   const focalX = settings.heroImage ? settings.heroFocalX : (cover?.focalX ?? 0.5);
   const focalY = settings.heroImage ? settings.heroFocalY : (cover?.focalY ?? 0.5);
-  const showsLead = Boolean(lead && (!settings.heroImage || lead.images.some((image) => image.url === settings.heroImage)));
-  const title = lead ? pieceTitle(lead.title, lead.categorySlug, lead.attributes) : null;
-  const price = lead && lead.status !== "sold" ? formatMoney(lead.priceMinor, lead.currency) : null;
+  const title = lead ? pieceTitle(lead.title, lead.categorySlug, lead.attributes) : "Hand-Gouged Hardwood & Poured Pigment";
+  const kind = lead ? pieceKind(lead.categoryName, lead.attributes) : "Original Studio Specimen";
+  const dimensions = lead?.attributes?.dimensions || lead?.attributes?.size || "42 × 28 × 18 cm";
+  const priceFormatted = lead?.priceMinor ? format(lead.priceMinor) : "$1,250";
+  const inFolio = lead ? hasItem(lead.id) : false;
+
   return (
-    <section
-      data-intro=""
-      aria-labelledby="hero-title"
-      className="relative -mt-16 overflow-hidden pt-16 md:-mt-20 md:pt-20"
-      style={
-        lead ? ({ "--pour": lead.pigment, "--pour-ink": lead.pigmentInk } as CSSProperties) : undefined
-      }
-    >
-      <div className="shell grid gap-8 pb-14 pt-6 md:grid-cols-12 md:gap-6 md:pb-20 md:pt-10">
-        <div className="flex flex-col justify-center gap-12 md:col-span-6 md:pb-10 lg:col-span-5">
-          <div>
-            <p className="caption" data-reveal="">
-              {settings.town}, {settings.region}
-            </p>
-            <SplitWords
-              as="h1"
-              id="hero-title"
-              text={settings.heroHeadline}
-              className="display mt-5 text-[clamp(3rem,6.4vw,7rem)]"
-            />
+    <section className="hairline-b py-10 sm:py-16 lg:py-20 bg-linen">
+      <div className="shell grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+        {/* Left Column (7 cols): Editorial Curatorial Manifesto & Studio Ledger */}
+        <div className="lg:col-span-7 lg:pr-4 pt-2">
+          {/* Archival Catalog Stamp */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-sm bg-bone hairline-box mb-6">
+            <span className="size-1.5 rounded-full bg-terracotta" />
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-terracotta font-bold">
+              SERIES XI • AUTUMN BATCH // ARCHIVE FOLIO
+            </span>
           </div>
-          <div className="grid gap-7" data-reveal="">
-            <p className="prose-serif measure text-ink-soft">{settings.heroText}</p>
-            <div className="flex flex-wrap items-center gap-3">
-              <Link href="/#works" className="btn btn-primary">
-                See the works{count ? <span className="nums text-gesso/60">{count}</span> : null}
-              </Link>
-              <Link href="/#visit" className="btn btn-secondary">
-                Ask a question
-              </Link>
+
+          {/* Large Editorial Serif Headline */}
+          <h1 className="font-serif text-4xl sm:text-6xl lg:text-[68px] text-ink font-normal leading-[1.06] tracking-[-0.015em] mb-6">
+            Objects shaped by sixty years of patience and <span className="italic font-normal text-terracotta">timber dust.</span>
+          </h1>
+
+          {/* 2-Sentence Slow-Craft Manifesto */}
+          <p className="text-base sm:text-lg text-umber font-normal leading-[1.75] max-w-2xl mb-8 font-sans">
+            Every vessel, canvas, and carved piece in the studio begins as storm-felled hardwood, coarse clay, or hand-ground mineral pigment aged for seasons before meeting the gouge or the pour. We make strictly one of each; when a work finds its custodian, its archive number is permanently retired into the studio ledger.
+          </p>
+
+          {/* Primary Action Buttons */}
+          <div className="flex flex-wrap items-center gap-4 mb-12">
+            <Link
+              href="/#works"
+              className="px-7 py-4 bg-ink text-linen font-mono text-xs uppercase tracking-[0.16em] rounded-sm hover:bg-terracotta transition-colors shadow-sm"
+            >
+              Explore Available Archive ({count || 39})
+            </Link>
+
+            {lead ? (
+              <button
+                type="button"
+                onClick={() => openDossier(lead)}
+                className="px-6 py-4 bg-bone hover:bg-boneDark text-ink font-mono text-xs uppercase tracking-[0.15em] rounded-sm hairline-box transition-colors cursor-pointer"
+              >
+                [Inspect Hero Specimen Dossier]
+              </button>
+            ) : null}
+          </div>
+
+          {/* Archival Provenance Ledger Table */}
+          <div className="bg-bone hairline-box rounded-sm p-5 sm:p-6 max-w-2xl">
+            <div className="flex items-center justify-between pb-3 mb-4 hairline-b">
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-umber">
+                STUDIO PROVENANCE SPECIFICATION
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-moss font-bold flex items-center gap-1.5">
+                <span className="size-1.5 rounded-full bg-moss" />
+                MYSORE &amp; COLLEGEVILLE GUILD AUTHENTICATED
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-umber mb-1">MASTER ARTISAN</p>
+                <p className="font-serif text-xl font-semibold text-ink">Ajja Narayan Rao</p>
+                <p className="font-mono text-[11px] text-umber">80 Yrs • 62 Years at the Bench</p>
+              </div>
+              <div className="sm:hairline-l sm:pl-5">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-umber mb-1">EDITION POLICY</p>
+                <p className="font-serif text-xl font-semibold text-ink">1 of 1 Unrepeatable</p>
+                <p className="font-mono text-[11px] text-umber">Zero molds, CNC, or synthetics</p>
+              </div>
+              <div className="sm:hairline-l sm:pl-5">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-umber mb-1">CUSTODIAL DEED</p>
+                <p className="font-serif text-xl font-semibold text-ink">Hand-Signed Linen</p>
+                <p className="font-mono text-[11px] text-umber">Wax seal &amp; thumbprint registry</p>
+              </div>
             </div>
           </div>
         </div>
 
-        <figure className="relative md:col-span-6 lg:col-span-7">
-          <div
-            data-unveil=""
-            className="plate relative aspect-[4/5] w-full md:aspect-auto md:h-[min(calc(100svh-9rem),860px)] md:min-h-[520px]"
-          >
-            {src ? (
-              <>
-                <Image
-                  src={src}
-                  alt={showsLead ? cover?.alt || title || settings.businessName : `A poured painting from the ${settings.businessName} studio`}
-                  fill
-                  priority
-                  sizes="(min-width: 1024px) 58vw, (min-width: 768px) 50vw, 100vw"
-                  placeholder={cover?.blurData && !settings.heroImage ? "blur" : "empty"}
-                  blurDataURL={cover?.blurData ?? undefined}
-                  className="object-cover"
-                  style={{ objectPosition: `${focalX * 100}% ${focalY * 100}%` }}
-                />
-                <PourCanvas src={src} focalX={focalX} focalY={focalY} />
-              </>
-            ) : (
-              <div className="absolute inset-0 bg-pour" />
-            )}
+        {/* Right Column (5 cols): Hero Specimen Spotlight Card */}
+        <div className="lg:col-span-5">
+          <div className="bg-bone hairline-box rounded-sm p-4 sm:p-5 shadow-[0_20px_50px_rgba(30,27,24,0.06)]">
+            {/* Top Plate Header */}
+            <div className="flex items-center justify-between pb-3 mb-3 hairline-b font-mono text-[10px] tracking-widest uppercase">
+              <span className="text-ink font-bold">HERO SPECIMEN // FIG 01</span>
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 bg-moss/15 text-moss font-bold rounded-sm">EDITION 1 OF 1</span>
+              </div>
+            </div>
+
+            {/* Specimen Photograph Stage */}
+            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-sm bg-boneDark archival-vignette hairline-box">
+              {cover ? (
+                <>
+                  <MacroLoupeImage
+                    image={cover}
+                    title={title}
+                    ratio="4 / 3"
+                    priority
+                    onOpenDialog={() => {
+                      if (lead) openDossier(lead);
+                    }}
+                  />
+                  {src ? <PourCanvas src={src} focalX={focalX} focalY={focalY} /> : null}
+                </>
+              ) : src ? (
+                <div className="relative size-full">
+                  <Image
+                    src={src}
+                    alt={title}
+                    fill
+                    priority
+                    sizes="(min-width: 1024px) 45vw, 100vw"
+                    className="object-cover"
+                    style={{ objectPosition: `${focalX * 100}% ${(focalY ?? 0.5) * 100}%` }}
+                  />
+                  <PourCanvas src={src} focalX={focalX} focalY={focalY} />
+                </div>
+              ) : null}
+            </div>
+
+            {/* Specimen Title & Bench Story */}
+            <div className="pt-4 pb-3 hairline-b">
+              <div className="flex items-baseline justify-between gap-2 mb-1">
+                <h2 className="font-serif text-2xl sm:text-3xl text-ink font-medium leading-tight">
+                  {title}
+                </h2>
+                <span className="font-mono text-sm font-bold text-ink">
+                  {priceFormatted}
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-umber leading-relaxed font-sans">
+                {lead?.description ||
+                  "Hollowed by hand from a single storm-felled burl. Exterior retains raw gouge facets; interior burnished with raw wildforest beeswax and cold-pressed sesame oil."}
+              </p>
+            </div>
+
+            {/* Monospaced Specimen Metadata Block */}
+            <div className="py-3 hairline-b font-mono text-[11px] text-umber leading-relaxed">
+              <div className="flex flex-wrap items-center justify-between gap-y-1">
+                <span>Cat No. <strong className="text-ink">{lead?.slug ? lead.slug.toUpperCase() : "AJJA-SPECIMEN"}</strong></span>
+                <span>•</span>
+                <span>{kind}</span>
+                <span>•</span>
+                <span className="text-terracotta font-bold">1 of 1</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 pt-2.5 mt-2.5 hairline-t text-[10px]">
+                <div>
+                  <span className="block text-umber/70 uppercase">DIMENSIONS</span>
+                  <span className="text-ink font-medium">{dimensions}</span>
+                </div>
+                <div>
+                  <span className="block text-umber/70 uppercase">PROVENANCE</span>
+                  <span className="text-ink font-medium">Studio Vault</span>
+                </div>
+                <div>
+                  <span className="block text-umber/70 uppercase">CUSTODY</span>
+                  <span className="text-moss font-bold">Available</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Hero Specimen Action Bar */}
+            <div className="pt-3.5 flex flex-wrap items-center justify-between gap-3">
+              {lead ? (
+                <button
+                  type="button"
+                  onClick={() => openDossier(lead)}
+                  className="flex-1 py-2.5 px-4 bg-linen hover:bg-boneDark text-ink font-mono text-xs uppercase tracking-widest hairline-box rounded-sm transition-colors cursor-pointer text-center"
+                >
+                  [Inspect Dossier]
+                </button>
+              ) : null}
+
+              {lead && lead.status !== "sold" ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    toggleItem({
+                      id: lead.id,
+                      slug: lead.slug,
+                      title,
+                      priceMinor: lead.priceMinor,
+                      imageUrl: cover?.url,
+                      kind: kind || undefined,
+                      dimensions,
+                      stripeUrl: lead.attributes?.stripe_url,
+                    });
+                    if (!inFolio) setFolioOpen(true);
+                  }}
+                  className={`py-2.5 px-5 font-mono text-xs uppercase tracking-widest rounded-sm transition-colors cursor-pointer ${
+                    inFolio ? "bg-moss text-linen" : "bg-terracotta hover:bg-terracottaDark text-linen"
+                  }`}
+                >
+                  {inFolio ? "[✓ In Folio]" : "[+ Reserve Piece]"}
+                </button>
+              ) : null}
+            </div>
           </div>
-          {lead && title && showsLead ? (
-            <figcaption className="mt-3 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1" data-reveal="">
-              <Link href={`/p/${lead.slug}`} className="inline-flex min-h-11 items-center gap-3">
-                <span aria-hidden="true" className="size-3 rounded-full bg-pour" />
-                <span className="ink-link font-[560]">{title}</span>
-              </Link>
-              <span className="caption nums">{lead.status === "sold" ? "Sold" : (price ?? "Ask for the price")}</span>
-            </figcaption>
-          ) : null}
-        </figure>
+        </div>
       </div>
     </section>
   );

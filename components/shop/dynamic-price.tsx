@@ -18,3 +18,4 @@ export function DynamicPrice({
   const formatted = format(priceMinor);
   return <span className={className}>{formatted ?? fallback}</span>;
 }
+

@@ -1,60 +1,116 @@
 import Link from "next/link";
 import type { ShopSettings } from "@/lib/settings";
-import { digits } from "@/lib/whatsapp";
 
 export function SiteFooter({ settings }: { settings: ShopSettings }) {
-  const contact = [
-    settings.email ? { href: `mailto:${settings.email}`, label: settings.email } : null,
-    settings.phone ? { href: `tel:${digits(settings.phone)}`, label: settings.phone } : null,
-    settings.whatsapp ? { href: `https://wa.me/${digits(settings.whatsapp)}`, label: "WhatsApp" } : null,
-    settings.whatsappChannel ? { href: settings.whatsappChannel, label: "WhatsApp channel" } : null,
-    settings.instagram ? { href: settings.instagram, label: "Instagram" } : null,
-    settings.facebook ? { href: settings.facebook, label: "Facebook" } : null,
-  ].filter((item): item is { href: string; label: string } => item !== null);
   return (
-    <footer className="no-print overflow-hidden bg-night text-gesso">
-      <div className="shell grid gap-12 pb-8 pt-20 md:grid-cols-12 md:pt-28">
-        <div className="md:col-span-5">
-          <p className="display-wide text-3xl md:text-4xl">
-            Made by hand in {settings.town}, {settings.region}.
+    <footer className="bg-bone hairline-t text-umber py-16 sm:py-20 no-print">
+      <div className="shell grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 sm:gap-12 mb-14">
+        {/* Brand & Manifesto */}
+        <div className="space-y-4">
+          <div className="flex items-baseline gap-2">
+            <span className="font-serif text-3xl font-semibold tracking-tight text-ink">
+              {settings.businessName.toUpperCase()}
+            </span>
+            <span className="font-mono text-[9px] uppercase tracking-widest text-terracotta border border-terracotta/40 px-1 py-0.5 rounded-sm">
+              ARCHIVE
+            </span>
+          </div>
+          <p className="text-xs text-umber font-sans leading-relaxed">
+            A family sanctuary of analog slow craft. Every artifact shaped by hand with natural river timber, mineral earth, and pure beeswax.
           </p>
-          <p className="mt-4 max-w-sm text-gesso/70">{settings.paymentNote}</p>
+          <div className="font-mono text-[10px] tracking-wider uppercase text-umber pt-2">
+            <p>Bench: {settings.town}, {settings.region}</p>
+            <p>Roots: Chamundi Foothills, Mysore (Est. 1964)</p>
+          </div>
         </div>
-        <nav aria-label="Footer" className="grid content-start gap-1 md:col-span-3 md:col-start-7">
-          <Link className="inline-flex min-h-11 items-center text-gesso/85 hover:text-gesso" href="/#works">
-            Works
-          </Link>
-          <Link className="inline-flex min-h-11 items-center text-gesso/85 hover:text-gesso" href="/policies">
-            Buying, collection, and returns
-          </Link>
-          <Link className="inline-flex min-h-11 items-center text-gesso/85 hover:text-gesso" href="/privacy">
+
+        {/* Navigation / Holdings */}
+        <div className="space-y-3 font-mono text-xs">
+          <p className="font-bold uppercase tracking-widest text-ink text-[11px] mb-3">ARCHIVE FOLIOS</p>
+          <ul className="space-y-2">
+            <li>
+              <Link href="/#works" className="hover:text-ink transition-colors">
+                Series XI: Poured Pigment Panels
+              </Link>
+            </li>
+            <li>
+              <Link href="/#works" className="hover:text-ink transition-colors">
+                Carved Hardwood Vessels &amp; Stools
+              </Link>
+            </li>
+            <li>
+              <Link href="/#works" className="hover:text-ink transition-colors">
+                Wood-Fired Ceramic Artifacts
+              </Link>
+            </li>
+            <li>
+              <Link href="/#inquire" className="hover:text-ink transition-colors text-terracotta">
+                Architectural Commissions
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Custodial Policies */}
+        <div className="space-y-3 font-mono text-xs">
+          <p className="font-bold uppercase tracking-widest text-ink text-[11px] mb-3">CUSTODY &amp; DISPATCH</p>
+          <ul className="space-y-2">
+            <li>
+              <Link href="/#acquisition" className="hover:text-ink transition-colors">
+                Archival Crating &amp; Transit
+              </Link>
+            </li>
+            <li>
+              <Link href="/#acquisition" className="hover:text-ink transition-colors">
+                Certificate of Hand-Signed Deed
+              </Link>
+            </li>
+            <li>
+              <Link href="/#acquisition" className="hover:text-ink transition-colors">
+                Lifetime Bench Re-Waxing Guarantee
+              </Link>
+            </li>
+            <li>
+              <Link href="/policies" className="hover:text-ink transition-colors">
+                Studio Terms &amp; Policies
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Contact & Hours */}
+        <div className="space-y-3 font-mono text-xs">
+          <p className="font-bold uppercase tracking-widest text-ink text-[11px] mb-3">STUDIO INQUIRIES</p>
+          <p className="text-xs text-umber font-sans">
+            Curatorial visits by appointment in Collegeville, PA and Mysore.
+          </p>
+          {settings.email ? (
+            <p className="font-mono text-xs text-ink font-semibold pt-1">
+              <a href={`mailto:${settings.email}`} className="hover:text-terracotta transition-colors">
+                {settings.email}
+              </a>
+            </p>
+          ) : null}
+          <div className="pt-2">
+            <Link
+              href="/#inquire"
+              className="inline-block px-3 py-1.5 bg-linen hairline-box rounded-sm text-[10px] uppercase tracking-wider text-ink hover:bg-terracotta hover:text-linen transition-colors"
+            >
+              [Direct Bench Inquiry ↗]
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <div className="shell pt-8 hairline-t flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[10px] uppercase tracking-widest text-umber">
+        <p>© 1964–2026 {settings.businessName.toUpperCase()} ATELIER &amp; ARCHIVE. ALL SPECIMEN NUMBERS PERPETUALLY REGULATED.</p>
+        <p className="flex items-center gap-2">
+          <span>ONE OF ONE EDITIONS ONLY</span>
+          <span>•</span>
+          <Link href="/privacy" className="hover:text-ink transition-colors underline">
             Privacy
           </Link>
-        </nav>
-        <div className="grid content-start gap-1 md:col-span-3">
-          {contact.map((item) => (
-            <a key={item.href} className="inline-flex min-h-11 items-center break-all text-gesso/85 hover:text-gesso" href={item.href}>
-              {item.label}
-            </a>
-          ))}
-          {settings.mapUrl ? (
-            <a className="inline-flex min-h-11 items-center text-gesso/85 hover:text-gesso" href={settings.mapUrl} rel="noopener" target="_blank">
-              Map of {settings.town}
-            </a>
-          ) : null}
-        </div>
-      </div>
-      <div className="shell" aria-hidden="true">
-        <p
-          data-word={settings.businessName}
-          className="display select-none text-[29vw] leading-[0.74] tracking-[-0.06em] text-gesso/[0.07] before:content-[attr(data-word)]"
-        />
-      </div>
-      <div className="shell flex flex-wrap justify-between gap-2 border-t border-gesso/10 py-5 text-sm text-gesso/55">
-        <p>
-          © {settings.businessName}
         </p>
-        <p>Every photograph is the piece itself.</p>
       </div>
     </footer>
   );

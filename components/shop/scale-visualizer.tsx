@@ -100,3 +100,4 @@ export function ScaleVisualizer({ image, title, sizeText = "Medium format", kind
     </div>
   );
 }
+

@@ -160,3 +160,4 @@ export function MacroLoupeImage({ image, title, ratio, priority = false, onOpenD
     </div>
   );
 }
+

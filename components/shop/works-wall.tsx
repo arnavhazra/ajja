@@ -1,32 +1,26 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import gsap from "gsap";
-import { cn } from "@/lib/cn";
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { PieceCard } from "./piece-card";
 import type { PublicProduct } from "@/lib/types";
 
 type Filter = { key: string; label: string; count: number };
 
 type Props = {
   products: PublicProduct[];
-  children: React.ReactNode[];
+  children?: React.ReactNode;
 };
 
-/**
- * The full wall. Server-rendered cards arrive as children (same order as products);
- * filtering only hides and shows them, so every card is in the HTML without JS.
- */
-export function WorksWall({ products, children }: Props) {
+export function WorksWall({ products }: Props) {
   const [active, setActive] = useState("all");
-  const listRef = useRef<HTMLUListElement>(null);
 
   const filters = useMemo<Filter[]>(() => {
     const groups = new Map<string, Filter>();
-    let available = 0;
     let sold = 0;
+
     for (const product of products) {
       if (product.status === "sold") sold += 1;
-      else available += 1;
       if (product.categorySlug && product.categoryName) {
         const current = groups.get(product.categorySlug);
         groups.set(product.categorySlug, {
@@ -36,75 +30,113 @@ export function WorksWall({ products, children }: Props) {
         });
       }
     }
-    const list: Filter[] = [{ key: "all", label: "Everything", count: products.length }];
-    if (available && sold) list.push({ key: "available", label: "Available", count: available });
-    if (groups.size > 1) list.push(...groups.values());
-    if (sold) list.push({ key: "sold", label: "Sold", count: sold });
+
+    const list: Filter[] = [{ key: "all", label: "All Works", count: products.length }];
+    if (groups.size > 0) list.push(...groups.values());
+    if (sold > 0) list.push({ key: "sold", label: "Reserved Archive", count: sold });
     return list;
   }, [products]);
 
   const matches = (product: PublicProduct) => {
     if (active === "all") return true;
-    if (active === "available") return product.status !== "sold";
     if (active === "sold") return product.status === "sold";
+    if (active === "available") return product.status !== "sold";
     return product.categorySlug === active;
   };
 
-  const isFirstRender = useRef(true);
-
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    const list = listRef.current;
-    if (!list || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const items = list.querySelectorAll("li:not([hidden])");
-    gsap.fromTo(
-      items,
-      { autoAlpha: 0, y: 20 },
-      { autoAlpha: 1, y: 0, duration: 0.6, ease: "expo.out", stagger: 0.025, overwrite: true },
-    );
-  }, [active]);
-
-  const choose = (key: string) => {
-    if (key === active) return;
-    setActive(key);
-  };
-
-  const visible = products.filter(matches).length;
+  const filtered = products.filter(matches);
 
   return (
-    <div>
-      {filters.length > 1 ? (
-        <div role="group" aria-label="Show" className="no-scrollbar -mx-[var(--gutter)] flex gap-2 overflow-x-auto px-[var(--gutter)] pb-1">
-          {filters.map((filter) => (
-            <button
-              key={filter.key}
-              type="button"
-              aria-pressed={active === filter.key}
-              onClick={() => choose(filter.key)}
-              className={cn(
-                "btn min-h-11 shrink-0 px-4 text-sm",
-                active === filter.key ? "btn-primary" : "btn-secondary",
-              )}
-            >
-              {filter.label}
-              <span className={cn("nums", active === filter.key ? "text-gesso/60" : "text-ink-soft")}>{filter.count}</span>
-            </button>
+    <section id="works" className="py-14 sm:py-20 hairline-b bg-linen">
+      <div className="shell">
+        {/* Section Header & Active Subtitle */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-6 hairline-b">
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-terracotta mb-2 font-bold">
+              FOLIO 02 // CATALOGUE RAISONNÉ &amp; CURRENT HOLDINGS
+            </p>
+            <h2 className="font-serif text-4xl sm:text-5xl text-ink font-normal tracking-tight">
+              Current Studio Manifest
+            </h2>
+          </div>
+
+          <div className="max-w-md">
+            <p className="text-xs sm:text-sm text-umber leading-relaxed font-sans">
+              Displayed in uncropped native aspect ratios—square ceramic pedestals (1:1), vertical linen canvases (3:4), and horizontal timber carvings (4:3). Click any work to inspect fine surface detail and in-room scale.
+            </p>
+          </div>
+        </div>
+
+        {/* Filter Bar Sub-Controls */}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-umber mr-2">
+              FILTER ARCHIVE:
+            </span>
+            {filters.map((filter) => {
+              const isActive = active === filter.key;
+              return (
+                <button
+                  key={filter.key}
+                  type="button"
+                  onClick={() => setActive(filter.key)}
+                  className={`px-3 py-1 rounded-sm font-mono text-[11px] uppercase cursor-pointer transition-colors ${
+                    isActive
+                      ? "bg-ink text-linen font-bold shadow-sm"
+                      : "bg-bone text-umber hover:text-ink hairline-box"
+                  }`}
+                >
+                  {isActive ? "● " : ""}{filter.label} ({filter.count})
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center gap-2 font-mono text-[10px] text-umber">
+            <span className="inline-block size-2 rounded-full bg-terracotta" />
+            <span>CLICK ANY SPECIMEN FOR IN-ROOM SCALE &amp; DOSSIER</span>
+          </div>
+        </div>
+
+        {/* Staggered 3-Column Editorial Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
+          {filtered.map((product, index) => (
+            <PieceCard
+              key={product.id}
+              product={product}
+              index={index}
+              priority={index < 3}
+            />
           ))}
         </div>
-      ) : null}
-      <p className="sr-only" aria-live="polite">
-        Showing {visible} of {products.length}
-      </p>
-      <ul ref={listRef} className="mt-10 columns-1 gap-x-[clamp(1rem,2.4vw,2.5rem)] sm:columns-2 lg:columns-3">
-        {products.map((product, index) => (
-          <li key={product.id} hidden={!matches(product)} className="mb-12 break-inside-avoid md:mb-16">
-            {children[index]}
-          </li>
-        ))}
-      </ul>
-    </div>
+
+        {/* Bespoke Architectural Commission Callout Banner */}
+        <div className="mt-14 bg-bone hairline-box rounded-sm p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-terracotta font-bold">
+                BESPOKE PATRONAGE
+              </span>
+              <span className="text-umber/40">•</span>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-umber">
+                3 COMMISSIONS PER SEASON
+              </span>
+            </div>
+            <h3 className="font-serif text-2xl sm:text-3xl text-ink mb-1">
+              Seeking specific architectural dimensions or timber species?
+            </h3>
+            <p className="text-sm text-umber font-sans leading-relaxed">
+              Ajja undertakes three custom woodworking or canvas commissions each cycle using naturally fallen rosewood, teak, and jackfruit logs seasoned in our studio yard.
+            </p>
+          </div>
+          <Link
+            href="/#inquire"
+            className="px-6 py-3.5 bg-ink text-linen font-mono text-xs uppercase tracking-widest rounded-sm hover:bg-terracotta transition-colors whitespace-nowrap shadow-sm"
+          >
+            [Inquire on Commission]
+          </Link>
+        </div>
+      </div>
+    </section>
   );
 }
