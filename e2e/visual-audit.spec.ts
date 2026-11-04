@@ -7,7 +7,7 @@ import { hashPassword } from "../lib/password";
 const SCREENSHOT_DIR = path.resolve(process.cwd(), "screenshots");
 mkdirSync(SCREENSHOT_DIR, { recursive: true });
 
-const adminEmail = "e2e-desk@example.test";
+const adminEmail = (process.env.DEV_ADMIN_EMAIL || process.env.OWNER_EMAIL || "e2e-desk@example.test").toLowerCase();
 const adminPassword = "e2e-desk-password-long";
 const title = "Visual Audit Specimen";
 const slug = "visual-audit-specimen";

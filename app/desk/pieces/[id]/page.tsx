@@ -1,8 +1,8 @@
 import { Suspense } from "react";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { DragPhoto } from "@/components/desk/drag-photo";
 import { Flash, one } from "@/components/desk/flash";
+import { FocalPicker } from "@/components/desk/focal-picker";
 import { PhotoUpload } from "@/components/desk/upload";
 import { PieceCard } from "@/components/shop/piece-card";
 import {
@@ -17,10 +17,15 @@ import {
   savePhoto,
   savePiece,
   sellPiece,
+  setAsHeroImage,
   trashPiece,
 } from "@/lib/desk-actions";
 import { loadDeskPiece, requireDesk } from "@/lib/desk-data";
 import { minorToDollars } from "@/lib/money";
+import { evaluatePieceReadiness } from "@/lib/piece-readiness";
+import { getSettings } from "@/lib/public-data";
+import { statusLabel } from "@/lib/status";
+import { cn } from "@/lib/cn";
 import { formatNewYorkInput } from "@/lib/time";
 import type { PublicProduct } from "@/lib/types";
 
@@ -48,12 +53,20 @@ async function Editor({
   await requireDesk();
   const { id } = await params;
   const query = await searchParams;
-  const loaded = await loadDeskPiece(id);
+  const [loaded, settings] = await Promise.all([loadDeskPiece(id), getSettings()]);
   if (!loaded) notFound();
   const { product, images, groups } = loaded;
   const attributes = (product.attributes ?? {}) as Record<string, string>;
   const group = groups.find((item) => item.id === product.categoryId);
   const fields = Array.isArray(group?.fieldSchema) ? (group.fieldSchema as { key?: string; label?: string }[]) : [];
+  const isHero = images.some((img) => img.url === settings.heroImage);
+  const readiness = evaluatePieceReadiness({
+    title: product.title,
+    categoryId: product.categoryId,
+    attributes,
+    priceMinor: product.priceMinor,
+    hasPhoto: images.length > 0,
+  });
   const preview: PublicProduct = {
     id: product.id,
     slug: product.slug,
@@ -92,8 +105,36 @@ async function Editor({
     <main className="desk-page">
       <Flash note={one(query.note)} undo={one(query.undo)} back={`/pieces/${product.id}`} />
       <div className="desk-lead">
-        <h1 className="text-4xl">Edit this piece</h1>
-        <p className="desk-note">Blank price stays blank. Nothing is invented for you.</p>
+        <div className="flex flex-wrap items-baseline justify-between gap-4">
+          <div>
+            <h1 className="text-4xl">Edit this piece</h1>
+            <p className="desk-note">Blank price stays blank. Nothing is invented for you.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="desk-pill" data-status={product.status}>
+              {statusLabel(product.status)}
+            </span>
+            <span
+              className={cn(
+                "desk-pill font-medium",
+                readiness.isReady ? "border-ok text-ok" : "border-sold text-sold",
+              )}
+            >
+              {readiness.label}
+            </span>
+            {isHero ? <span className="desk-pill bg-cobalt text-white">★ Homepage Hero</span> : null}
+            {product.status === "published" ? (
+              <a
+                href={`/p/${product.slug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-quiet h-8 min-h-0 px-3 text-xs"
+              >
+                View on site ↗
+              </a>
+            ) : null}
+          </div>
+        </div>
       </div>
       <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
         <form action={savePiece} className="grid gap-3">
@@ -246,80 +287,100 @@ async function Editor({
         <h2 className="text-3xl">Photos</h2>
         <PhotoUpload productId={product.id} />
         {images.map((image, index) => (
-          <article key={image.id} className="grid gap-3 border-b border-line pb-4 md:grid-cols-[12rem_1fr]">
-            <div className="photo-frame relative h-48">
-              <Image src={image.url} alt={image.alt || "Piece photo"} fill className="object-cover" sizes="200px" />
-            </div>
-            <div className="grid gap-2">
-              <div className="flex flex-wrap gap-2">
+          <article key={image.id} className="grid gap-4 border-b border-line pb-6">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="nums text-sm font-semibold">Photo #{index + 1}</span>
+                {index === 0 ? <span className="desk-pill">Cover</span> : null}
+                {settings.heroImage === image.url ? (
+                  <span className="desk-pill bg-cobalt text-white">★ Current Homepage Hero</span>
+                ) : null}
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
                 <form action={moveImage}>
                   <input type="hidden" name="imageId" value={image.id} />
                   <input type="hidden" name="direction" value="up" />
-                  <button className="btn btn-quiet" type="submit" disabled={index === 0}>
+                  <button className="btn btn-quiet h-8 min-h-0 px-3 text-xs" type="submit" disabled={index === 0}>
                     Move up
                   </button>
                 </form>
                 <form action={moveImage}>
                   <input type="hidden" name="imageId" value={image.id} />
                   <input type="hidden" name="direction" value="down" />
-                  <button className="btn btn-quiet" type="submit" disabled={index === images.length - 1}>
+                  <button className="btn btn-quiet h-8 min-h-0 px-3 text-xs" type="submit" disabled={index === images.length - 1}>
                     Move down
                   </button>
                 </form>
                 <DragPhoto id={image.id} productId={product.id} ids={images.map((item) => item.id)} />
-                <form action={coverImage}>
-                  <input type="hidden" name="imageId" value={image.id} />
-                  <button className="btn btn-quiet" type="submit">
-                    Use as cover
-                  </button>
-                </form>
+                {index !== 0 ? (
+                  <form action={coverImage}>
+                    <input type="hidden" name="imageId" value={image.id} />
+                    <button className="btn btn-quiet h-8 min-h-0 px-3 text-xs" type="submit">
+                      Use as cover
+                    </button>
+                  </form>
+                ) : null}
                 <form action={rotateImage}>
                   <input type="hidden" name="imageId" value={image.id} />
-                  <button className="btn btn-quiet" type="submit">
-                    Turn
+                  <button className="btn btn-quiet h-8 min-h-0 px-3 text-xs" type="submit">
+                    Turn 90°
+                  </button>
+                </form>
+                <form action={setAsHeroImage}>
+                  <input type="hidden" name="imageId" value={image.id} />
+                  <button className="btn btn-secondary h-8 min-h-0 px-3 text-xs" type="submit">
+                    {settings.heroImage === image.url ? "★ Refresh Hero" : "Set as Homepage Hero"}
                   </button>
                 </form>
               </div>
-              <form action={savePhoto} className="grid gap-2 md:grid-cols-3">
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-[1fr_18rem]">
+              <form action={savePhoto} className="grid gap-3">
                 <input type="hidden" name="imageId" value={image.id} />
-                <label className="grid gap-1 md:col-span-3">
-                  Photo description
-                  <input className="field" name="alt" defaultValue={image.alt} />
-                </label>
+                <FocalPicker
+                  url={image.url}
+                  initialX={Number(image.focalX)}
+                  initialY={Number(image.focalY)}
+                  alt={image.alt || product.title}
+                />
                 <label className="grid gap-1">
-                  Focus across, 0 to 1
-                  <input className="field" name="focalX" inputMode="decimal" defaultValue={String(image.focalX)} />
+                  Photo description (alt text for accessibility)
+                  <input className="field" name="alt" defaultValue={image.alt} placeholder="e.g. Overhead view of poured cobalt oil on raw Belgian linen" />
                 </label>
-                <label className="grid gap-1">
-                  Focus down, 0 to 1
-                  <input className="field" name="focalY" inputMode="decimal" defaultValue={String(image.focalY)} />
-                </label>
-                <button className="btn btn-secondary self-end" type="submit">
-                  Save photo
+                <button className="btn btn-primary self-start" type="submit">
+                  Save focal point & description
                 </button>
               </form>
-              <form action={cropImage} className="grid gap-2 md:grid-cols-4">
-                <input type="hidden" name="imageId" value={image.id} />
-                <label className="grid gap-1">
-                  Crop from left %
-                  <input className="field" name="left" inputMode="numeric" defaultValue="0" />
-                </label>
-                <label className="grid gap-1">
-                  Crop from top %
-                  <input className="field" name="top" inputMode="numeric" defaultValue="0" />
-                </label>
-                <label className="grid gap-1">
-                  Width %
-                  <input className="field" name="width" inputMode="numeric" defaultValue="100" />
-                </label>
-                <label className="grid gap-1">
-                  Height %
-                  <input className="field" name="height" inputMode="numeric" defaultValue="100" />
-                </label>
-                <button className="btn btn-quiet" type="submit">
-                  Crop
-                </button>
-              </form>
+
+              <div className="flex flex-col justify-between rounded-sm border border-line bg-plate/40 p-4">
+                <form action={cropImage} className="grid gap-3">
+                  <input type="hidden" name="imageId" value={image.id} />
+                  <p className="text-sm font-semibold">Fine crop margins</p>
+                  <p className="caption text-xs">Trim edges in percent (0–100).</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <label className="grid gap-1 text-xs">
+                      Left %
+                      <input className="field h-9 text-xs" name="left" inputMode="numeric" defaultValue="0" />
+                    </label>
+                    <label className="grid gap-1 text-xs">
+                      Top %
+                      <input className="field h-9 text-xs" name="top" inputMode="numeric" defaultValue="0" />
+                    </label>
+                    <label className="grid gap-1 text-xs">
+                      Width %
+                      <input className="field h-9 text-xs" name="width" inputMode="numeric" defaultValue="100" />
+                    </label>
+                    <label className="grid gap-1 text-xs">
+                      Height %
+                      <input className="field h-9 text-xs" name="height" inputMode="numeric" defaultValue="100" />
+                    </label>
+                  </div>
+                  <button className="btn btn-quiet mt-2" type="submit">
+                    Apply crop
+                  </button>
+                </form>
+              </div>
             </div>
           </article>
         ))}

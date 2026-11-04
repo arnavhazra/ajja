@@ -8,6 +8,7 @@ import { deskPrefix } from "@/lib/desk-path";
 import { minorToDollars } from "@/lib/money";
 import { statusLabel } from "@/lib/status";
 import { pieceTitle } from "@/lib/piece-title";
+import { evaluatePieceReadiness } from "@/lib/piece-readiness";
 import { getDb } from "@/lib/db";
 import { categories } from "@/lib/db/schema";
 import { asc } from "drizzle-orm";
@@ -108,12 +109,36 @@ async function Pieces({ searchParams }: { searchParams: Promise<Record<string, s
               <Link className="block truncate text-lg font-[600] hover:underline" href={`${prefix}/pieces/${row.id}`}>
                 {pieceTitle(row.title, groupName.get(row.categoryId ?? "") ?? null, row.attributes)}
               </Link>
-              <p className="flex flex-wrap items-center gap-2 text-sm text-ink-soft">
-                <span className="desk-pill" data-status={row.status}>{statusLabel(row.status)}</span>
-                {row.featured ? <span className="desk-pill">Featured</span> : null}
-                {row.image ? null : <span>No photo yet</span>}
-                {row.title.trim() ? null : <span>No title yet</span>}
-              </p>
+              {(() => {
+                const readiness = evaluatePieceReadiness({
+                  title: row.title,
+                  categoryId: row.categoryId,
+                  attributes: row.attributes,
+                  priceMinor: row.priceMinor,
+                  hasPhoto: Boolean(row.image),
+                });
+                return (
+                  <p className="flex flex-wrap items-center gap-2 text-sm text-ink-soft">
+                    <span className="desk-pill" data-status={row.status}>{statusLabel(row.status)}</span>
+                    {row.featured ? <span className="desk-pill">Featured</span> : null}
+                    {!readiness.isReady ? (
+                      <span className="desk-pill border-sold text-sold text-xs">
+                        Needs {readiness.missing.join(", ")}
+                      </span>
+                    ) : null}
+                    {row.status === "published" ? (
+                      <a
+                        href={`/p/${row.slug}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs text-ink-soft hover:text-ink underline"
+                      >
+                        view live ↗
+                      </a>
+                    ) : null}
+                  </p>
+                );
+              })()}
             </div>
             <div className="flex flex-wrap gap-2">
               {trash ? (

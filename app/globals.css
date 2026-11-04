@@ -71,6 +71,8 @@ html {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
   text-rendering: optimizeLegibility;
 }
 
@@ -298,9 +300,15 @@ textarea.field {
 .plate img {
   transition: transform 900ms var(--ease-out);
 }
+.piece-link {
+  transition: transform 160ms var(--ease-out);
+}
+.piece-link:active {
+  transform: scale(0.985);
+}
 @media (hover: hover) and (pointer: fine) {
   .piece-link:hover .plate img {
-    transform: scale(1.025);
+    transform: scale(1.028);
   }
 }
 

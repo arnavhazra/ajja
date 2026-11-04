@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 import { cn } from "@/lib/cn";
 import type { PublicProduct } from "@/lib/types";
@@ -50,18 +50,26 @@ export function WorksWall({ products, children }: Props) {
     return product.categorySlug === active;
   };
 
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    const list = listRef.current;
+    if (!list || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const items = list.querySelectorAll("li:not([hidden])");
+    gsap.fromTo(
+      items,
+      { autoAlpha: 0, y: 20 },
+      { autoAlpha: 1, y: 0, duration: 0.6, ease: "expo.out", stagger: 0.025, overwrite: true },
+    );
+  }, [active]);
+
   const choose = (key: string) => {
     if (key === active) return;
     setActive(key);
-    const list = listRef.current;
-    if (!list || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    requestAnimationFrame(() => {
-      gsap.fromTo(
-        list.querySelectorAll("li:not([hidden])"),
-        { autoAlpha: 0, y: 24 },
-        { autoAlpha: 1, y: 0, duration: 0.7, ease: "expo.out", stagger: 0.03, overwrite: true },
-      );
-    });
   };
 
   const visible = products.filter(matches).length;

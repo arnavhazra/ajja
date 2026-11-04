@@ -22,7 +22,14 @@ const newsreader = Newsreader({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#ecede8",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  interactiveWidget: "resizes-content",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ecede8" },
+    { media: "(prefers-color-scheme: dark)", color: "#121a22" },
+  ],
 };
 
 export async function generateMetadata(): Promise<Metadata> {

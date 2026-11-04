@@ -24,13 +24,17 @@ export function ColourIndex({ products }: { products: PublicProduct[] }) {
                 <Link
                   href={`/p/${product.slug}`}
                   tabIndex={duplicate ? -1 : undefined}
-                  className="group flex h-40 w-24 flex-col justify-end p-3 transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:w-56 focus-visible:w-56 md:h-56 md:w-28"
+                  className="group relative flex h-40 w-24 flex-col justify-end overflow-hidden p-3 transition-[width,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:w-56 focus-visible:w-56 active:scale-[0.98] md:h-56 md:w-28"
                   style={{ background: product.pigment, color: product.pigmentInk }}
                 >
-                  <span className="truncate text-sm font-[560] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-white/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                  />
+                  <span className="relative z-10 truncate text-sm font-[560] tracking-tight opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
                     {title}
                   </span>
-                  <span className="nums text-xs opacity-0 transition-opacity duration-300 group-hover:opacity-80 group-focus-visible:opacity-80">
+                  <span className="nums relative z-10 text-xs opacity-0 transition-opacity duration-300 group-hover:opacity-85 group-focus-visible:opacity-85">
                     {product.pigment.toUpperCase()}
                   </span>
                 </Link>

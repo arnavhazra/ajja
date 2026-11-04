@@ -653,6 +653,44 @@ export async function coverImage(formData: FormData) {
   return go(`/pieces/${image.productId}`, "Cover photo saved.");
 }
 
+export async function setAsHeroImage(formData: FormData) {
+  const session = await actor();
+  const imageId = String(formData.get("imageId") ?? "");
+  const productId = String(formData.get("productId") ?? "");
+  const db = getDb();
+
+  let image = null;
+  if (imageId) {
+    const [row] = await db.select().from(productImages).where(eq(productImages.id, imageId)).limit(1);
+    image = row ?? null;
+  } else if (productId) {
+    const [row] = await db
+      .select()
+      .from(productImages)
+      .where(eq(productImages.productId, productId))
+      .orderBy(asc(productImages.sortOrder))
+      .limit(1);
+    image = row ?? null;
+  }
+
+  if (!image) {
+    const target = productId ? `/pieces/${productId}` : "/pieces";
+    return go(target, "Add a photo first before choosing it as the homepage hero.");
+  }
+
+  const current = await readSettings();
+  const next: ShopSettings = {
+    ...current,
+    heroImage: image.url,
+    heroFocalX: Number(image.focalX) || 0.5,
+    heroFocalY: Number(image.focalY) || 0.5,
+  };
+  await writeSettings(next);
+  await audit(session.userId, "Set homepage hero photo", "product", image.productId);
+  refresh();
+  return go(`/pieces/${image.productId}`, "Set as the homepage hero artwork.");
+}
+
 export async function savePhoto(formData: FormData) {
   const session = await actor();
   const imageId = String(formData.get("imageId"));

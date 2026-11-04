@@ -43,9 +43,20 @@ void main() {
   vec2 d = (uv - mouse) * aspect;
   float fall = exp(-dot(d, d) * 18.0) * strength;
   vec2 swirl = vec2(-d.y, d.x) * fall * 0.22 + d * fall * -0.05;
-  vec2 st = cover(uv + flow + swirl);
-  vec3 col = texture2D(img, st).rgb;
-  col += fall * 0.06;
+  vec2 offset = flow + swirl;
+
+  /* Subtle viscous chromatic refraction and glossy wet-paint sheen */
+  vec2 stR = cover(uv + offset * 1.018);
+  vec2 stG = cover(uv + offset);
+  vec2 stB = cover(uv + offset * 0.982);
+  float r = texture2D(img, stR).r;
+  float g = texture2D(img, stG).g;
+  float b = texture2D(img, stB).b;
+  vec3 col = vec3(r, g, b);
+
+  /* Gloss specular highlight along the pointer's fluid wake */
+  float sheen = fall * 0.05 + pow(fall, 2.5) * 0.09;
+  col += sheen;
   gl_FragColor = vec4(col, 1.0);
 }
 `;
