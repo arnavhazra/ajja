@@ -4,9 +4,7 @@ import Image from "next/image";
 import type { PublicProduct } from "@/lib/types";
 
 export function AtelierSection({ detail }: { detail?: PublicProduct | null }) {
-  const photoUrl =
-    detail?.images[0]?.url ||
-    "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1200&q=85";
+  const photoUrl = detail?.images[0]?.url || "";
 
   return (
     <section id="atelier" className="py-16 sm:py-24 hairline-b bg-linen">
@@ -15,23 +13,25 @@ export function AtelierSection({ detail }: { detail?: PublicProduct | null }) {
         <div className="lg:col-span-6">
           <div className="bg-bone p-4 sm:p-6 hairline-box rounded-sm shadow-sm">
             <div className="relative aspect-[4/5] w-full overflow-hidden rounded-sm bg-ink">
+              {photoUrl ? (
               <Image
                 src={photoUrl}
-                alt="Archival photograph of Ajja Narayan Rao's hands holding carving chisels in natural window light"
+                alt="Studio photograph from the Ajja atelier"
                 fill
                 sizes="(min-width: 1024px) 45vw, 100vw"
                 className="object-cover grayscale contrast-125 brightness-95 hover:scale-105 transition-transform duration-1000"
               />
+              ) : null}
               <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-ink/10 pointer-events-none" />
               <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between text-linen/90 font-mono text-[10px] tracking-widest uppercase">
-                <span>MYSORE ATELIER EAST WING</span>
-                <span>SILVER GELATIN PRINT #71</span>
+                <span>AJJA ATELIER ARCHIVE</span>
+                <span>STUDIO RECORD</span>
               </div>
             </div>
 
             <div className="pt-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-widest text-umber">
-              <span>PHOTO ARCHIVE — CHAMUNDI FOOTHILLS BENCH</span>
-              <span>HAND-FORGED 18MM KANNA &amp; GOUGE</span>
+              <span>FROM THE BENCH</span>
+              <span>HAND WORK ONLY</span>
             </div>
           </div>
         </div>
@@ -41,7 +41,7 @@ export function AtelierSection({ detail }: { detail?: PublicProduct | null }) {
           <div className="inline-flex items-center gap-2 mb-4">
             <span className="w-6 h-[1px] bg-terracotta" />
             <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-terracotta font-bold">
-              THE MAKER&apos;S CREDO // AJJA NARAYAN RAO (B. 1946)
+              THE MAKER&apos;S CREDO // AJJA RAMANAND RAO (B. 1949)
             </span>
           </div>
 
@@ -50,7 +50,7 @@ export function AtelierSection({ detail }: { detail?: PublicProduct | null }) {
           </h2>
 
           <blockquote className="font-serif italic text-2xl sm:text-[28px] text-ink/90 leading-[1.38] pl-5 border-l-2 border-terracotta mb-8">
-            &ldquo;When I was twenty, I tried to force the timber to submit to my drawing. Now that I am eighty, I know the tree has lived three hundred monsoons longer than I have. My only task is to clear away the silence so its grain can speak.&rdquo;
+            &ldquo;When I was twenty, I tried to force the timber to submit to my drawing. Now that I am older, I know the tree has lived many more seasons than I have. My only task is to clear away the silence so its grain can speak.&rdquo;
           </blockquote>
 
           <div className="space-y-4 text-sm sm:text-base text-umber leading-[1.75] mb-10 font-sans">
@@ -77,7 +77,7 @@ export function AtelierSection({ detail }: { detail?: PublicProduct | null }) {
                 02. Perpetual Studio Custody
               </h3>
               <p className="text-xs text-umber leading-relaxed font-sans">
-                Every artifact carries a lifetime re-waxing and conservation guarantee at our bench at zero cost to the custodian.
+                Every artifact is welcome back to the bench for re-waxing and care.
               </p>
             </div>
           </div>
@@ -85,14 +85,14 @@ export function AtelierSection({ detail }: { detail?: PublicProduct | null }) {
           {/* Handwritten Digital Signature + Embossed Mysore Guild Wax Seal SVG */}
           <div className="flex flex-wrap items-center justify-between gap-6">
             <div>
-              <svg className="h-14 w-56 text-ink mb-1" viewBox="0 0 280 70" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Handwritten signature of Ajja Narayan Rao">
+              <svg className="h-14 w-56 text-ink mb-1" viewBox="0 0 280 70" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Handwritten signature of Ajja Ramanand Rao">
                 <path d="M18 52C26 36 38 14 44 14C48 14 42 46 39 54C37 58 45 42 54 36C62 31 64 46 70 46C76 46 82 33 88 33C93 33 91 58 84 63C77 67 74 56 84 48C94 40 105 32 110 34C115 36 108 58 103 62C98 66 95 53 106 45C117 37 126 35 130 41C134 47 142 36 146 39C150 42 156 45 165 42M24 36C42 34 66 30 82 28M182 48C186 35 194 18 198 18C202 18 201 38 206 44C211 50 218 30 222 24C225 35 228 45 236 44C244 43 249 34 256 35C263 36 260 45 268 44" stroke="#1E1B18" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 <circle cx="94" cy="24" r="1.5" fill="#1E1B18"/>
                 <circle cx="114" cy="23" r="1.5" fill="#1E1B18"/>
                 <path d="M16 60C75 56 175 53 265 51" stroke="#C2593F" strokeWidth="1" strokeLinecap="round" strokeDasharray="3 3"/>
               </svg>
               <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-umber">
-                AJJA NARAYAN RAO • MASTER OF THE ATELIER
+                AJJA RAMANAND RAO • MASTER OF THE ATELIER
               </p>
             </div>
 
@@ -105,8 +105,8 @@ export function AtelierSection({ detail }: { detail?: PublicProduct | null }) {
                 <text x="32" y="35" textAnchor="middle" fill="#C2593F" fontFamily="monospace" fontSize="7" fontWeight="bold">1964</text>
               </svg>
               <div className="font-mono text-[10px] leading-tight">
-                <span className="block text-ink font-bold uppercase">CRAFTSMEN GUILD</span>
-                <span className="text-umber">SEAL NO. KA-MYS-0194</span>
+                <span className="block text-ink font-bold uppercase">AJJA ATELIER</span>
+                <span className="text-umber">EST. 1964</span>
               </div>
             </div>
           </div>
@@ -115,3 +115,4 @@ export function AtelierSection({ detail }: { detail?: PublicProduct | null }) {
     </section>
   );
 }
+

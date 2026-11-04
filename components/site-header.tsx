@@ -35,7 +35,7 @@ export function SiteHeader({ name }: { name: string }) {
           <div className="flex items-center gap-2 truncate">
             <span className="inline-block size-1.5 rounded-full bg-terracotta shrink-0" />
             <span className="truncate">
-              ATELIER &amp; ARCHIVE • COLLEGEVILLE &amp; MYSORE • EST. 1964 // EDITION 01 / CATALOGUE RAISONNÉ
+              ATELIER &amp; ARCHIVE • COLLEGEVILLE • EST. 1964 // EDITION 01 / CATALOGUE RAISONNÉ
             </span>
           </div>
 
@@ -77,10 +77,10 @@ export function SiteHeader({ name }: { name: string }) {
             <div className="hidden xl:block">
               <p className="font-mono text-[10px] uppercase tracking-widest text-ink flex items-center gap-1.5">
                 <span className="size-1.5 rounded-full bg-moss" />
-                Studio Open • Collegeville &amp; Mysore
+                The Studio • Collegeville, PA
               </p>
               <p className="font-mono text-[9px] text-umber tracking-wider">
-                Original Woodwork, Ceramics &amp; Poured Pigments
+                Original Woodwork &amp; Poured Pigments
               </p>
             </div>
           </div>
@@ -100,7 +100,7 @@ export function SiteHeader({ name }: { name: string }) {
               The Atelier
             </Link>
             <Link
-              href="/#method"
+              href="/#buying"
               className="px-3 py-1.5 rounded-sm text-[11px] font-mono tracking-wider uppercase text-umber hover:text-ink hover:bg-boneDark transition-colors"
             >
               Method &amp; Provenance
@@ -192,7 +192,7 @@ export function SiteHeader({ name }: { name: string }) {
               The Atelier &amp; Maker Credo
             </Link>
             <Link
-              href="/#method"
+              href="/#buying"
               onClick={() => setMobileMenuOpen(false)}
               className="py-3 border-b border-line hover:text-terracotta transition-colors"
             >

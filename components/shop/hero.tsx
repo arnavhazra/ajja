@@ -24,8 +24,8 @@ export function Hero({ settings, lead, count }: Props) {
   const focalY = settings.heroImage ? settings.heroFocalY : (cover?.focalY ?? 0.5);
   const title = lead ? pieceTitle(lead.title, lead.categorySlug, lead.attributes) : "Hand-Gouged Hardwood & Poured Pigment";
   const kind = lead ? pieceKind(lead.categoryName, lead.attributes) : "Original Studio Specimen";
-  const dimensions = lead?.attributes?.dimensions || lead?.attributes?.size || "42 × 28 × 18 cm";
-  const priceFormatted = lead?.priceMinor ? format(lead.priceMinor) : "$1,250";
+  const dimensions = lead?.attributes?.dimensions || lead?.attributes?.size || "Dimensions on request";
+  const priceFormatted = lead?.priceMinor ? format(lead.priceMinor) : "Ask for price";
   const inFolio = lead ? hasItem(lead.id) : false;
 
   return (
@@ -48,7 +48,7 @@ export function Hero({ settings, lead, count }: Props) {
 
           {/* 2-Sentence Slow-Craft Manifesto */}
           <p className="text-base sm:text-lg text-umber font-normal leading-[1.75] max-w-2xl mb-8 font-sans">
-            Every vessel, canvas, and carved piece in the studio begins as storm-felled hardwood, coarse clay, or hand-ground mineral pigment aged for seasons before meeting the gouge or the pour. We make strictly one of each; when a work finds its custodian, its archive number is permanently retired into the studio ledger.
+            Every canvas and carved piece in the studio begins as storm-felled hardwood or hand-ground mineral pigment before meeting the gouge or the pour. We make strictly one of each; when a work finds its custodian, its archive number is permanently retired into the studio ledger.
           </p>
 
           {/* Primary Action Buttons */}
@@ -57,7 +57,7 @@ export function Hero({ settings, lead, count }: Props) {
               href="/#works"
               className="px-7 py-4 bg-ink text-linen font-mono text-xs uppercase tracking-[0.16em] rounded-sm hover:bg-terracotta transition-colors shadow-sm"
             >
-              Explore Available Archive ({count || 39})
+              Explore Available Archive ({count})
             </Link>
 
             {lead ? (
@@ -79,15 +79,15 @@ export function Hero({ settings, lead, count }: Props) {
               </span>
               <span className="font-mono text-[10px] uppercase tracking-widest text-moss font-bold flex items-center gap-1.5">
                 <span className="size-1.5 rounded-full bg-moss" />
-                MYSORE &amp; COLLEGEVILLE GUILD AUTHENTICATED
+                ONE-OF-ONE STUDIO ORIGINALS
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div>
                 <p className="font-mono text-[10px] uppercase tracking-widest text-umber mb-1">MASTER ARTISAN</p>
-                <p className="font-serif text-xl font-semibold text-ink">Ajja Narayan Rao</p>
-                <p className="font-mono text-[11px] text-umber">80 Yrs • 62 Years at the Bench</p>
+                <p className="font-serif text-xl font-semibold text-ink">Ajja Ramanand Rao</p>
+                <p className="font-mono text-[11px] text-umber">B. 1949 • Master Craftsman</p>
               </div>
               <div className="sm:hairline-l sm:pl-5">
                 <p className="font-mono text-[10px] uppercase tracking-widest text-umber mb-1">EDITION POLICY</p>
@@ -95,9 +95,9 @@ export function Hero({ settings, lead, count }: Props) {
                 <p className="font-mono text-[11px] text-umber">Zero molds, CNC, or synthetics</p>
               </div>
               <div className="sm:hairline-l sm:pl-5">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-umber mb-1">CUSTODIAL DEED</p>
-                <p className="font-serif text-xl font-semibold text-ink">Hand-Signed Linen</p>
-                <p className="font-mono text-[11px] text-umber">Wax seal &amp; thumbprint registry</p>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-umber mb-1">ARCHIVE LEDGER</p>
+                <p className="font-serif text-xl font-semibold text-ink">Serial-Recorded</p>
+                <p className="font-mono text-[11px] text-umber">Retired on acquisition</p>
               </div>
             </div>
           </div>
@@ -157,7 +157,7 @@ export function Hero({ settings, lead, count }: Props) {
               </div>
               <p className="text-xs sm:text-sm text-umber leading-relaxed font-sans">
                 {lead?.description ||
-                  "Hollowed by hand from a single storm-felled burl. Exterior retains raw gouge facets; interior burnished with raw wildforest beeswax and cold-pressed sesame oil."}
+                  "A one-of-one studio piece. Ask the bench about its making and materials."}
               </p>
             </div>
 
@@ -177,7 +177,7 @@ export function Hero({ settings, lead, count }: Props) {
                 </div>
                 <div>
                   <span className="block text-umber/70 uppercase">PROVENANCE</span>
-                  <span className="text-ink font-medium">Studio Vault</span>
+                  <span className="text-ink font-medium">Collegeville Studio</span>
                 </div>
                 <div>
                   <span className="block text-umber/70 uppercase">CUSTODY</span>

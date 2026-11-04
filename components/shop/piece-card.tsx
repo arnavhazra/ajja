@@ -21,7 +21,6 @@ type Props = {
 
 export function PieceCard({
   product,
-  index = 0,
   priority = false,
   sizes = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw",
   className,
@@ -33,14 +32,14 @@ export function PieceCard({
   const cover = product.images[0];
   const title = pieceTitle(product.title, product.categorySlug, product.attributes);
   const kind = pieceKind(product.categoryName, product.attributes) || "Studio Artifact";
-  const dimensions = product.attributes.dimensions || product.attributes.size || "Original proportions";
+  const dimensions = product.attributes.dimensions || product.attributes.size || "Dimensions on request";
   const sold = product.status === "sold";
   const inFolio = hasItem(product.id);
 
   const dynamicPrice = format(product.priceMinor);
   const price = sold ? "Reserved" : (dynamicPrice ?? (formatMoney(product.priceMinor, product.currency) ?? "Ask for price"));
   const ratio = cover?.width && cover?.height ? `${cover.width} / ${cover.height}` : "4 / 5";
-  const specimenCode = `AJJA-2024-W${String(index + 1).padStart(2, "0")}`;
+  const specimenCode = product.slug.toUpperCase();
 
   const handleFolioClick = (e: MouseEvent) => {
     e.preventDefault();

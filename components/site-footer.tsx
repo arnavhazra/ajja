@@ -40,7 +40,7 @@ export function SiteFooter({ settings }: { settings: ShopSettings }) {
             </li>
             <li>
               <Link href="/#works" className="hover:text-ink transition-colors">
-                Wood-Fired Ceramic Artifacts
+                Poured Pigment Canvases
               </Link>
             </li>
             <li>
@@ -62,12 +62,12 @@ export function SiteFooter({ settings }: { settings: ShopSettings }) {
             </li>
             <li>
               <Link href="/#acquisition" className="hover:text-ink transition-colors">
-                Certificate of Hand-Signed Deed
+                Certificate of Studio Record
               </Link>
             </li>
             <li>
               <Link href="/#acquisition" className="hover:text-ink transition-colors">
-                Lifetime Bench Re-Waxing Guarantee
+                Bench Care &amp; Re-Waxing
               </Link>
             </li>
             <li>
@@ -82,7 +82,7 @@ export function SiteFooter({ settings }: { settings: ShopSettings }) {
         <div className="space-y-3 font-mono text-xs">
           <p className="font-bold uppercase tracking-widest text-ink text-[11px] mb-3">STUDIO INQUIRIES</p>
           <p className="text-xs text-umber font-sans">
-            Curatorial visits by appointment in Collegeville, PA and Mysore.
+            Studio visits by appointment in Collegeville, PA.
           </p>
           {settings.email ? (
             <p className="font-mono text-xs text-ink font-semibold pt-1">

@@ -5,27 +5,27 @@ import { useState } from "react";
 const FAQ_ITEMS = [
   {
     num: "01",
-    title: "Museum-Grade Crating & White-Glove Logistics",
+    title: "Careful Crating & Delivery",
     content:
-      "All works depart the studio encased in bespoke archival timber crates with acid-free glassine facing and 50mm high-density polyethylene impact damping. Shipments are fully insured with climate-monitored courier handling to private residences and gallery collections worldwide.",
+      "Every work leaves the studio wrapped and crated by hand. Packing, courier, and timing are agreed with you directly before anything leaves the bench.",
   },
   {
     num: "02",
-    title: "Physical Deed of Transfer & Ledger Registry",
+    title: "Studio Record & Certificate",
     content:
-      "Every acquisition includes a signed, wax-sealed Certificate of Custody on handmade cotton-rag paper. The work's unique serial number is recorded in the studio archive ledger, granting lifetime bench re-waxing and conservation rights.",
+      "Every acquisition includes a signed certificate and the work's serial number recorded in the studio ledger. Your piece is always welcome back to the bench for re-waxing and care.",
   },
   {
     num: "03",
     title: "Private Studio Viewings & Bench Visits",
     content:
-      "Curators and patrons are welcome to visit our Collegeville, Pennsylvania studio or our Chamundi foothills workshop by appointment to examine works in daylight or discuss custom dimensions.",
+      "Collectors are welcome to visit the Collegeville, Pennsylvania studio by appointment to see works in daylight or discuss custom dimensions.",
   },
   {
     num: "04",
     title: "Direct Acquisition & Retainer Terms",
     content:
-      "Pieces can be acquired directly via studio invoice, wire transfer, or secure Stripe checkout. Bespoke architectural commissions require a 50% bench retainer with photographic progress dispatches sent throughout the carving and curing cycles.",
+      "Pieces are acquired by studio invoice or a secure checkout link. Bespoke commissions begin with an agreed bench retainer, with progress photographs sent as the work takes shape.",
   },
 ];
 
@@ -81,3 +81,4 @@ export function AcquisitionFaq() {
     </section>
   );
 }
+

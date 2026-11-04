@@ -192,14 +192,20 @@ function FolioDrawer() {
     const prefilled = `Hello Ajja,\n\nI would like to inquire about acquiring the following shortlisted works:\n\n${pieceList}\n\nPlease let me know about studio availability, provenance, and framing/shipping arrangements.`;
 
     // Try finding the textarea on current page or navigate to /#visit
+    try {
+      sessionStorage.setItem("ajja:enquiry-prefill", prefilled);
+    } catch {}
     setTimeout(() => {
       const textarea = document.querySelector("textarea[name='message']") as HTMLTextAreaElement | null;
       if (textarea) {
         textarea.value = prefilled;
         textarea.scrollIntoView({ behavior: "smooth", block: "center" });
         textarea.focus();
+        try {
+          sessionStorage.removeItem("ajja:enquiry-prefill");
+        } catch {}
       } else {
-        router.push(`/#visit?msg=${encodeURIComponent(prefilled)}`);
+        router.push("/#visit");
       }
     }, 100);
   };

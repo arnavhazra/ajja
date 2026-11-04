@@ -192,7 +192,7 @@ async function ProductBody({ params }: { params: Promise<{ slug: string }> }) {
           <h2 id="related-title" className="display-wide text-3xl md:text-4xl">
             Also in the studio
           </h2>
-          <ul className="mt-10 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="mt-10 grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
             {related.map((item) => (
               <li key={item.id}>
                 <PieceCard product={item} sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" />

@@ -370,6 +370,19 @@ img {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* ---------- Colour Index Marquee ---------- */
+.swatch-run {
+  display: flex;
+  width: max-content;
+  animation: swatch-run 60s linear infinite;
+}
+.swatch-run:hover {
+  animation-play-state: paused;
+}
+@keyframes swatch-run {
+  to { transform: translateX(-50%); }
+}
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -380,6 +393,9 @@ img {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  .swatch-run {
+    animation: none;
   }
 }
 

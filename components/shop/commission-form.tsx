@@ -117,7 +117,7 @@ export function CommissionForm({
 
           <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <p className="font-mono text-[10px] text-umber uppercase tracking-wider">
-              ● All transactions verified via custodial deed. Zero spam.
+              ● Nothing is paid on this site — your note goes straight to the bench.
             </p>
             <button
               type="submit"
@@ -132,3 +132,4 @@ export function CommissionForm({
     </section>
   );
 }
+

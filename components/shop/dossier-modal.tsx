@@ -174,7 +174,7 @@ export function DossierProvider({ children }: { children: React.ReactNode }) {
               <div className="md:col-span-5 p-6 bg-bone flex flex-col justify-between">
                 <div>
                   <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-linen font-mono text-[10px] uppercase text-terracotta tracking-wider mb-2 hairline-box">
-                    <span>●</span> {activeProduct.status === "sold" ? "Archived Custody" : "In Studio Vault"}
+                    <span>●</span> {activeProduct.status === "sold" ? "Archived Custody" : "In the Studio"}
                   </div>
                   <h2 className="font-serif text-3xl font-medium text-ink leading-tight mb-2">{title}</h2>
                   <p className="font-mono text-sm font-bold text-ink mb-4">{priceFormatted}</p>
@@ -193,11 +193,11 @@ export function DossierProvider({ children }: { children: React.ReactNode }) {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-umber uppercase tracking-wider text-[10px]">Provenance</span>
-                      <span className="text-ink font-medium">Mysore &amp; Collegeville Bench</span>
+                      <span className="text-ink font-medium">Collegeville Studio</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-umber uppercase tracking-wider text-[10px]">Authenticity</span>
-                      <span className="text-moss font-semibold">Hand-Signed Linen Deed</span>
+                      <span className="text-moss font-semibold">Serial-Recorded Studio Ledger</span>
                     </div>
                   </div>
                 </div>

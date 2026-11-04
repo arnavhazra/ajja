@@ -1,12 +1,24 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { EventBeacon } from "./event-beacon";
 import { cn } from "@/lib/cn";
 import { sendEnquiry } from "@/lib/public-actions";
 
 export function EnquiryForm({ productId, productName }: { productId?: string; productName?: string }) {
   const [state, action, pending] = useActionState(sendEnquiry, { ok: false, message: "" });
+
+  useEffect(() => {
+    try {
+      const prefill = sessionStorage.getItem("ajja:enquiry-prefill");
+      if (prefill) {
+        sessionStorage.removeItem("ajja:enquiry-prefill");
+        const textarea = document.querySelector<HTMLTextAreaElement>("form#message textarea[name='message']");
+        if (textarea && !textarea.value) textarea.value = prefill;
+      }
+    } catch {}
+  }, []);
+
   if (state.ok) {
     return (
       <div role="status" className="grid min-h-80 content-center gap-4 rounded-[2px] bg-gesso p-8 md:p-10">

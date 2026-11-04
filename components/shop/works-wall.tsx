@@ -62,7 +62,7 @@ export function WorksWall({ products }: Props) {
 
           <div className="max-w-md">
             <p className="text-xs sm:text-sm text-umber leading-relaxed font-sans">
-              Displayed in uncropped native aspect ratios—square ceramic pedestals (1:1), vertical linen canvases (3:4), and horizontal timber carvings (4:3). Click any work to inspect fine surface detail and in-room scale.
+              Displayed in uncropped native aspect ratios—square (1:1), vertical (3:4), and horizontal (4:3). Click any work to inspect fine surface detail and in-room scale.
             </p>
           </div>
         </div>
