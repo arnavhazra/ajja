@@ -1,11 +1,27 @@
-export function pieceTitle(title?: string | null, categoryOrHint?: string | null, attributes?: Record<string, string>) {
+export function hasRealTitle(title?: string | null) {
   const trimmed = title?.trim();
-  if (trimmed && !/^title not written yet$/i.test(trimmed) && !/^studio study/i.test(trimmed)) return trimmed;
+  return Boolean(trimmed && !/^title not written yet$/i.test(trimmed) && !/^studio study/i.test(trimmed));
+}
+
+function shortRef(ref?: string | null) {
+  const clean = (ref ?? "").replace(/^piece-/i, "").replace(/[^a-z0-9]/gi, "");
+  return clean.slice(0, 6).toLowerCase() || "000000";
+}
+
+export function pieceTitle(
+  title?: string | null,
+  categoryOrHint?: string | null,
+  attributes?: Record<string, string>,
+  ref?: string | null,
+) {
+  const trimmed = title?.trim();
+  if (trimmed && hasRealTitle(trimmed)) return trimmed;
   const medium = attributes?.medium?.toLowerCase() ?? "";
   const hint = (categoryOrHint ?? "").toLowerCase();
-  if (hint.includes("paint") || medium.includes("paint") || medium.includes("canvas")) return "Poured painting";
-  if (hint.includes("wood") || medium.includes("wood") || medium.includes("pine")) return "Handmade woodwork";
-  return "Studio piece";
+  let kind = "Studio piece";
+  if (hint.includes("paint") || medium.includes("paint") || medium.includes("canvas")) kind = "Poured painting";
+  else if (hint.includes("wood") || medium.includes("wood") || medium.includes("pine")) kind = "Handmade woodwork";
+  return `${kind} · No. ${shortRef(ref)}`;
 }
 
 export function pieceKind(categoryName: string | null, attributes?: Record<string, string>) {

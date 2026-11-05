@@ -1,10 +1,11 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
+import React, { createContext, useContext, useEffect, useRef, useSyncExternalStore, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCurrency } from "./currency-provider";
+import { folioTotals } from "@/lib/folio";
 
 export interface FolioItem {
   id: string;
@@ -14,7 +15,7 @@ export interface FolioItem {
   imageUrl?: string;
   kind?: string;
   dimensions?: string;
-  stripeUrl?: string;
+  status?: string;
 }
 
 interface FolioContextValue {
@@ -135,48 +136,99 @@ export function useFolio() {
   return useContext(FolioContext);
 }
 
+interface SavedResponseItem {
+  slug: string;
+  title: string;
+  priceMinor: number | null;
+  status: string;
+  image?: { url: string } | null;
+}
+
+const FOCUSABLE = "a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex='-1'])";
+
 function FolioDrawer() {
   const { items, isOpen, setIsOpen, removeItem, clear } = useFolio();
   const { format } = useCurrency();
   const router = useRouter();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
 
+  // Re-read live titles and prices whenever the drawer opens.
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) setIsOpen(false);
+    if (!isOpen || items.length === 0) return;
+    const slugs = items.map((item) => item.slug).join(",");
+    let cancelled = false;
+    fetch(`/api/saved?slugs=${encodeURIComponent(slugs)}`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: { items?: SavedResponseItem[] } | null) => {
+        if (cancelled || !data?.items?.length) return;
+        const fresh = new Map(data.items.map((item) => [item.slug, item]));
+        const next = getFolioSnapshot()
+          .filter((item) => fresh.has(item.slug))
+          .map((item) => {
+            const live = fresh.get(item.slug);
+            if (!live) return item;
+            return {
+              ...item,
+              title: live.title,
+              priceMinor: live.priceMinor,
+              status: live.status,
+              imageUrl: live.image?.url ?? item.imageUrl,
+            };
+          });
+        emitChange(next);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
+  // Focus trap + Escape + focus restore.
+  useEffect(() => {
+    if (!isOpen) return;
+    restoreFocusRef.current = document.activeElement as HTMLElement | null;
+    const panel = panelRef.current;
+    const focusables = () => Array.from(panel?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? []);
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const list = focusables();
+      if (!list.length) return;
+      const first = list[0];
+      const last = list[list.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (event.shiftKey && (!active || active === first || !panel?.contains(active))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (!active || active === last || !panel?.contains(active))) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    const first = focusables()[0];
+    first?.focus();
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      restoreFocusRef.current?.focus?.();
+      restoreFocusRef.current = null;
+    };
   }, [isOpen, setIsOpen]);
 
   if (!isOpen) return null;
 
-  const totalMinor = items.reduce((sum, item) => sum + (item.priceMinor ?? 0), 0);
+  const { pricedCount, totalMinor } = folioTotals(items);
   const formattedTotal = format(totalMinor);
 
   const handleInquireAll = () => {
     setIsOpen(false);
-    const pieceList = items
-      .map((it) => `• ${it.title}${it.priceMinor ? ` (${format(it.priceMinor)})` : ""} — /p/${it.slug}`)
-      .join("\n");
-    const prefilled = `Hello,\n\nI would like to ask about these pieces:\n\n${pieceList}\n\nPlease let me know if they are still available, and about delivery or collection.`;
-
-    // Find the message field on this page, or go to the enquiry form on the home page
-    try {
-      sessionStorage.setItem("ajja:enquiry-prefill", prefilled);
-    } catch {}
-    setTimeout(() => {
-      const textarea = document.querySelector("textarea[name='message']") as HTMLTextAreaElement | null;
-      if (textarea) {
-        textarea.value = prefilled;
-        textarea.scrollIntoView({ behavior: "smooth", block: "center" });
-        textarea.focus();
-        try {
-          sessionStorage.removeItem("ajja:enquiry-prefill");
-        } catch {}
-      } else {
-        router.push("/#inquire");
-      }
-    }, 100);
+    const slugs = items.map((item) => item.slug).join(",");
+    router.push(`/?pieces=${encodeURIComponent(slugs)}#inquire`);
   };
 
   return (
@@ -189,7 +241,10 @@ function FolioDrawer() {
       />
 
       {/* Drawer */}
-      <div className="relative flex h-full w-full max-w-md flex-col bg-gesso shadow-2xl safe-bottom border-l border-line">
+      <div
+        ref={panelRef}
+        className="relative flex h-full w-full max-w-md flex-col bg-gesso shadow-2xl safe-bottom border-l border-line"
+      >
         <div className="flex items-center justify-between border-b border-line px-6 py-4">
           <div>
             <h2 className="display-wide text-xl">Saved pieces</h2>
@@ -200,7 +255,7 @@ function FolioDrawer() {
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="btn btn-quiet min-h-9 px-3 text-sm cursor-pointer"
+            className="btn btn-quiet min-h-11 px-3 text-sm cursor-pointer"
           >
             Close
           </button>
@@ -240,27 +295,15 @@ function FolioDrawer() {
                     </div>
                     <div className="flex items-center justify-between pt-1">
                       <span className="nums text-xs font-semibold text-ink">
-                        {item.priceMinor ? format(item.priceMinor) : "Ask for price"}
+                        {item.status === "sold" ? "Sold" : item.priceMinor ? format(item.priceMinor) : "Ask for price"}
                       </span>
-                      <div className="flex items-center gap-2">
-                        {item.stripeUrl ? (
-                          <a
-                            href={item.stripeUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[11px] font-mono text-cobalt hover:underline"
-                          >
-                            Pay link ↗
-                          </a>
-                        ) : null}
-                        <button
-                          type="button"
-                          onClick={() => removeItem(item.id)}
-                          className="text-xs text-sold/80 hover:text-sold hover:underline cursor-pointer"
-                        >
-                          Remove
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeItem(item.id)}
+                        className="inline-flex min-h-11 items-center px-2 text-xs text-sold/80 hover:text-sold hover:underline cursor-pointer"
+                      >
+                        Remove
+                      </button>
                     </div>
                   </div>
                 </li>
@@ -271,10 +314,12 @@ function FolioDrawer() {
 
         {items.length > 0 ? (
           <div className="border-t border-line bg-plate/40 p-6 space-y-4">
-            <div className="flex items-baseline justify-between">
-              <span className="caption text-sm">Total of priced pieces</span>
-              <span className="nums text-xl font-bold">{formattedTotal ?? "—"}</span>
-            </div>
+            {pricedCount > 0 ? (
+              <div className="flex items-baseline justify-between">
+                <span className="caption text-sm">Total of priced pieces</span>
+                <span className="nums text-xl font-bold">{formattedTotal ?? "—"}</span>
+              </div>
+            ) : null}
             <div className="space-y-2">
               <button
                 type="button"
@@ -286,7 +331,7 @@ function FolioDrawer() {
               <button
                 type="button"
                 onClick={clear}
-                className="w-full text-center text-xs text-ink-soft hover:text-ink cursor-pointer py-1"
+                className="flex min-h-11 w-full items-center justify-center text-center text-xs text-ink-soft hover:text-ink cursor-pointer py-1"
               >
                 Clear saved pieces
               </button>

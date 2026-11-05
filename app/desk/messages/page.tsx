@@ -1,13 +1,14 @@
 import { Suspense } from "react";
+import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import { Flash, one } from "@/components/desk/flash";
-import { saveRetention, setEnquiryStatus } from "@/lib/desk-actions";
+import { markEnquiries, saveRetention, setEnquiryStatus } from "@/lib/desk-actions";
 import { loadMessages, requireDesk } from "@/lib/desk-data";
 import { getSettings } from "@/lib/public-data";
 import { digits, whatsAppHref } from "@/lib/whatsapp";
 
 export default function MessagesPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   return (
-    <Suspense fallback={<p className="p-4">Loading…</p>}>
+    <Suspense fallback={<DeskRowsSkeleton />}>
       <Messages searchParams={searchParams} />
     </Suspense>
   );
@@ -17,7 +18,8 @@ async function Messages({ searchParams }: { searchParams: Promise<Record<string,
   await requireDesk();
   const params = await searchParams;
   const status = one(params.status);
-  const [rows, settings] = await Promise.all([loadMessages(status), getSettings()]);
+  const q = one(params.q);
+  const [rows, settings] = await Promise.all([loadMessages(status, q), getSettings()]);
   return (
     <main className="desk-page">
       <Flash note={one(params.note)} undo="" back="/messages" />
@@ -42,6 +44,29 @@ async function Messages({ searchParams }: { searchParams: Promise<Record<string,
           Export
         </a>
       </nav>
+      <form className="flex flex-wrap items-end gap-2" method="get">
+        <label className="grid gap-1">
+          <span className="field-label">Search</span>
+          <input className="field" name="q" defaultValue={q} placeholder="Name, message, or contact" />
+        </label>
+        {status ? <input type="hidden" name="status" value={status} /> : null}
+        <button className="btn btn-primary self-end" type="submit">
+          Search
+        </button>
+      </form>
+      <form id="bulk-mark" action={markEnquiries} className="flex flex-wrap items-center gap-2">
+        <label className="grid gap-1">
+          <span className="field-label">Mark ticked messages</span>
+          <select className="field h-9" name="status" defaultValue="replied">
+            <option value="replied">Replied</option>
+            <option value="closed">Closed</option>
+            <option value="new">New</option>
+          </select>
+        </label>
+        <button className="btn btn-secondary self-end" type="submit">
+          Apply
+        </button>
+      </form>
       <div className="desk-stack">
         {rows.length === 0 ? <p>No messages in this list.</p> : null}
         {rows.map((row) => {
@@ -49,7 +74,13 @@ async function Messages({ searchParams }: { searchParams: Promise<Record<string,
           const href = phone.length >= 10 ? whatsAppHref(phone, `Hello ${row.name}, this is ${settings.businessName}.`) : "";
           return (
             <article key={row.id} className="grid gap-2 border-b border-line pb-4">
-              <h2 className="text-2xl">{row.name}</h2>
+              <h2 className="flex items-center gap-2 text-2xl">
+                <input type="checkbox" name="id" value={row.id} form="bulk-mark" aria-label={`Tick ${row.name}`} />
+                {row.name}
+                {row.stale ? (
+                  <span className="desk-pill ml-2" data-tone="warn">waiting 3+ days</span>
+                ) : null}
+              </h2>
               <p>{row.contact}</p>
               <p>{row.message}</p>
               {row.giftNote ? <p>Gift note: {row.giftNote}</p> : null}

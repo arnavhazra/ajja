@@ -15,6 +15,9 @@ import { statusLabel } from "@/lib/status";
 import { cn } from "@/lib/cn";
 import type { PublicProduct } from "@/lib/types";
 
+// after()-scheduled photo tidy can outlive the response; give it room.
+export const maxDuration = 120;
+
 export default function EditorPage({
   params,
   searchParams,
@@ -130,7 +133,7 @@ async function Editor({
                 href={`/p/${product.slug}`}
                 target="_blank"
                 rel="noreferrer"
-                className="btn btn-quiet h-8 min-h-0 px-3 text-xs"
+                className="btn btn-quiet min-h-11 px-3 text-xs"
               >
                 View on site ↗
               </a>

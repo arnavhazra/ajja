@@ -8,30 +8,15 @@ export async function DeskNav({ email }: { email: string }) {
   const [prefix, counts] = await Promise.all([deskPrefix(), loadNavCounts()]);
   const sections: DeskNavSection[] = [
     {
-      title: "Work",
+      title: "Desk",
       links: [
         ["", "Today"],
         ["/pieces", "Pieces"],
-        ["/add", "Add a piece"],
-        ["/review", "Review", counts.review],
-      ],
-    },
-    {
-      title: "Shop",
-      links: [
-        ["/home", "Home page"],
-        ["/groups", "Groups"],
         ["/messages", "Messages", counts.waiting],
-        ["/poster", "Poster"],
-      ],
-    },
-    {
-      title: "Studio",
-      links: [
+        ["/groups", "Groups"],
         ["/insights", "Numbers"],
         ["/files", "Files"],
-        ["/history", "History"],
-        ["/account", "Account"],
+        ["/settings", "Settings"],
       ],
     },
   ];

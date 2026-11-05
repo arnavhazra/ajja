@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { cn } from "@/lib/cn";
-import { bulkApply, moveFeatured, restorePiece, saveInlineField, undoInline } from "@/lib/desk-actions";
+import { bulkApply, moveFeatured, restorePiece, saveInlineField, toggleFeatured, undoInline } from "@/lib/desk-actions";
 
 export type DeskPieceRow = {
   id: string;
@@ -266,28 +266,43 @@ export function PiecesTable({
               {trash ? (
                 <form action={restorePiece}>
                   <input type="hidden" name="id" value={row.id} />
-                  <button className="btn btn-secondary h-9 min-h-0 px-3 text-xs" type="submit">
+                  <button className="btn btn-secondary min-h-11 px-3 text-xs" type="submit">
                     Restore
                   </button>
                 </form>
-              ) : row.featured ? (
+              ) : (
                 <span className="flex gap-1">
-                  <form action={moveFeatured}>
+                  <form action={toggleFeatured}>
                     <input type="hidden" name="id" value={row.id} />
-                    <input type="hidden" name="direction" value="up" />
-                    <button className="btn btn-quiet h-9 min-h-0 px-2 text-xs" type="submit" aria-label="Move featured up">
-                      ↑
+                    <button
+                      className={cn("btn btn-quiet min-h-11 px-2 text-xs", row.featured && "text-ok")}
+                      type="submit"
+                      aria-label={row.featured ? `Unfeature ${row.displayTitle}` : `Feature ${row.displayTitle}`}
+                      aria-pressed={row.featured}
+                    >
+                      ★
                     </button>
                   </form>
-                  <form action={moveFeatured}>
-                    <input type="hidden" name="id" value={row.id} />
-                    <input type="hidden" name="direction" value="down" />
-                    <button className="btn btn-quiet h-9 min-h-0 px-2 text-xs" type="submit" aria-label="Move featured down">
-                      ↓
-                    </button>
-                  </form>
+                  {row.featured ? (
+                    <>
+                      <form action={moveFeatured}>
+                        <input type="hidden" name="id" value={row.id} />
+                        <input type="hidden" name="direction" value="up" />
+                        <button className="btn btn-quiet min-h-11 px-2 text-xs" type="submit" aria-label="Move featured up">
+                          ↑
+                        </button>
+                      </form>
+                      <form action={moveFeatured}>
+                        <input type="hidden" name="id" value={row.id} />
+                        <input type="hidden" name="direction" value="down" />
+                        <button className="btn btn-quiet min-h-11 px-2 text-xs" type="submit" aria-label="Move featured down">
+                          ↓
+                        </button>
+                      </form>
+                    </>
+                  ) : null}
                 </span>
-              ) : null}
+              )}
             </div>
           </div>
         ))}
@@ -344,10 +359,10 @@ export function PiecesTable({
               </select>
             </label>
           ) : null}
-          <button className="btn btn-primary h-9 min-h-0 px-4" type="submit" disabled={pending}>
+          <button className="btn btn-primary min-h-11 px-4" type="submit" disabled={pending}>
             Apply
           </button>
-          <button className="btn btn-quiet h-9 min-h-0 px-3" type="button" onClick={() => setSelected(new Set())}>
+          <button className="btn btn-quiet min-h-11 px-3" type="button" onClick={() => setSelected(new Set())}>
             Clear
           </button>
         </form>
@@ -362,7 +377,7 @@ export function PiecesTable({
         >
           <span>{toast.message}</span>
           {toast.undoId ? (
-            <button className="btn btn-secondary h-8 min-h-0 px-3 text-xs" type="button" onClick={undo}>
+            <button className="btn btn-secondary min-h-11 px-3 text-xs" type="button" onClick={undo}>
               Undo
             </button>
           ) : null}

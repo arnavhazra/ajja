@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import { Flash, one } from "@/components/desk/flash";
 import { removeTestimonial, saveHome, saveTestimonial } from "@/lib/desk-actions";
 import { loadQuotes, requireDesk } from "@/lib/desk-data";
@@ -7,7 +8,7 @@ import { getSettings, loadStudio } from "@/lib/public-data";
 
 export default function HomeEditorPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   return (
-    <Suspense fallback={<p className="p-4">Loading…</p>}>
+    <Suspense fallback={<DeskRowsSkeleton />}>
       <HomeEditor searchParams={searchParams} />
     </Suspense>
   );
@@ -165,6 +166,21 @@ async function HomeEditor({ searchParams }: { searchParams: Promise<Record<strin
             <input className="field" name="faqQ" aria-label="New question" placeholder="New question" />
             <textarea className="field" name="faqA" aria-label="New answer" placeholder="Answer" />
           </div>
+        </fieldset>
+        <fieldset className="grid gap-3">
+          <legend className="text-2xl">Timing &amp; ways of working</legend>
+          <label className="grid gap-1">
+            Lead times — how long a piece or a commission takes
+            <textarea className="field" name="leadTime" defaultValue={settings.leadTime} />
+          </label>
+          <label className="grid gap-1">
+            Holds — how long you keep a piece aside
+            <textarea className="field" name="holds" defaultValue={settings.holds} />
+          </label>
+          <label className="grid gap-1">
+            Custom work — what commissions you take on
+            <textarea className="field" name="commissions" defaultValue={settings.commissions} />
+          </label>
         </fieldset>
         <label className="grid gap-1">
           Buying

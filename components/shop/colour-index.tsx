@@ -1,47 +1,62 @@
-import Link from "next/link";
-import { pieceTitle } from "@/lib/piece-title";
-import type { PublicProduct } from "@/lib/types";
+"use client";
 
-/** One band of colour per piece, sampled from its photograph. */
+import { pieceTitle } from "@/lib/piece-title";
+import { dedupeByPigment, sortByHue } from "@/lib/pigment-math";
+import type { PublicProduct } from "@/lib/types";
+import { useWallFilter } from "./wall-filter";
+
+/** The pigment shelf — swatch jars by hue. Pick one and the wall keeps only that colour. */
 export function ColourIndex({ products }: { products: PublicProduct[] }) {
-  if (products.length < 3) return null;
-  const run = [...products, ...products];
+  const { pigment, setPigment } = useWallFilter();
+  const unique = sortByHue(dedupeByPigment(products, (product) => product.pigment), (product) => product.pigment);
+  if (unique.length < 3) return null;
+
+  const choose = (hex: string) => {
+    setPigment(pigment === hex ? null : hex);
+    document.getElementById("works")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
-    <section aria-labelledby="colour-title" className="overflow-hidden py-16 md:py-24">
-      <div className="shell flex flex-wrap items-end justify-between gap-4">
-        <h2 id="colour-title" className="display-wide text-2xl md:text-3xl">
-          An index of colour
-        </h2>
-        <p className="caption max-w-sm">Each band is taken from one photograph. Choose a colour to see its piece.</p>
-      </div>
-      <div className="mt-8">
-        <ul className="swatch-run" aria-label="Pieces by colour">
-          {run.map((product, index) => {
-            const title = pieceTitle(product.title, product.categorySlug, product.attributes);
-            const duplicate = index >= products.length;
+    <section aria-labelledby="colour-title" className="hairline-b py-16 md:py-24">
+      <div className="shell">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="tag text-pour">02 — The pigment shelf</p>
+            <h2 id="colour-title" className="display-wide mt-2 text-3xl md:text-4xl">
+              Colour, jar by jar
+            </h2>
+          </div>
+          <p className="caption max-w-sm text-lg">
+            Each jar holds the colour of one piece. Pick a jar and the wall keeps only its family.
+          </p>
+        </div>
+        <ul className="mt-10 flex flex-wrap gap-x-5 gap-y-7" aria-label="Pieces by colour">
+          {unique.map((product) => {
+            const title = pieceTitle(product.title, product.categorySlug, product.attributes, product.id);
+            const active = pigment === product.pigment;
             return (
-              <li key={`${product.id}-${index}`} aria-hidden={duplicate || undefined}>
-                <Link
-                  href={`/p/${product.slug}`}
-                  tabIndex={duplicate ? -1 : undefined}
-                  className="group relative flex h-40 w-24 flex-col justify-end overflow-hidden p-3 transition-[width,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:w-56 focus-visible:w-56 active:scale-[0.98] md:h-56 md:w-28"
-                  style={{ background: product.pigment, color: product.pigmentInk }}
+              <li key={product.id}>
+                <button
+                  type="button"
+                  className="jar"
+                  aria-pressed={active}
+                  aria-label={`${title}, colour ${product.pigment.toUpperCase()}${active ? ", filtering the wall" : ""}`}
+                  onClick={() => choose(product.pigment)}
                 >
-                  <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-white/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                  />
-                  <span className="relative z-10 truncate text-sm font-[560] tracking-tight opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
-                    {title}
-                  </span>
-                  <span className="nums relative z-10 text-xs opacity-0 transition-opacity duration-300 group-hover:opacity-85 group-focus-visible:opacity-85">
+                  <span className="jar-swatch" style={{ background: product.pigment }} aria-hidden="true" />
+                  <span className="jar-name tag" aria-hidden="true">
                     {product.pigment.toUpperCase()}
                   </span>
-                </Link>
+                </button>
               </li>
             );
           })}
         </ul>
+        {pigment ? (
+          <button type="button" className="tag mt-4 inline-flex min-h-11 items-center text-ink underline" onClick={() => setPigment(null)}>
+            Show every colour
+          </button>
+        ) : null}
       </div>
     </section>
   );

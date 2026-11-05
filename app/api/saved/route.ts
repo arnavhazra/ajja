@@ -1,4 +1,5 @@
 import { loadSaved } from "@/lib/public-data";
+import { pieceTitle } from "@/lib/piece-title";
 
 export async function GET(request: Request) {
   const slugs = new URL(request.url).searchParams.get("slugs")?.split(",").filter(Boolean) ?? [];
@@ -6,7 +7,7 @@ export async function GET(request: Request) {
   return Response.json({
     items: products.map((product) => ({
       slug: product.slug,
-      title: product.title,
+      title: pieceTitle(product.title, product.categorySlug, product.attributes, product.id),
       priceMinor: product.priceMinor,
       currency: product.currency,
       status: product.status,

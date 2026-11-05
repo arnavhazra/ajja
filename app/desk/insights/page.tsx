@@ -1,9 +1,10 @@
 import { Suspense } from "react";
+import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import { loadInsights, requireDesk } from "@/lib/desk-data";
 
 export default function InsightsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   return (
-    <Suspense fallback={<p className="p-4">Loading…</p>}>
+    <Suspense fallback={<DeskRowsSkeleton />}>
       <Insights searchParams={searchParams} />
     </Suspense>
   );
@@ -18,7 +19,7 @@ async function Insights({ searchParams }: { searchParams: Promise<Record<string,
   return (
     <main className="desk-page">
       <div className="desk-lead">
-        <h1 className="text-4xl">How it is going</h1>
+        <h1 className="text-4xl">Numbers</h1>
         <p className="desk-note">Counts for the last {days} days. No chart tool, just bars.</p>
       </div>
       <nav className="flex gap-2">
@@ -47,10 +48,10 @@ function Bars({ title, rows }: { title: string; rows: { label: string; count: nu
         {rows.map((row) => (
           <li key={row.label}>
             <p>
-              {row.label}: {row.count}
+              {row.label}: <span className="nums">{row.count}</span>
             </p>
-            <div className="h-3 bg-paper-2">
-              <div className="h-3 bg-accent" style={{ width: `${(row.count / max) * 100}%` }} />
+            <div className="h-3 bg-plate" role="img" aria-label={`${row.label}: ${row.count}`}>
+              <div className="h-3 bg-cobalt" aria-hidden="true" style={{ width: `${(row.count / max) * 100}%` }} />
             </div>
           </li>
         ))}

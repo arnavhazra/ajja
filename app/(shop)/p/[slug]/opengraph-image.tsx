@@ -10,7 +10,7 @@ export const contentType = "image/png";
 export default async function ProductImage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const { product } = await loadProduct(slug);
-  const title = pieceTitle(product?.title ?? "", product?.slug);
+  const title = pieceTitle(product?.title ?? "", product?.categorySlug, product?.attributes, product?.id ?? product?.slug);
   const price = formatMoney(product?.priceMinor ?? null, product?.currency) ?? "Inquire for price";
   return new ImageResponse(
     <div

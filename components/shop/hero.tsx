@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { useCurrency } from "./currency-provider";
 import { PourCanvas } from "./pour-canvas";
 import { pieceKind, pieceTitle } from "@/lib/piece-title";
@@ -10,6 +11,7 @@ import type { PublicProduct } from "@/lib/types";
 
 type Props = { settings: ShopSettings; lead: PublicProduct | null; count: number };
 
+/** "The Museum Wall" — the page is the wall: hang-line, pin holes, matted frame, museum label. */
 export function Hero({ settings, lead, count }: Props) {
   const { format } = useCurrency();
 
@@ -17,144 +19,140 @@ export function Hero({ settings, lead, count }: Props) {
   const src = settings.heroImage || cover?.url || "";
   const focalX = settings.heroImage ? settings.heroFocalX : (cover?.focalX ?? 0.5);
   const focalY = settings.heroImage ? settings.heroFocalY : (cover?.focalY ?? 0.5);
-  const title = lead ? pieceTitle(lead.title, lead.categorySlug, lead.attributes) : "";
+  const title = lead ? pieceTitle(lead.title, lead.categorySlug, lead.attributes, lead.id) : "";
   const kind = lead ? pieceKind(lead.categoryName, lead.attributes) : null;
   const dimensions = lead?.attributes?.dimensions || lead?.attributes?.size || "";
-  const priceFormatted = lead?.priceMinor ? format(lead.priceMinor) : null;
+  const price = lead ? format(lead.priceMinor) : null;
+  const sold = lead?.status === "sold";
 
   return (
-    <section className="hairline-b py-10 sm:py-16 lg:py-20 bg-linen">
-      <div className="shell grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
-        <div className="lg:col-span-7 lg:pr-4 pt-2">
-          <div className="inline-flex items-center gap-2 mb-6">
-            <span className="size-1.5 rounded-full bg-terracotta" />
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-terracotta font-bold">
-              Made by hand in {settings.town}, {settings.region}
-            </span>
-          </div>
+    <section
+      className="hairline-b relative overflow-hidden"
+      style={{ "--pour": lead?.pigment ?? "var(--cobalt)" } as CSSProperties}
+    >
+      {/* pencil hang-line across the whole wall — sits behind the hung frame */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-[54%] z-0 h-px bg-line" />
 
-          <h1 className="font-serif text-4xl sm:text-6xl lg:text-[68px] text-ink font-normal leading-[1.06] tracking-[-0.015em] mb-6">
-            {settings.heroHeadline}
+      <div className="shell relative z-10 grid min-h-[88svh] grid-rows-[auto_1fr_auto] py-8 md:py-10">
+        {/* Wordmark row */}
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <h1 className="display font-extrabold text-[clamp(4.5rem,15vw,12rem)]">
+            {settings.businessName}
+            <span className="text-pour">.</span>
           </h1>
-
-          <p className="text-base sm:text-lg text-umber font-normal leading-[1.75] max-w-2xl mb-8 font-sans">
-            {settings.heroText}
+          <p className="caption max-w-56 pb-4 text-right text-xl md:text-2xl">
+            a family studio in {settings.town}, {settings.region}
           </p>
+        </div>
 
-          <div className="flex flex-wrap items-center gap-4 mb-12">
-            <Link
-              href="/#works"
-              className="px-7 py-4 bg-ink text-linen font-mono text-xs uppercase tracking-[0.16em] rounded-sm hover:bg-terracotta transition-colors shadow-sm"
-            >
-              See the works ({count})
-            </Link>
+        {/* Hung piece + wall label */}
+        <div className="relative flex items-center py-8 md:py-10">
+          <div className="mx-auto grid w-full max-w-5xl items-center gap-6 md:grid-cols-[minmax(0,34rem)_16rem] md:gap-10">
+            {/* Framed piece on the hang-line */}
+            <div className="relative">
+              <span
+                aria-hidden="true"
+                className="absolute -top-3 left-8 size-1.5 rounded-full bg-pour"
+                style={{ boxShadow: "0 0 0 3px color-mix(in srgb, var(--pour) 20%, transparent)" }}
+              />
+              <span
+                aria-hidden="true"
+                className="absolute -top-3 right-8 size-1.5 rounded-full bg-pour"
+                style={{ boxShadow: "0 0 0 3px color-mix(in srgb, var(--pour) 20%, transparent)" }}
+              />
+              <div className="plate-mark relative bg-card p-4 shadow-[0_24px_60px_-20px_rgba(15,18,22,0.45)] sm:p-6 md:p-8">
+                <div className="relative aspect-[4/5] w-full overflow-hidden bg-plate">
+                  {src ? (
+                    <>
+                      <Image
+                        src={src}
+                        alt={title || "A piece from the studio"}
+                        fill
+                        priority
+                        fetchPriority="high"
+                        quality={72}
+                        sizes="(min-width: 768px) 34rem, 90vw"
+                        className="object-cover"
+                        style={{ objectPosition: `${focalX * 100}% ${focalY * 100}%` }}
+                      />
+                      <PourCanvas src={src} focalX={focalX} focalY={focalY} />
+                    </>
+                  ) : (
+                    <div className="grid h-full place-items-center">
+                      <span className="tag">Nothing hung yet</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
 
-            {lead ? (
-              <Link
-                href={`/p/${lead.slug}`}
-                className="px-6 py-4 bg-bone hover:bg-boneDark text-ink font-mono text-xs uppercase tracking-[0.15em] rounded-sm hairline-box transition-colors"
-              >
-                See this piece
-              </Link>
-            ) : null}
-          </div>
+            {/* Museum wall label + ledger stats, both on the label's grid */}
+            <div className="grid gap-4 self-start md:-ml-2">
+              {lead ? (
+                <div className="wall-label grid gap-3 p-5">
+                  <p className="tag">{sold ? "Sold" : "In the studio"}</p>
+                  <p className="caption text-2xl leading-tight text-ink">{title}</p>
+                  <dl className="grid gap-1.5 text-xs text-ink-soft">
+                    {kind ? (
+                      <div className="flex justify-between gap-4">
+                        <dt className="tag">Medium</dt>
+                        <dd>{kind}</dd>
+                      </div>
+                    ) : null}
+                    {dimensions ? (
+                      <div className="flex justify-between gap-4">
+                        <dt className="tag">Size</dt>
+                        <dd>{dimensions}</dd>
+                      </div>
+                    ) : null}
+                    <div className="flex justify-between gap-4">
+                      <dt className="tag">Price</dt>
+                      <dd className="nums text-ink">{sold ? "Sold" : (price ?? "Ask for the price")}</dd>
+                    </div>
+                  </dl>
+                  <Link
+                    href={sold ? `/p/${lead.slug}` : `/p/${lead.slug}#enquire`}
+                    className="tag mt-1 inline-flex min-h-11 items-center gap-2 text-cobalt"
+                  >
+                    {sold ? "See the piece" : "Ask about this piece"} →
+                  </Link>
+                </div>
+              ) : null}
 
-          <div className="bg-bone hairline-box rounded-sm p-5 sm:p-6 max-w-2xl">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div>
-                <p className="font-mono text-[10px] uppercase tracking-widest text-umber mb-1">The maker</p>
-                <p className="font-serif text-xl font-semibold text-ink">{settings.ownerName}</p>
-                <p className="font-mono text-[11px] text-umber">{settings.town}, {settings.region}</p>
-              </div>
-              <div className="sm:hairline-l sm:pl-5">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-umber mb-1">The pieces</p>
-                <p className="font-serif text-xl font-semibold text-ink nums">{count} in the studio</p>
-                <p className="font-mono text-[11px] text-umber">Photographed as they are</p>
-              </div>
-              <div className="sm:hairline-l sm:pl-5">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-umber mb-1">How to buy</p>
-                <p className="font-serif text-xl font-semibold text-ink">Ask first</p>
-                <p className="font-mono text-[11px] text-umber">Nothing is paid online</p>
-              </div>
+              {/* ledger stats, aligned to the label's width */}
+              <dl className="flex flex-wrap gap-x-8 gap-y-3 border-t border-line pt-4 pl-5">
+                <div>
+                  <dt className="tag">On the wall</dt>
+                  <dd className="display mt-1 text-3xl nums">{count}</dd>
+                </div>
+                <div>
+                  <dt className="tag">How to buy</dt>
+                  <dd className="caption mt-1 text-2xl text-ink">Ask first</dd>
+                </div>
+                <div>
+                  <dt className="tag">Paid online</dt>
+                  <dd className="caption mt-1 text-2xl text-ink">Never</dd>
+                </div>
+              </dl>
             </div>
           </div>
         </div>
 
-        {lead ? (
-          <div className="lg:col-span-5">
-            <div className="bg-bone hairline-box rounded-sm p-4 sm:p-5 shadow-[0_20px_50px_rgba(30,27,24,0.06)]">
-              <div className="flex items-center justify-between pb-3 mb-3 hairline-b font-mono text-[10px] tracking-widest uppercase">
-                <span className="text-ink font-bold">{kind || "Studio piece"}</span>
-                <span className={lead.status === "sold" ? "px-2 py-0.5 bg-sold/15 text-sold font-bold rounded-sm" : "px-2 py-0.5 bg-moss/15 text-moss font-bold rounded-sm"}>
-                  {lead.status === "sold" ? "Sold" : lead.quantity === 1 ? "One of one" : "In the studio"}
-                </span>
-              </div>
-
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-sm bg-boneDark archival-vignette hairline-box">
-                {src ? (
-                  <>
-                    <Image
-                      src={src}
-                      alt={title}
-                      fill
-                      priority
-                      sizes="(min-width: 1024px) 45vw, 100vw"
-                      className="object-cover"
-                      style={{ objectPosition: `${focalX * 100}% ${focalY * 100}%` }}
-                    />
-                    <PourCanvas src={src} focalX={focalX} focalY={focalY} />
-                  </>
-                ) : null}
-              </div>
-
-              <div className="pt-4 pb-3 hairline-b">
-                <div className="flex items-baseline justify-between gap-2 mb-1">
-                  <h2 className="font-serif text-2xl sm:text-3xl text-ink font-medium leading-tight">
-                    <Link href={`/p/${lead.slug}`} className="hover:text-terracotta transition-colors">
-                      {title}
-                    </Link>
-                  </h2>
-                  <span className="font-mono text-sm font-bold text-ink">
-                    {priceFormatted ?? "Ask for price"}
-                  </span>
-                </div>
-                {lead.description ? (
-                  <p className="text-xs sm:text-sm text-umber leading-relaxed font-sans line-clamp-2">
-                    {lead.description}
-                  </p>
-                ) : null}
-              </div>
-
-              <div className="py-3 hairline-b font-mono text-[11px] text-umber leading-relaxed">
-                <div className="grid grid-cols-3 gap-2 text-[10px]">
-                  {dimensions ? (
-                    <div>
-                      <span className="block text-umber uppercase">Size</span>
-                      <span className="text-ink font-medium">{dimensions}</span>
-                    </div>
-                  ) : null}
-                  <div>
-                    <span className="block text-umber uppercase">Where</span>
-                    <span className="text-ink font-medium">{settings.town} studio</span>
-                  </div>
-                  <div>
-                    <span className="block text-umber uppercase">Status</span>
-                    <span className="text-moss font-bold">{lead.status === "sold" ? "Sold" : "Available"}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-3.5">
-                <Link
-                  href={`/p/${lead.slug}#enquire`}
-                  className="block w-full py-2.5 px-4 bg-terracotta hover:bg-terracottaDark text-linen font-mono text-xs uppercase tracking-widest rounded-sm transition-colors text-center"
-                >
-                  Ask about this piece
-                </Link>
-              </div>
-            </div>
+        {/* Bottom rail */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <p className="tag">
+            {settings.heroText ? null : null}
+            Photographed as they are — nothing is paid online
+          </p>
+          <div className="flex items-center gap-5">
+            <Link href="/#inquire" className="tag inline-flex min-h-11 items-center">
+              Ask the studio
+            </Link>
+            <Link href="/#works" className="tag inline-flex min-h-11 items-center gap-2 bg-ink px-5 text-gesso">
+              See the works ↓
+            </Link>
           </div>
-        ) : null}
+        </div>
       </div>
     </section>
   );

@@ -1,36 +1,35 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useState } from "react";
 import { EventBeacon } from "./event-beacon";
 import { cn } from "@/lib/cn";
 import { sendEnquiry } from "@/lib/public-actions";
 
-export function EnquiryForm({ productId, productName }: { productId?: string; productName?: string }) {
-  const [state, action, pending] = useActionState(sendEnquiry, { ok: false, message: "" });
+type Props = { productId?: string; productName?: string; initialMessage?: string };
 
-  useEffect(() => {
-    try {
-      const prefill = sessionStorage.getItem("ajja:enquiry-prefill");
-      if (prefill) {
-        sessionStorage.removeItem("ajja:enquiry-prefill");
-        const textarea = document.querySelector<HTMLTextAreaElement>("form#message textarea[name='message']");
-        if (textarea && !textarea.value) textarea.value = prefill;
-      }
-    } catch {}
-  }, []);
+export function EnquiryForm(props: Props) {
+  const [round, setRound] = useState(0);
+  return <EnquiryFormInner key={round} {...props} onSendAnother={() => setRound((n) => n + 1)} />;
+}
+
+function EnquiryFormInner({ productId, productName, initialMessage, onSendAnother }: Props & { onSendAnother: () => void }) {
+  const [state, action, pending] = useActionState(sendEnquiry, { ok: false, message: "" });
 
   if (state.ok) {
     return (
-      <div role="status" className="grid min-h-80 content-center gap-4 rounded-[2px] bg-gesso p-8 md:p-10">
+      <div role="status" className="note-card grid min-h-80 content-center gap-4 rounded-[2px] p-8 md:p-10">
         <span aria-hidden="true" className="size-4 rounded-full bg-pour" />
         <p className="display-wide text-3xl">Thank you. Your note is with the studio.</p>
         <p className="text-ink-soft">{state.message}</p>
+        <button type="button" onClick={onSendAnother} className="btn btn-secondary w-fit min-h-11">
+          Send another
+        </button>
         <EventBeacon type="form" productId={productId} />
       </div>
     );
   }
   return (
-    <form id="message" action={action} className="grid gap-5 rounded-[2px] bg-gesso p-6 md:p-10">
+    <form id="message" action={action} className="note-card grid gap-5 rounded-[2px] p-6 md:p-10">
       {productName ? (
         <p className="display-wide text-2xl">
           About <span className="text-pour">{productName}</span>
@@ -54,7 +53,7 @@ export function EnquiryForm({ productId, productName }: { productId?: string; pr
           name="message"
           required
           maxLength={2000}
-          defaultValue={productName ? `I would like to ask about ${productName}.` : ""}
+          defaultValue={initialMessage ?? (productName ? `I would like to ask about ${productName}.` : "")}
           placeholder={productName ? undefined : "Which piece, and what would you like to know?"}
         />
       </label>

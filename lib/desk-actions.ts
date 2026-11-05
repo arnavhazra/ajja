@@ -2,7 +2,7 @@
 
 import { createHash, randomUUID } from "node:crypto";
 import { del } from "@vercel/blob";
-import { and, asc, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import sharp from "sharp";
@@ -22,7 +22,10 @@ import {
   siteSettings,
   testimonials,
 } from "./db/schema";
+import { after } from "next/server";
+import { z } from "zod";
 import { deskPrefix } from "./desk-path";
+import { enhanceKind, enhancePhoto, shouldEnhance } from "./enhance";
 import { assertBlobUrl, storeImage } from "./images";
 import { dollarsToMinor } from "./money";
 import { inlineEditSchema, passwordChangeSchema, passwordSignInSchema, pieceSchema } from "./schemas";
@@ -89,8 +92,9 @@ async function actor() {
   }
 }
 
-async function audit(userId: string | null, action: string, entity: string, entityId: string | null, meta: Record<string, string> = {}) {
-  await getDb().insert(auditLog).values({ userId, action, entity, entityId, meta });
+async function audit(userId: string | null, action: string, entity: string, entityId: string | null, meta: Record<string, unknown> = {}) {
+  const [row] = await getDb().insert(auditLog).values({ userId, action, entity, entityId, meta }).returning({ id: auditLog.id });
+  return row?.id ?? "";
 }
 
 async function snapshot(productId: string, label: string, email: string) {
@@ -267,16 +271,20 @@ export async function ingestUpload(url: string, filename: string) {
       currency: "USD",
       attributes: { originalFile: filename },
     });
-    await db.insert(productImages).values({
-      productId: id,
-      url: image.url,
-      width: image.width,
-      height: image.height,
-      blurData: image.blurData,
-      alt: "",
-    });
+    const [ins] = await db
+      .insert(productImages)
+      .values({
+        productId: id,
+        url: image.url,
+        width: image.width,
+        height: image.height,
+        blurData: image.blurData,
+        alt: "",
+      })
+      .returning({ id: productImages.id });
     await audit(session.userId, "Added a piece", "product", id, { file: filename });
     refresh();
+    after(() => enhanceUploadedPhoto(id, ins.id, image.url));
     return { ok: true as const, message: "Draft saved.", id };
   } catch (error) {
     return { ok: false as const, message: error instanceof Error ? error.message : "The photo could not be saved." };
@@ -296,17 +304,21 @@ export async function addPhotoToPiece(productId: string, url: string) {
     await del(url).catch(() => undefined);
     const undoId = await snapshot(productId, "Added a photo", session.email);
     const current = await db.select().from(productImages).where(eq(productImages.productId, productId));
-    await db.insert(productImages).values({
-      productId,
-      url: image.url,
-      width: image.width,
-      height: image.height,
-      blurData: image.blurData,
-      alt: "",
-      sortOrder: current.length,
-    });
+    const [ins] = await db
+      .insert(productImages)
+      .values({
+        productId,
+        url: image.url,
+        width: image.width,
+        height: image.height,
+        blurData: image.blurData,
+        alt: "",
+        sortOrder: current.length,
+      })
+      .returning({ id: productImages.id });
     await audit(session.userId, "Added a photo", "product", productId);
     refresh();
+    after(() => enhanceUploadedPhoto(productId, ins.id, image.url));
     return { ok: true as const, message: "Photo added.", undoId };
   } catch (error) {
     return { ok: false as const, message: error instanceof Error ? error.message : "The photo could not be saved." };
@@ -513,6 +525,12 @@ export async function undoChange(formData: FormData) {
       restored += 1;
       lastProductId = productId;
       await audit(session.userId, "Undid a change", "product", productId);
+      continue;
+    }
+    const entity = await restoreRemoved(id);
+    if (entity) {
+      restored += 1;
+      await audit(session.userId, "Undid a change", entity, id);
     }
   }
   if (!restored) return go(back.startsWith("/") ? back : "/pieces", "Nothing to undo.");
@@ -584,6 +602,52 @@ async function restoreVersion(versionId: string) {
   return version.productId;
 }
 
+// Bring back a removed group or collection from the snapshot kept in its audit row.
+async function restoreRemoved(auditId: string) {
+  const db = getDb();
+  const [row] = await db.select().from(auditLog).where(eq(auditLog.id, auditId)).limit(1);
+  const meta = (row?.meta ?? {}) as {
+    kind?: string;
+    snapshot?: Record<string, unknown>;
+    memberIds?: string[];
+    links?: { productId: string; sortOrder: number }[];
+    restoredAt?: string;
+  };
+  if (!row || !meta.snapshot || meta.restoredAt) return "";
+  if (meta.kind === "category") {
+    const snap = meta.snapshot as unknown as typeof categories.$inferSelect;
+    await db
+      .insert(categories)
+      .values({ ...snap, createdAt: new Date(snap.createdAt) })
+      .onConflictDoNothing();
+    if (meta.memberIds?.length) {
+      await db
+        .update(products)
+        .set({ categoryId: snap.id, updatedAt: new Date() })
+        .where(and(inArray(products.id, meta.memberIds), isNull(products.categoryId)));
+    }
+  } else if (meta.kind === "collection") {
+    const snap = meta.snapshot as unknown as typeof collections.$inferSelect;
+    await db
+      .insert(collections)
+      .values({ ...snap, createdAt: new Date(snap.createdAt) })
+      .onConflictDoNothing();
+    await db.delete(collectionProducts).where(eq(collectionProducts.collectionId, snap.id));
+    if (meta.links?.length) {
+      await db.insert(collectionProducts).values(
+        meta.links.map((link) => ({ collectionId: snap.id, productId: link.productId, sortOrder: link.sortOrder })),
+      );
+    }
+  } else {
+    return "";
+  }
+  await db
+    .update(auditLog)
+    .set({ meta: { ...meta, restoredAt: new Date().toISOString() } })
+    .where(eq(auditLog.id, auditId));
+  return meta.kind;
+}
+
 export async function undoInline(versionId: string) {
   "use server";
   const session = await actor();
@@ -592,6 +656,62 @@ export async function undoInline(versionId: string) {
   await audit(session.userId, "Undid a change", "product", productId);
   refresh();
   return { ok: true as const, message: "Change undone." };
+}
+
+/** Name & price sprint — save the two fields and carry on to the next draft. */
+export async function sprintSave(formData: FormData) {
+  const session = await actor();
+  const id = String(formData.get("id") ?? "");
+  const title = String(formData.get("title") ?? "").trim().slice(0, 160);
+  const price = money(String(formData.get("price") ?? ""));
+  if (!price.ok) return go(`/review`, price.message);
+  const db = getDb();
+  const [current] = await db.select().from(products).where(eq(products.id, id)).limit(1);
+  if (!current) return go("/review", "That piece is not here.");
+  const undoId = await snapshot(id, "Sprint edit", session.email);
+  let slug = current.slug;
+  if (title && (current.slug.startsWith("piece-") || current.title !== title)) {
+    const nextSlug = await uniqueSlug(title, current.id);
+    if (nextSlug !== current.slug) {
+      await db.insert(redirects).values({ fromPath: `/p/${current.slug}`, toPath: `/p/${nextSlug}` }).onConflictDoNothing();
+      slug = nextSlug;
+    }
+  }
+  await db
+    .update(products)
+    .set({ title, priceMinor: price.value, slug, updatedAt: new Date() })
+    .where(eq(products.id, id));
+  await audit(session.userId, "Sprint edit", "product", id);
+  refresh();
+  return go(`/review?skip=${id}`, "Saved.", undoId);
+}
+
+export async function toggleFeatured(formData: FormData) {
+  const session = await actor();
+  const id = String(formData.get("id"));
+  const db = getDb();
+  const [row] = await db.select({ featured: products.featured }).from(products).where(eq(products.id, id)).limit(1);
+  if (!row) return go("/pieces", "That piece is not here.");
+  await db.update(products).set({ featured: !row.featured, updatedAt: new Date() }).where(eq(products.id, id));
+  await audit(session.userId, row.featured ? "Unfeatured a piece" : "Featured a piece", "product", id);
+  refresh();
+  return go("/pieces", row.featured ? "No longer featured." : "Featured.");
+}
+
+/** Permanently remove trash older than 30 days. */
+export async function emptyTrash() {
+  const session = await actor();
+  const db = getDb();
+  const old = await db
+    .select({ id: products.id })
+    .from(products)
+    .where(sql`${products.deletedAt} is not null and ${products.deletedAt} < now() - interval '30 days'`);
+  if (old.length === 0) return go("/pieces?trash=1", "Nothing in the trash is older than 30 days.");
+  await db.delete(productImages).where(inArray(productImages.productId, old.map((r) => r.id)));
+  await db.delete(products).where(inArray(products.id, old.map((r) => r.id)));
+  await audit(session.userId, "Emptied the trash", "product", old.length.toString());
+  refresh();
+  return go("/pieces?trash=1", `${old.length} pieces removed for good.`);
 }
 
 export async function moveFeatured(formData: FormData) {
@@ -684,6 +804,99 @@ export async function moveImage(formData: FormData) {
   await audit(session.userId, "Reordered photos", "product", image.productId);
   refresh();
   return go(`/pieces/${image.productId}`, "Photo order saved.");
+}
+
+/** Auto-tidy a newly uploaded photo: one OpenRouter generation, set as cover.
+ *  Idempotent via attributes.enhance[imageId]. Skips silently without a key. */
+async function enhanceUploadedPhoto(productId: string, imageId: string, imageUrl: string) {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) return;
+  const db = getDb();
+  const mark = async (status: string, extra: Record<string, unknown> = {}) => {
+    const [p] = await db.select({ attributes: products.attributes }).from(products).where(eq(products.id, productId)).limit(1);
+    const attrs = (p?.attributes ?? {}) as unknown as Record<string, unknown>;
+    const enhance = { ...((attrs.enhance as unknown as Record<string, unknown>) ?? {}) };
+    enhance[imageId] = { status, ...extra };
+    await db.update(products).set({ attributes: { ...attrs, enhance } as unknown as Record<string, string> }).where(eq(products.id, productId));
+  };
+  // Idempotency: only one generation per photo, ever.
+  const [existing] = await db.select({ attributes: products.attributes }).from(products).where(eq(products.id, productId)).limit(1);
+  const enhanceMap = (existing?.attributes?.enhance as unknown as Record<string, { status?: string }>) ?? {};
+  if (!shouldEnhance(enhanceMap, imageId)) return;
+  await mark("pending", {});
+  try {
+    const [info] = await db
+      .select({ category: categories.name, attributes: products.attributes })
+      .from(products)
+      .leftJoin(categories, eq(products.categoryId, categories.id))
+      .where(eq(products.id, productId))
+      .limit(1);
+    const kind = enhanceKind(info?.category, info?.attributes as unknown as Record<string, unknown>);
+    const gen = await enhancePhoto({ apiKey, imageUrl, kind });
+    const stored = await storeImage(Buffer.from(gen.bytes), "pieces/enhanced.webp");
+    const images = await db.select().from(productImages).where(eq(productImages.productId, productId)).orderBy(asc(productImages.sortOrder));
+    const [ins] = await db
+      .insert(productImages)
+      .values({ productId, url: stored.url, width: stored.width, height: stored.height, blurData: stored.blurData, alt: "enhanced-version", sortOrder: images.length })
+      .returning({ id: productImages.id });
+    const [p] = await db.select({ attributes: products.attributes }).from(products).where(eq(products.id, productId)).limit(1);
+    const attrs = (p?.attributes ?? {}) as unknown as Record<string, unknown>;
+    const versions = { ...((attrs.enhancedVersions as unknown as Record<string, string>) ?? {}) };
+    versions[imageId] = ins.id;
+    await db.update(products).set({ attributes: { ...attrs, enhancedVersions: versions } as unknown as Record<string, string> }).where(eq(products.id, productId));
+    let order = 1;
+    const fresh = await db.select().from(productImages).where(eq(productImages.productId, productId)).orderBy(asc(productImages.sortOrder));
+    for (const item of fresh) {
+      await db.update(productImages).set({ sortOrder: item.id === ins.id ? 0 : order++ }).where(eq(productImages.id, item.id));
+    }
+    await mark("done", { model: gen.model, cost: gen.usage?.cost ?? null });
+  } catch {
+    await mark("failed", {});
+  }
+}
+
+/** Manual retry — the only path to a second generation for a photo. */
+export async function retryEnhance(formData: FormData) {
+  const session = await actor();
+  const parsed = z.object({ imageId: z.string().uuid(), productId: z.string().uuid() }).safeParse({
+    imageId: String(formData.get("imageId") ?? ""),
+    productId: String(formData.get("productId") ?? ""),
+  });
+  if (!parsed.success) return go("/pieces", "That photo is not here.");
+  const db = getDb();
+  const [image] = await db.select().from(productImages).where(eq(productImages.id, parsed.data.imageId)).limit(1);
+  if (!image) return go("/pieces", "That photo is not here.");
+  const [p] = await db.select({ attributes: products.attributes }).from(products).where(eq(products.id, parsed.data.productId)).limit(1);
+  const attrs = (p?.attributes ?? {}) as unknown as Record<string, unknown>;
+  const enhance = { ...((attrs.enhance as unknown as Record<string, unknown>) ?? {}) };
+  delete enhance[parsed.data.imageId];
+  await db.update(products).set({ attributes: { ...attrs, enhance } as unknown as Record<string, string> }).where(eq(products.id, parsed.data.productId));
+  await audit(session.userId, "Retried photo tidy", "product", parsed.data.productId);
+  after(() => enhanceUploadedPhoto(parsed.data.productId, parsed.data.imageId, image.url));
+  return go(`/pieces/${parsed.data.productId}`, "Tidying photo…");
+}
+
+/** Set every enhanced version as its piece's cover — the approved catalogue sweep. */
+export async function approveEnhancedCovers() {
+  const session = await actor();
+  const db = getDb();
+  const rows = await db.select({ id: products.id, attributes: products.attributes }).from(products);
+  let applied = 0;
+  for (const row of rows) {
+    const versions = (((row.attributes ?? {}) as unknown as Record<string, unknown>).enhancedVersions ?? {}) as Record<string, string>;
+    for (const enhancedId of Object.values(versions)) {
+      const images = await db.select().from(productImages).where(eq(productImages.productId, row.id)).orderBy(asc(productImages.sortOrder));
+      if (!images.some((i) => i.id === enhancedId)) continue;
+      let order = 1;
+      for (const item of images) {
+        await db.update(productImages).set({ sortOrder: item.id === enhancedId ? 0 : order++ }).where(eq(productImages.id, item.id));
+      }
+      await audit(session.userId, "Chose the cover photo", "product", row.id);
+      applied += 1;
+    }
+  }
+  refresh();
+  return go("/settings", `Enhanced cover set on ${applied} pieces.`);
 }
 
 export async function coverImage(formData: FormData) {
@@ -846,14 +1059,14 @@ export async function saveCategory(formData: FormData) {
   return go("/groups", "Group saved.");
 }
 
-export async function moveCategory(formData: FormData) {
+export async function moveCategory(direction: string, formData: FormData) {
   const session = await actor();
   const id = String(formData.get("id"));
-  const direction = formData.get("direction") === "up" ? -1 : 1;
+  const dir = direction === "up" ? -1 : 1;
   const db = getDb();
   const rows = await db.select().from(categories).orderBy(asc(categories.sortOrder));
   const index = rows.findIndex((row) => row.id === id);
-  const swap = rows[index + direction];
+  const swap = rows[index + dir];
   if (!swap || index < 0) return go("/groups", "That group is already at the end.");
   await db.update(categories).set({ sortOrder: swap.sortOrder }).where(eq(categories.id, id));
   await db.update(categories).set({ sortOrder: rows[index].sortOrder }).where(eq(categories.id, swap.id));
@@ -865,12 +1078,22 @@ export async function moveCategory(formData: FormData) {
 export async function removeCategory(formData: FormData) {
   const session = await actor();
   const id = String(formData.get("id"));
-  const used = await getDb().select({ id: products.id }).from(products).where(eq(products.categoryId, id)).limit(1);
-  if (used.length) return go("/groups", "Move the pieces out of this group first.");
-  await getDb().delete(categories).where(eq(categories.id, id));
-  await audit(session.userId, "Removed a group", "category", id);
+  const db = getDb();
+  const [category] = await db.select().from(categories).where(eq(categories.id, id)).limit(1);
+  if (!category) return go("/groups", "That group is not here.");
+  const members = await db.select({ id: products.id }).from(products).where(eq(products.categoryId, id));
+  const undoId = await audit(session.userId, "Removed a group", "category", id, {
+    kind: "category",
+    snapshot: category,
+    memberIds: members.map((member) => member.id),
+  });
+  if (members.length) {
+    await db.update(products).set({ categoryId: null, updatedAt: new Date() }).where(eq(products.categoryId, id));
+  }
+  await db.delete(categories).where(eq(categories.id, id));
   refresh();
-  return go("/groups", "Group removed.");
+  const moved = members.length === 1 ? " 1 piece moved out of it." : members.length > 1 ? ` ${members.length} pieces moved out of it.` : "";
+  return go("/groups", `Group removed.${moved}`, undoId);
 }
 
 export async function saveCollection(formData: FormData) {
@@ -906,11 +1129,18 @@ export async function removeCollection(formData: FormData) {
   const session = await actor();
   const id = String(formData.get("id"));
   const db = getDb();
+  const [collection] = await db.select().from(collections).where(eq(collections.id, id)).limit(1);
+  if (!collection) return go("/groups", "That collection is not here.");
+  const links = await db.select().from(collectionProducts).where(eq(collectionProducts.collectionId, id));
+  const undoId = await audit(session.userId, "Removed a collection", "collection", id, {
+    kind: "collection",
+    snapshot: collection,
+    links,
+  });
   await db.delete(collectionProducts).where(eq(collectionProducts.collectionId, id));
   await db.delete(collections).where(eq(collections.id, id));
-  await audit(session.userId, "Removed a collection", "collection", id);
   refresh();
-  return go("/groups", "Collection removed.");
+  return go("/groups", "Collection removed.", undoId);
 }
 
 export async function saveHome(formData: FormData) {
@@ -965,6 +1195,9 @@ export async function saveHome(formData: FormData) {
       returns: String(formData.get("returns") ?? "").trim().slice(0, 1000),
     },
     faqs,
+    leadTime: String(formData.get("leadTime") ?? "").trim().slice(0, 1000),
+    holds: String(formData.get("holds") ?? "").trim().slice(0, 1000),
+    commissions: String(formData.get("commissions") ?? "").trim().slice(0, 1000),
     theme: theme === "clay" || theme === "ink" ? theme : "walnut",
     fontPair: fontPair === "newsreader" ? "newsreader" : "fraunces",
     copyNeedsApproval: formData.get("approved") !== "on",
@@ -1014,6 +1247,18 @@ export async function setEnquiryStatus(formData: FormData) {
   await getDb().update(enquiries).set({ status }).where(eq(enquiries.id, id));
   await audit(session.userId, "Updated a message", "enquiry", id, { status });
   return go("/messages", "Message updated.");
+}
+
+/** Bulk mark several messages at once — checkboxes post every checked id. */
+export async function markEnquiries(formData: FormData) {
+  const session = await actor();
+  const ids = formData.getAll("id").map(String).filter(Boolean).slice(0, 200);
+  const status = String(formData.get("status"));
+  if (!["new", "replied", "closed"].includes(status)) return go("/messages", "Choose a status.");
+  if (!ids.length) return go("/messages", "Nothing was ticked.");
+  await getDb().update(enquiries).set({ status }).where(inArray(enquiries.id, ids));
+  await audit(session.userId, "Updated messages", "enquiry", ids.join(","), { status, count: ids.length });
+  return go("/messages", `${ids.length} messages updated.`);
 }
 
 export async function saveRetention(formData: FormData) {

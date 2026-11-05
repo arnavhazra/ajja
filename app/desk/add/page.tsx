@@ -1,10 +1,14 @@
 import { Suspense } from "react";
+import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import { PhotoUpload } from "@/components/desk/upload";
 import { requireDesk } from "@/lib/desk-data";
 
+// after()-scheduled photo tidy can outlive the response; give it room.
+export const maxDuration = 120;
+
 export default function AddPage() {
   return (
-    <Suspense fallback={<p className="p-4">Loading…</p>}>
+    <Suspense fallback={<DeskRowsSkeleton />}>
       <Add />
     </Suspense>
   );

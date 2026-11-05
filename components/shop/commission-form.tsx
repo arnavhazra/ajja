@@ -1,28 +1,41 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { sendEnquiry } from "@/lib/public-actions";
 import { EventBeacon } from "@/components/event-beacon";
 
-export function CommissionForm({
-  productId,
-  productName,
-  responseNote,
-}: {
+type Props = {
   productId?: string;
   productName?: string;
   responseNote?: string;
-}) {
+  initialMessage?: string;
+};
+
+export function CommissionForm(props: Props) {
+  const [round, setRound] = useState(0);
+  return <CommissionFormInner key={round} {...props} onSendAnother={() => setRound((n) => n + 1)} />;
+}
+
+function CommissionFormInner({
+  productId,
+  productName,
+  responseNote,
+  initialMessage,
+  onSendAnother,
+}: Props & { onSendAnother: () => void }) {
   const [state, action, pending] = useActionState(sendEnquiry, { ok: false, message: "" });
 
   if (state.ok) {
     return (
-      <div role="status" className="bg-bone hairline-box rounded-sm p-8 sm:p-12 text-center max-w-2xl mx-auto shadow-sm">
+      <div role="status" className="note-card rounded-[2px] p-8 sm:p-12 text-center max-w-2xl mx-auto">
         <span className="inline-block size-3 rounded-full bg-moss mb-4" />
         <h3 className="font-serif text-3xl font-medium text-ink mb-2">Thank you — your note is with the studio.</h3>
         <p className="text-sm text-umber leading-relaxed font-sans max-w-md mx-auto">
           {state.message || responseNote || "We will write back as soon as we can."}
         </p>
+        <button type="button" onClick={onSendAnother} className="btn btn-secondary mt-6 min-h-11">
+          Send another
+        </button>
         <EventBeacon type="form" productId={productId} />
       </div>
     );
@@ -43,7 +56,7 @@ export function CommissionForm({
           </p>
         </div>
 
-        <form action={action} className="bg-bone hairline-box rounded-sm p-6 sm:p-10 shadow-sm space-y-5">
+        <form action={action} className="note-card rounded-[2px] p-6 sm:p-10 space-y-5">
           {productName ? (
             <div className="p-3 bg-linen hairline-box rounded-sm font-mono text-xs text-ink flex items-center justify-between">
               <span>About:</span>
@@ -102,7 +115,7 @@ export function CommissionForm({
               required
               rows={4}
               maxLength={2500}
-              defaultValue={productName ? `I would like to ask about ${productName}.` : ""}
+              defaultValue={initialMessage ?? (productName ? `I would like to ask about ${productName}.` : "")}
               placeholder="Which piece, or what would you like made — size, wood, where it will live?"
               className="w-full px-4 py-3 bg-linen hairline-box rounded-sm text-ink font-sans text-sm placeholder:text-umber/40 focus:outline-none focus:border-terracotta leading-relaxed"
             />

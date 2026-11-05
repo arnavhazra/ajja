@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const VERTEX = `
 attribute vec2 p;
@@ -65,8 +65,34 @@ type Props = { src: string; focalX: number; focalY: number; className?: string }
 
 export function PourCanvas({ src, focalX, focalY, className }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  // Mount the GL work only after the page is idle (post-LCP) and the canvas is on screen.
+  const [mount, setMount] = useState(false);
 
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    let idle = 0;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      observer.disconnect();
+      const idleWindow = window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number };
+      if (idleWindow.requestIdleCallback) {
+        idle = idleWindow.requestIdleCallback(() => setMount(true), { timeout: 2500 });
+      } else {
+        idle = window.setTimeout(() => setMount(true), 300);
+      }
+    });
+    observer.observe(canvas);
+    return () => {
+      observer.disconnect();
+      if (idle) window.clearTimeout(idle as number);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!mount) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -125,7 +151,7 @@ export function PourCanvas({ src, focalX, focalY, className }: Props) {
     const start = performance.now();
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       const { width, height } = canvas.getBoundingClientRect();
       canvas.width = Math.max(1, Math.round(width * dpr));
       canvas.height = Math.max(1, Math.round(height * dpr));
@@ -216,7 +242,7 @@ export function PourCanvas({ src, focalX, focalY, className }: Props) {
       gl.deleteShader(vs);
       gl.deleteShader(fs);
     };
-  }, [src, focalX, focalY]);
+  }, [mount, src, focalX, focalY]);
 
   return (
     <canvas

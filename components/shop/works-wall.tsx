@@ -3,22 +3,26 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { PieceCard } from "./piece-card";
+import { useWallFilter } from "./wall-filter";
 import type { PublicProduct } from "@/lib/types";
 
 type Filter = { key: string; label: string; count: number };
 
-type Props = {
-  products: PublicProduct[];
-  children?: React.ReactNode;
-};
+/** Card span driven by the photo's aspect — the wall hangs mixed sizes. */
+function spanFor(product: PublicProduct) {
+  const cover = product.images[0];
+  const ratio = cover?.width && cover?.height ? cover.width / cover.height : 0.8;
+  if (ratio >= 1.45) return "lg:col-span-2";
+  return "";
+}
 
-export function WorksWall({ products }: Props) {
+export function WorksWall({ products }: { products: PublicProduct[] }) {
   const [active, setActive] = useState("all");
+  const { pigment, matches } = useWallFilter();
 
   const filters = useMemo<Filter[]>(() => {
     const groups = new Map<string, Filter>();
     let sold = 0;
-
     for (const product of products) {
       if (product.status === "sold") sold += 1;
       if (product.categorySlug && product.categoryName) {
@@ -30,48 +34,37 @@ export function WorksWall({ products }: Props) {
         });
       }
     }
-
     const list: Filter[] = [{ key: "all", label: "All", count: products.length }];
     if (groups.size > 0) list.push(...groups.values());
     if (sold > 0) list.push({ key: "sold", label: "Sold", count: sold });
     return list;
   }, [products]);
 
-  const matches = (product: PublicProduct) => {
+  const keep = (product: PublicProduct) => {
+    if (!matches(product.pigment)) return false;
     if (active === "all") return true;
     if (active === "sold") return product.status === "sold";
-    if (active === "available") return product.status !== "sold";
     return product.categorySlug === active;
   };
 
-  const filtered = products.filter(matches);
+  const seen = new Set<string>();
+  const filtered = products.filter(keep).filter((product) => (seen.has(product.id) ? false : (seen.add(product.id), true)));
 
   return (
-    <section id="works" className="py-14 sm:py-20 hairline-b bg-linen">
+    <section id="works" className="hairline-b bg-gesso py-14 sm:py-20">
       <div className="shell">
-        {/* Section header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-6 hairline-b">
+        <div className="mb-10 flex flex-col justify-between gap-6 pb-6 hairline-b md:flex-row md:items-end">
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-terracotta mb-2 font-bold">
-              In the studio now
-            </p>
-            <h2 className="font-serif text-4xl sm:text-5xl text-ink font-normal tracking-tight">
-              The works
-            </h2>
+            <p className="tag text-pour">01 — In the studio now</p>
+            <h2 className="display mt-2 text-4xl sm:text-6xl">The works</h2>
           </div>
-
-          <div className="max-w-md">
-            <p className="text-xs sm:text-sm text-umber leading-relaxed font-sans">
-              Each piece is photographed as it is. Choose a work to see it closer, or ask the studio about it.
-            </p>
-          </div>
+          <p className="caption max-w-md text-lg">
+            Each piece hangs as it was photographed. Choose a work to see it closer, or ask the studio about it.
+          </p>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap items-center gap-2 mb-8">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-umber mr-2">
-            Show:
-          </span>
+        <div className="mb-8 flex flex-wrap items-center gap-2">
+          <span className="tag mr-2">Show:</span>
           {filters.map((filter) => {
             const isActive = active === filter.key;
             return (
@@ -80,47 +73,48 @@ export function WorksWall({ products }: Props) {
                 type="button"
                 aria-pressed={isActive}
                 onClick={() => setActive(filter.key)}
-                className={`px-3 py-1 rounded-sm font-mono text-[11px] uppercase cursor-pointer transition-colors ${
-                  isActive
-                    ? "bg-ink text-linen font-bold shadow-sm"
-                    : "bg-bone text-umber hover:text-ink hairline-box"
+                className={`tag inline-flex min-h-11 items-center rounded-[2px] px-3 transition-colors cursor-pointer ${
+                  isActive ? "bg-ink font-bold text-gesso" : "hairline-box text-ink-soft hover:text-ink"
                 }`}
               >
-                {isActive ? "● " : ""}{filter.label} ({filter.count})
+                {filter.label} <span className="nums ml-1">({filter.count})</span>
               </button>
             );
           })}
+          {pigment ? (
+            <span className="tag inline-flex min-h-11 items-center gap-2 text-ink">
+              <span className="inline-block size-3 rounded-full" style={{ background: pigment }} />
+              filtered by a colour
+            </span>
+          ) : null}
         </div>
 
-        {/* Staggered 3-Column Editorial Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
+        {/* Staggered editorial wall — spans follow the photographs */}
+        <div className="grid grid-cols-1 items-start gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
           {filtered.map((product, index) => (
             <PieceCard
               key={product.id}
               product={product}
               index={index}
               priority={index < 3}
+              className={spanFor(product)}
+              sizes="(min-width: 1024px) 30vw, (min-width: 640px) 50vw, 100vw"
             />
           ))}
         </div>
+        {filtered.length === 0 ? (
+          <p className="caption mt-4 text-lg">Nothing on the wall matches that yet — try another colour or filter.</p>
+        ) : null}
 
-        {/* Custom work callout */}
-        <div className="mt-14 bg-bone hairline-box rounded-sm p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="mt-14 flex flex-col items-start justify-between gap-6 hairline-box bg-card p-6 sm:p-8 md:flex-row md:items-center">
           <div className="max-w-2xl">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-terracotta font-bold mb-1.5">
-              Custom work
-            </p>
-            <h3 className="font-serif text-2xl sm:text-3xl text-ink mb-1">
-              Need a different size, or a piece made for you?
-            </h3>
-            <p className="text-sm text-umber font-sans leading-relaxed">
+            <p className="tag text-pour">Custom work</p>
+            <h3 className="display-wide mt-1.5 text-2xl sm:text-3xl">Need a different size, or a piece made for you?</h3>
+            <p className="caption mt-1 text-lg">
               Tell the studio what you have in mind — a size, a wood, a place it will live — and we will tell you what is possible.
             </p>
           </div>
-          <Link
-            href="/#inquire"
-            className="px-6 py-3.5 bg-ink text-linen font-mono text-xs uppercase tracking-widest rounded-sm hover:bg-terracotta transition-colors whitespace-nowrap shadow-sm"
-          >
+          <Link href="/#inquire" className="btn btn-primary min-h-11">
             Ask about a commission
           </Link>
         </div>

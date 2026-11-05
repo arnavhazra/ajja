@@ -2,8 +2,9 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { Flash, one } from "@/components/desk/flash";
 import { DeskRowsSkeleton } from "@/components/desk/skeleton";
+import { emptyTrash } from "@/lib/desk-actions";
 import { PiecesTable, type DeskPieceRow } from "@/components/desk/pieces-table";
-import { loadDeskPieces, requireDesk } from "@/lib/desk-data";
+import { loadDeskPieces, loadNeedCounts, requireDesk } from "@/lib/desk-data";
 import { deskPrefix } from "@/lib/desk-path";
 import { evaluatePieceReadiness } from "@/lib/piece-readiness";
 import { minorToDollars } from "@/lib/money";
@@ -33,10 +34,11 @@ async function Pieces({ searchParams }: { searchParams: Promise<Record<string, s
   const params = await searchParams;
   const trash = one(params.trash) === "1";
   const need = one(params.need);
-  const [rows, groups, prefix] = await Promise.all([
-    loadDeskPieces({ q: one(params.q), status: one(params.status), trash }),
+  const [{ rows, page, hasMore }, groups, prefix, globalNeeds] = await Promise.all([
+    loadDeskPieces({ q: one(params.q), status: one(params.status), trash, page: Math.max(0, Number(one(params.page)) || 0) }),
     getDb().select().from(categories).orderBy(asc(categories.sortOrder)),
     deskPrefix(),
+    loadNeedCounts(),
   ]);
   const groupName = new Map(groups.map((group) => [group.id, group.name]));
 
@@ -54,14 +56,14 @@ async function Pieces({ searchParams }: { searchParams: Promise<Record<string, s
   };
 
   const all = rows.map((row) => ({ row, ...needsOf(row) }));
-  const needCounts = new Map(NEEDS.map(({ key }) => [key, all.filter(({ needs }) => needs.includes(key)).length]));
+  const needCounts = new Map(NEEDS.map(({ key }) => [key, globalNeeds[key]]));
   const visible = need ? all.filter(({ needs }) => needs.includes(need)) : all;
 
   const tableRows: DeskPieceRow[] = visible.map(({ row, readiness, needs }) => ({
     id: row.id,
     slug: row.slug,
     title: row.title,
-    displayTitle: pieceTitle(row.title, groupName.get(row.categoryId ?? "") ?? null, row.attributes as Record<string, string> | undefined),
+    displayTitle: pieceTitle(row.title, groupName.get(row.categoryId ?? "") ?? null, row.attributes as Record<string, string> | undefined, row.id),
     status: row.status,
     featured: row.featured,
     price: minorToDollars(row.priceMinor),
@@ -116,6 +118,13 @@ async function Pieces({ searchParams }: { searchParams: Promise<Record<string, s
         <Link className="btn btn-quiet self-end" href={trash ? `${prefix}/pieces` : `${prefix}/pieces?trash=1`}>
           {trash ? "Back to pieces" : "Trash"}
         </Link>
+        {trash ? (
+          <form action={emptyTrash} className="self-end">
+            <button className="btn btn-secondary" type="submit">
+              Empty trash older than 30 days
+            </button>
+          </form>
+        ) : null}
       </form>
       {!trash ? (
         <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Show pieces that need something">
@@ -139,6 +148,21 @@ async function Pieces({ searchParams }: { searchParams: Promise<Record<string, s
         prefix={prefix}
         trash={trash}
       />
+      {page > 0 || hasMore ? (
+        <nav className="flex items-center gap-2" aria-label="Pages">
+          {page > 0 ? (
+            <Link className="btn btn-secondary" href={href({ page: String(page - 1) })}>
+              ← Previous
+            </Link>
+          ) : null}
+          <span className="desk-note nums">Page {page + 1}</span>
+          {hasMore ? (
+            <Link className="btn btn-secondary" href={href({ page: String(page + 1) })}>
+              Next →
+            </Link>
+          ) : null}
+        </nav>
+      ) : null}
     </main>
   );
 }

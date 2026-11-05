@@ -28,7 +28,6 @@ export function FolioActionButton({
       imageUrl: cover?.url,
       kind,
       dimensions: product.attributes.size || product.attributes.dimensions,
-      stripeUrl: product.attributes.stripe_url || product.attributes.stripe_payment_link,
     });
     if (!inFolio) {
       setIsOpen(true);

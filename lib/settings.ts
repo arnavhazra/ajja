@@ -32,6 +32,9 @@ export type ShopSettings = {
   copyNeedsApproval: boolean;
   lastBackupAt: string;
   policies: { buying: string; collection: string; returns: string };
+  leadTime: string;
+  holds: string;
+  commissions: string;
   faqs: { q: string; a: string }[];
   theme: "walnut" | "clay" | "ink";
   fontPair: "fraunces" | "newsreader";
@@ -61,7 +64,7 @@ export const defaultSettings: ShopSettings = {
   heroFocalX: 0.5,
   heroFocalY: 0.45,
   story:
-    "Every piece here is one of a kind, made by hand in Collegeville. The photographs are the listing — a piece with no price is simply a piece you ask about.",
+    "Every piece here is made by hand in Collegeville. The photographs are the listing — a piece with no price is simply a piece you ask about.",
   ownerPhoto: "",
   paymentNote: "Payment is arranged with me directly. This website does not take payment.",
   responseNote: "",
@@ -79,6 +82,9 @@ export const defaultSettings: ShopSettings = {
     returns:
       "These are single pieces. A sale is final once you have the piece, unless we agree otherwise in writing.",
   },
+  leadTime: "",
+  holds: "",
+  commissions: "",
   faqs: [
     {
       q: "How do I buy a piece?",
@@ -101,6 +107,9 @@ export function withDefaults(value: unknown): ShopSettings {
     ...raw,
     policies: { ...defaultSettings.policies, ...(raw.policies ?? {}) },
     faqs: Array.isArray(raw.faqs) ? raw.faqs : defaultSettings.faqs,
+    leadTime: raw.leadTime ?? "",
+    holds: raw.holds ?? "",
+    commissions: raw.commissions ?? "",
     hours: raw.hours ?? [],
     checklist: raw.checklist ?? {},
   };

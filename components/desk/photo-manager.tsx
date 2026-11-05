@@ -1,7 +1,7 @@
 import { DragPhoto } from "@/components/desk/drag-photo";
 import { FocalPicker } from "@/components/desk/focal-picker";
 import { PhotoUpload } from "@/components/desk/upload";
-import { coverImage, cropImage, moveImage, rotateImage, savePhoto, setAsHeroImage } from "@/lib/desk-actions";
+import { coverImage, cropImage, moveImage, retryEnhance, rotateImage, savePhoto, setAsHeroImage } from "@/lib/desk-actions";
 import type { productImages } from "@/lib/db/schema";
 
 type Image = typeof productImages.$inferSelect;
@@ -11,15 +11,19 @@ export function PhotoManager({
   images,
   heroImage,
 }: {
-  product: { id: string; title: string };
+  product: { id: string; title: string; attributes?: Record<string, unknown> };
   images: Image[];
   heroImage: string;
 }) {
+  const enhancedMap = (product.attributes?.enhancedVersions ?? {}) as Record<string, string>;
+  const enhancedById = new Map(images.filter((i) => i.alt === "enhanced-version").map((i) => [i.id, i]));
+  const enhanceStatus = (product.attributes?.enhance ?? {}) as unknown as Record<string, { status?: string }>;
+  const originals = images.filter((i) => i.alt !== "enhanced-version");
   return (
     <section className="grid gap-4" id="photos">
       <h2 className="text-3xl">Photos</h2>
       <PhotoUpload productId={product.id} />
-      {images.map((image, index) => (
+      {originals.map((image, index) => (
         <article key={image.id} className="grid gap-4 border-b border-line pb-6">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
@@ -33,14 +37,14 @@ export function PhotoManager({
               <form action={moveImage}>
                 <input type="hidden" name="imageId" value={image.id} />
                 <input type="hidden" name="direction" value="up" />
-                <button className="btn btn-quiet h-8 min-h-0 px-3 text-xs" type="submit" disabled={index === 0}>
+                <button className="btn btn-quiet min-h-11 px-3 text-xs" type="submit" disabled={index === 0}>
                   Move up
                 </button>
               </form>
               <form action={moveImage}>
                 <input type="hidden" name="imageId" value={image.id} />
                 <input type="hidden" name="direction" value="down" />
-                <button className="btn btn-quiet h-8 min-h-0 px-3 text-xs" type="submit" disabled={index === images.length - 1}>
+                <button className="btn btn-quiet min-h-11 px-3 text-xs" type="submit" disabled={index === images.length - 1}>
                   Move down
                 </button>
               </form>
@@ -48,20 +52,20 @@ export function PhotoManager({
               {index !== 0 ? (
                 <form action={coverImage}>
                   <input type="hidden" name="imageId" value={image.id} />
-                  <button className="btn btn-quiet h-8 min-h-0 px-3 text-xs" type="submit">
+                  <button className="btn btn-quiet min-h-11 px-3 text-xs" type="submit">
                     Use as cover
                   </button>
                 </form>
               ) : null}
               <form action={rotateImage}>
                 <input type="hidden" name="imageId" value={image.id} />
-                <button className="btn btn-quiet h-8 min-h-0 px-3 text-xs" type="submit">
+                <button className="btn btn-quiet min-h-11 px-3 text-xs" type="submit">
                   Turn 90°
                 </button>
               </form>
               <form action={setAsHeroImage}>
                 <input type="hidden" name="imageId" value={image.id} />
-                <button className="btn btn-secondary h-8 min-h-0 px-3 text-xs" type="submit">
+                <button className="btn btn-secondary min-h-11 px-3 text-xs" type="submit">
                   {heroImage === image.url ? "★ Refresh hero" : "Set as homepage hero"}
                 </button>
               </form>
@@ -115,6 +119,53 @@ export function PhotoManager({
               </form>
             </div>
           </div>
+
+          {(() => {
+            const status = enhanceStatus[image.id]?.status;
+            if (status === "pending") return <p className="tag">Tidying photo…</p>;
+            if (status === "failed")
+              return (
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="tag">Couldn&rsquo;t tidy this photo</p>
+                  <form action={retryEnhance}>
+                    <input type="hidden" name="imageId" value={image.id} />
+                    <input type="hidden" name="productId" value={product.id} />
+                    <button className="btn btn-quiet min-h-11 px-3 text-xs" type="submit">
+                      Try again
+                    </button>
+                  </form>
+                </div>
+              );
+            if (status === "done") return <p className="tag">Tidied</p>;
+            return null;
+          })()}
+
+          {enhancedMap[image.id] && enhancedById.get(enhancedMap[image.id]) ? (
+            <div className="grid gap-2 border border-line bg-card p-3">
+              <p className="text-sm font-semibold">Original / Enhanced</p>
+              <div className="grid grid-cols-2 gap-3">
+                <figure>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- desk comparison thumb */}
+                  <img src={image.url} alt={`${image.alt || product.title} — original`} className="w-full rounded-[2px] border border-line" />
+                  <figcaption className="tag mt-1">Original</figcaption>
+                </figure>
+                <figure>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- desk comparison thumb */}
+                  <img src={enhancedById.get(enhancedMap[image.id])!.url} alt={`${image.alt || product.title} — enhanced`} className="w-full rounded-[2px] border border-line" />
+                  <figcaption className="tag mt-1">Enhanced</figcaption>
+                </figure>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <form action={coverImage}>
+                  <input type="hidden" name="imageId" value={enhancedMap[image.id]} />
+                  <button className="btn btn-secondary min-h-11 px-3 text-xs" type="submit">
+                    Use enhanced as cover
+                  </button>
+                </form>
+                <p className="desk-note text-xs">The original stays in place — nothing on the site changes unless you say so.</p>
+              </div>
+            </div>
+          ) : null}
         </article>
       ))}
     </section>

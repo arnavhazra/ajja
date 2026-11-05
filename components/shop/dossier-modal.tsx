@@ -43,7 +43,7 @@ export function DossierProvider({ children, location = "" }: { children: React.R
   };
 
   const cover = activeProduct?.images[0];
-  const title = activeProduct ? pieceTitle(activeProduct.title, activeProduct.categorySlug, activeProduct.attributes) : "";
+  const title = activeProduct ? pieceTitle(activeProduct.title, activeProduct.categorySlug, activeProduct.attributes, activeProduct.id) : "";
   const kind = activeProduct ? pieceKind(activeProduct.categoryName, activeProduct.attributes) : "";
   const dimensions = activeProduct?.attributes?.dimensions || activeProduct?.attributes?.size || "";
   const material = activeProduct?.attributes?.material || activeProduct?.attributes?.medium || kind || "";
@@ -86,7 +86,7 @@ export function DossierProvider({ children, location = "" }: { children: React.R
                 <button
                   type="button"
                   onClick={closeDossier}
-                  className="btn btn-quiet min-h-8 px-2 py-1 text-xs cursor-pointer"
+                  className="btn btn-quiet min-h-11 px-3 text-xs cursor-pointer"
                   aria-label="Close"
                 >
                   ✕
@@ -104,7 +104,7 @@ export function DossierProvider({ children, location = "" }: { children: React.R
                     <button
                       type="button"
                       onClick={() => setViewMode("daylight")}
-                      className={`px-3 py-1 rounded-sm font-mono text-[10px] uppercase cursor-pointer transition-colors ${
+                      className={`inline-flex min-h-11 items-center px-3 rounded-sm font-mono text-[10px] uppercase cursor-pointer transition-colors ${
                         viewMode === "daylight" ? "bg-ink text-linen font-bold" : "text-umber hover:text-ink hairline-box bg-bone"
                       }`}
                     >
@@ -113,7 +113,7 @@ export function DossierProvider({ children, location = "" }: { children: React.R
                     <button
                       type="button"
                       onClick={() => setViewMode("macro")}
-                      className={`px-3 py-1 rounded-sm font-mono text-[10px] uppercase cursor-pointer transition-colors ${
+                      className={`inline-flex min-h-11 items-center px-3 rounded-sm font-mono text-[10px] uppercase cursor-pointer transition-colors ${
                         viewMode === "macro" ? "bg-ink text-linen font-bold" : "text-umber hover:text-ink hairline-box bg-bone"
                       }`}
                     >
@@ -122,7 +122,7 @@ export function DossierProvider({ children, location = "" }: { children: React.R
                     <button
                       type="button"
                       onClick={() => setViewMode("scale")}
-                      className={`px-3 py-1 rounded-sm font-mono text-[10px] uppercase cursor-pointer transition-colors ${
+                      className={`inline-flex min-h-11 items-center px-3 rounded-sm font-mono text-[10px] uppercase cursor-pointer transition-colors ${
                         viewMode === "scale" ? "bg-ink text-linen font-bold" : "text-umber hover:text-ink hairline-box bg-bone"
                       }`}
                     >
@@ -226,7 +226,6 @@ export function DossierProvider({ children, location = "" }: { children: React.R
                           imageUrl: cover?.url,
                           kind: kind || undefined,
                           dimensions,
-                          stripeUrl: activeProduct.attributes?.stripe_url,
                         });
                         if (!inFolio) setFolioOpen(true);
                       }}

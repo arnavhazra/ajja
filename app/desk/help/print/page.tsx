@@ -1,10 +1,11 @@
 import { Suspense } from "react";
+import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import { PrintButton } from "@/components/desk/print-button";
 import { requireDesk } from "@/lib/desk-data";
 
 export default function CheatSheetPage() {
   return (
-    <Suspense fallback={<p className="p-4">Loading…</p>}>
+    <Suspense fallback={<DeskRowsSkeleton />}>
       <CheatSheet />
     </Suspense>
   );

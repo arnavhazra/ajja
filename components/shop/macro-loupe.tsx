@@ -103,6 +103,8 @@ export function MacroLoupeImage({ image, title, ratio, priority = false, onOpenD
           alt={image.alt || title}
           fill
           priority={priority}
+          fetchPriority={priority ? "high" : "auto"}
+          quality={74}
           sizes="(min-width: 768px) 58vw, 100vw"
           placeholder={image.blurData ? "blur" : "empty"}
           blurDataURL={image.blurData ?? undefined}

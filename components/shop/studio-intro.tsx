@@ -3,6 +3,8 @@ import type { ShopSettings } from "@/lib/settings";
 import type { PublicProduct } from "@/lib/types";
 
 export function StudioIntro({ settings, detail }: { settings: ShopSettings; detail?: PublicProduct | null }) {
+  // The maker block is only real bio + town — hide it entirely until the owner writes one.
+  if (!settings.story.trim()) return null;
   const photoUrl = settings.ownerPhoto || detail?.images[0]?.url || "";
   const photoAlt = settings.ownerPhoto ? `${settings.ownerName} in the studio` : (detail?.images[0]?.alt || "A piece from the studio");
 

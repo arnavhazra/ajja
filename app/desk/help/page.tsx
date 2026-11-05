@@ -1,11 +1,12 @@
 import { Suspense } from "react";
+import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import Link from "next/link";
 import { requireDesk } from "@/lib/desk-data";
 import { deskPrefix } from "@/lib/desk-path";
 
 export default function HelpPage() {
   return (
-    <Suspense fallback={<p className="p-4">Loading…</p>}>
+    <Suspense fallback={<DeskRowsSkeleton />}>
       <Help />
     </Suspense>
   );

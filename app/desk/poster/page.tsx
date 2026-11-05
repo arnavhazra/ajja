@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Suspense } from "react";
+import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import QRCode from "qrcode";
 import { PrintButton } from "@/components/desk/print-button";
 import { loadPosterPieces, requireDesk } from "@/lib/desk-data";
@@ -8,7 +9,7 @@ import { siteUrl } from "@/lib/site-url";
 
 export default function PosterPage() {
   return (
-    <Suspense fallback={<p className="p-4">Loading…</p>}>
+    <Suspense fallback={<DeskRowsSkeleton />}>
       <Poster />
     </Suspense>
   );

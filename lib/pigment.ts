@@ -2,6 +2,8 @@ import "server-only";
 
 import sharp from "sharp";
 
+export { deltaE, dedupeByPigment, hexToLab, sortByHue } from "./pigment-math";
+
 export type Pigment = { hex: string; ink: "#ffffff" | "#18222c" };
 
 const FALLBACK: Pigment = { hex: "#2a44c4", ink: "#ffffff" };

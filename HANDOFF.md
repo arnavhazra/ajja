@@ -26,6 +26,10 @@ Staff door, local setup:
 - `DEV_ADMIN_PASSWORD`
 - `DEV_ADMIN_TOTP_SECRET`
 
+Photo tidy-up (image-to-image studio sweep):
+
+- `OPENROUTER_API_KEY`
+
 Neon companions already pulled beside `DATABASE_URL`:
 
 - `DATABASE_URL_UNPOOLED`
@@ -102,3 +106,11 @@ Leave these open until he supplies them:
 - Street
 
 The Visit page already says the street and the hours are not listed yet. Do not invent them on the profile.
+
+## Sign-in recovery
+
+The desk has a password door and an email-code door. If the owner forgets the
+password: visit `/{ADMIN_PATH}?code=1`, enter the `OWNER_EMAIL` address from the
+env, and a one-time code is emailed to it. That door only appears when
+`OWNER_EMAIL` is set (it is, in `.env.local` / Vercel env). There is no
+password-reset email — the code door is the recovery path.

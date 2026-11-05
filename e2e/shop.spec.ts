@@ -96,7 +96,8 @@ test("owner signs in with a password, prices, publishes, hides, undoes, and shar
   await page.getByRole("button", { name: "Put on the site" }).click();
   await expect(page.getByRole("status")).toContainText("Put on the site");
 
-  await page.getByRole("link", { name: "Home page" }).click();
+  await page.getByRole("link", { name: "Settings" }).click();
+  await page.getByRole("link", { name: "Home page wording & contact" }).click();
   await page.getByLabel("WhatsApp number").fill("15555550100");
   await page.getByRole("button", { name: "Save home page" }).click();
   await expect(page.getByRole("status")).toBeVisible();
@@ -135,8 +136,9 @@ test("photo upload makes a draft", async ({ page }) => {
   await page.getByLabel("Email").fill(adminEmail);
   await page.getByLabel("Password").fill(adminPassword);
   await page.getByRole("button", { name: "Sign in" }).click();
+  await page.getByRole("link", { name: "Settings" }).click();
   await page.getByRole("link", { name: "Add a piece" }).click();
-  await page.getByLabel("Choose a photo").setInputFiles("e2e/tiny.jpg");
+  await page.getByLabel("Choose photos").setInputFiles("e2e/tiny.jpg");
   await expect(page.getByRole("heading", { name: "Edit this piece" })).toBeVisible({ timeout: 60_000 });
 });
 
@@ -158,14 +160,27 @@ test("pages stay accessible", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Today" })).toBeVisible();
   for (const [link, route] of [
     ["Pieces", "/pieces"],
-    ["Home page", "/home"],
-    ["Account", "/account"],
+    ["Messages", "/messages"],
+    ["Groups", "/groups"],
+    ["Numbers", "/insights"],
+    ["Files", "/files"],
   ] as const) {
-    await page.getByRole("link", { name: link, exact: true }).first().click();
+    await page.getByRole("link", { name: link }).first().click();
     await expect(page).toHaveURL(new RegExp(`${route}$`));
     await expect(page.getByRole("heading", { level: 1, name: link })).toBeVisible();
     const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations, link).toEqual([]);
+  }
+  for (const [hubLink, route, h1] of [
+    ["Home page wording & contact", "/home", "Home page"],
+    ["Account & password", "/account", "Account"],
+  ] as const) {
+    await page.getByRole("link", { name: "Settings", exact: true }).click();
+    await page.getByRole("link", { name: hubLink, exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`${route}$`));
+    await expect(page.getByRole("heading", { level: 1, name: h1 })).toBeVisible();
+    const results = await new AxeBuilder({ page }).analyze();
+    expect(results.violations, h1).toEqual([]);
   }
   await page.emulateMedia({ reducedMotion: "no-preference" });
   for (const width of [360, 768, 1280, 1920]) {

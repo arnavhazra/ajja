@@ -23,7 +23,7 @@ function same(left: string, right: string) {
 }
 
 export function allowedEmails() {
-  return [process.env.OWNER_EMAIL, process.env.DEV_ADMIN_EMAIL]
+  return [process.env.OWNER_EMAIL, process.env.DEV_ADMIN_EMAIL, ...(process.env.E2E_DESK_EMAIL ?? "").split(",")]
     .map((email) => email?.trim().toLowerCase())
     .filter((email): email is string => Boolean(email));
 }

@@ -98,7 +98,7 @@ export function SiteFooter({ settings }: { settings: ShopSettings }) {
 
       <div className="shell pt-8 hairline-t flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[10px] uppercase tracking-widest text-umber">
         <p>© {settings.businessName}. Made by hand.</p>
-        <p>One of each — ask before it&apos;s gone.</p>
+        <p>Made by hand in {settings.town}, {settings.region}.</p>
       </div>
     </footer>
   );

@@ -7,7 +7,10 @@ import { ColourIndex } from "@/components/shop/colour-index";
 import { StudioIntro } from "@/components/shop/studio-intro";
 import { AcquisitionFaq } from "@/components/shop/acquisition-faq";
 import { CommissionForm } from "@/components/shop/commission-form";
-import { getSettings, loadManifest } from "@/lib/public-data";
+import { enquiryPrefillMessage, parsePiecesParam } from "@/lib/folio";
+import { formatMoney } from "@/lib/money";
+import { pieceTitle } from "@/lib/piece-title";
+import { getSettings, loadManifest, loadSaved } from "@/lib/public-data";
 import { siteUrl } from "@/lib/site-url";
 
 function ShopSkeleton() {
@@ -35,16 +38,36 @@ function ShopSkeleton() {
   );
 }
 
-export default function HomePage() {
+export default function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   return (
     <Suspense fallback={<ShopSkeleton />}>
-      <Home />
+      <Home searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function Home() {
-  const [settings, products] = await Promise.all([getSettings(), loadManifest()]);
+async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const pieceSlugs = parsePiecesParam(Array.isArray(params.pieces) ? params.pieces[0] : params.pieces);
+  const [settings, products, saved] = await Promise.all([getSettings(), loadManifest(), loadSaved(pieceSlugs)]);
+  const initialMessage = saved.length
+    ? enquiryPrefillMessage(
+        saved.map((product) => ({
+          title: pieceTitle(product.title, product.categorySlug, product.attributes, product.id),
+          slug: product.slug,
+          priceMinor: product.priceMinor,
+        })),
+        (minor) => formatMoney(minor, saved[0]?.currency ?? "USD"),
+      )
+    : undefined;
   const ordered = [...products].sort((a, b) => {
     if (a.status === "sold" && b.status !== "sold") return 1;
     if (b.status === "sold" && a.status !== "sold") return -1;
@@ -87,9 +110,9 @@ async function Home() {
 
       <StudioIntro settings={settings} detail={detail} />
 
-      <AcquisitionFaq />
+      <AcquisitionFaq settings={settings} />
 
-      <CommissionForm responseNote={settings.responseNote} />
+      <CommissionForm responseNote={settings.responseNote} initialMessage={initialMessage} />
 
       <MotionScan />
     </main>

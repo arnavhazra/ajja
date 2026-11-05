@@ -1,11 +1,12 @@
 import { Suspense } from "react";
+import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import { Flash, one } from "@/components/desk/flash";
 import { moveCategory, removeCategory, removeCollection, saveCategory, saveCollection } from "@/lib/desk-actions";
 import { loadGroups, requireDesk } from "@/lib/desk-data";
 
 export default function GroupsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   return (
-    <Suspense fallback={<p className="p-4">Loading…</p>}>
+    <Suspense fallback={<DeskRowsSkeleton />}>
       <Groups searchParams={searchParams} />
     </Suspense>
   );
@@ -66,10 +67,10 @@ async function Groups({ searchParams }: { searchParams: Promise<Record<string, s
                 <button className="btn btn-secondary" type="submit">
                   Save group
                 </button>
-                <button className="btn btn-quiet" type="submit" formAction={moveCategory} name="direction" value="up">
+                <button className="btn btn-quiet" type="submit" formAction={moveCategory.bind(null, "up")}>
                   Move up
                 </button>
-                <button className="btn btn-quiet" type="submit" formAction={moveCategory} name="direction" value="down">
+                <button className="btn btn-quiet" type="submit" formAction={moveCategory.bind(null, "down")}>
                   Move down
                 </button>
                 <button className="btn btn-quiet" type="submit" formAction={removeCategory}>

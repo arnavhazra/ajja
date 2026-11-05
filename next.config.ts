@@ -22,8 +22,10 @@ const csp = [
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
+  devIndicators: false,
   images: {
     dangerouslyAllowLocalIP: process.env.NODE_ENV !== "production",
+    qualities: [72, 74, 75],
     remotePatterns: [
       { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
     ],

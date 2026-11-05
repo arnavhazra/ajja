@@ -1,13 +1,16 @@
 import { Suspense } from "react";
+import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import Image from "next/image";
 import Link from "next/link";
 import { Flash, one } from "@/components/desk/flash";
+import { sprintSave } from "@/lib/desk-actions";
 import { requireDesk, loadReview } from "@/lib/desk-data";
 import { deskPrefix } from "@/lib/desk-path";
+import { minorToDollars } from "@/lib/money";
 
 export default function ReviewPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   return (
-    <Suspense fallback={<p className="p-4">Loading…</p>}>
+    <Suspense fallback={<DeskRowsSkeleton />}>
       <Review searchParams={searchParams} />
     </Suspense>
   );
@@ -19,21 +22,21 @@ async function Review({ searchParams }: { searchParams: Promise<Record<string, s
   const [item, prefix] = await Promise.all([loadReview(one(params.skip)), deskPrefix()]);
   return (
     <main className="desk-page">
-      <Flash note={one(params.note)} undo="" back="/review" />
+      <Flash note={one(params.note)} undo={one(params.undo)} back="/review" />
       <div className="desk-lead">
-        <h1 className="text-4xl">Review</h1>
-        <p className="desk-note">One draft at a time. Fill in what is missing, then go to the next.</p>
+        <h1 className="text-4xl">Name &amp; price sprint</h1>
+        <p className="desk-note">One piece at a time. Name it, price it if you can, press Enter — the next one loads.</p>
       </div>
       {item ? (
-        <article className="desk-review">
-          <figure className="photo-frame crop aspect-[4/5] relative grid w-full max-w-2xl place-items-center">
+        <article className="desk-review grid gap-5">
+          <figure className="photo-frame crop relative grid aspect-[4/3] w-full max-w-3xl place-items-center">
             {item.images[0] ? (
               <Image
                 src={item.images[0].url}
                 alt={item.images[0].alt || "Draft photograph"}
                 fill
                 priority
-                sizes="(max-width: 768px) 100vw, 40rem"
+                sizes="(max-width: 768px) 100vw, 48rem"
                 className="object-cover"
                 style={{
                   objectPosition: `${Number(item.images[0].focalX) * 100}% ${Number(item.images[0].focalY) * 100}%`,
@@ -43,33 +46,51 @@ async function Review({ searchParams }: { searchParams: Promise<Record<string, s
               <p>No photo yet</p>
             )}
           </figure>
-          <p className="display text-3xl">{item.product.title.trim() || "Studio Study"}</p>
           <p className="nums text-ink-soft">{item.remaining} still in the queue.</p>
           {item.missing.length ? (
             <p className="desk-note">Still missing: {item.missing.join(", ")}.</p>
           ) : (
-            <p className="desk-note">Nothing obvious is missing. You can put it on the site when you are ready.</p>
+            <p className="desk-note">Nothing obvious is missing.</p>
           )}
-          <div className="flex flex-wrap gap-2">
-            <Link className="btn btn-primary w-full sm:w-fit" href={`${prefix}/pieces/${item.product.id}`}>
-              Open this piece
-            </Link>
-            {item.nextId ? (
-              <Link className="btn btn-secondary" href={`${prefix}/review?skip=${item.product.id}`}>
-                Next
+          <form action={sprintSave} className="grid max-w-xl gap-3" key={item.product.id}>
+            <input type="hidden" name="id" value={item.product.id} />
+            <label className="grid gap-1">
+              <span className="field-label">Name</span>
+              <input
+                className="field text-lg"
+                name="title"
+                defaultValue={item.product.title}
+                placeholder="e.g. Cobalt pour no. 3"
+                autoFocus
+              />
+            </label>
+            <label className="grid gap-1">
+              <span className="field-label">Price in dollars — leave blank to keep it a question</span>
+              <input
+                className="field nums"
+                name="price"
+                defaultValue={minorToDollars(item.product.priceMinor)}
+                inputMode="decimal"
+                placeholder="e.g. 180"
+              />
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <button className="btn btn-primary" type="submit">
+                Save &amp; next →
+              </button>
+              <Link className="btn btn-secondary" href={`${prefix}/pieces/${item.product.id}`}>
+                Open full editor
               </Link>
-            ) : null}
-            {item.nextId ? (
-              <Link className="btn btn-quiet" href={`${prefix}/review?skip=${item.product.id}`}>
-                Skip
-              </Link>
-            ) : (
-              <p>This is the last draft.</p>
-            )}
-          </div>
+              {item.nextId ? (
+                <Link className="btn btn-quiet" href={`${prefix}/review?skip=${item.product.id}`}>
+                  Skip
+                </Link>
+              ) : null}
+            </div>
+          </form>
         </article>
       ) : (
-        <p className="desk-note">No drafts are waiting.</p>
+        <p className="desk-note">No drafts are waiting — the queue is clear.</p>
       )}
     </main>
   );

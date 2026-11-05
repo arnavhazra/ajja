@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import type { MouseEvent } from "react";
+import { ViewTransition, type MouseEvent } from "react";
 import { cn } from "@/lib/cn";
 import { formatMoney } from "@/lib/money";
 import { pieceKind, pieceTitle } from "@/lib/piece-title";
@@ -19,6 +19,13 @@ type Props = {
   index?: number;
 };
 
+function surfaceClass(kind: string) {
+  const hint = kind.toLowerCase();
+  if (hint.includes("ceramic") || hint.includes("glaze") || hint.includes("pot")) return "surface-glaze";
+  if (hint.includes("wood") || hint.includes("pine") || hint.includes("walnut")) return "surface-wood";
+  return "surface-canvas";
+}
+
 export function PieceCard({
   product,
   priority = false,
@@ -30,7 +37,7 @@ export function PieceCard({
   const { openDossier } = useDossier();
 
   const cover = product.images[0];
-  const title = pieceTitle(product.title, product.categorySlug, product.attributes);
+  const title = pieceTitle(product.title, product.categorySlug, product.attributes, product.id);
   const kind = pieceKind(product.categoryName, product.attributes) || "Studio piece";
   const dimensions = product.attributes.dimensions || product.attributes.size || "";
   const sold = product.status === "sold";
@@ -51,7 +58,6 @@ export function PieceCard({
       imageUrl: cover?.url,
       kind: kind ?? undefined,
       dimensions,
-      stripeUrl: product.attributes.stripe_url || product.attributes.stripe_payment_link,
     });
     if (!inFolio) setFolioOpen(true);
   };
@@ -63,89 +69,71 @@ export function PieceCard({
   };
 
   return (
-    <article className={cn("group flex flex-col bg-bone hairline-box rounded-sm p-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-1", className)}>
-      {/* Kind & status strip */}
-      <div className="flex items-center justify-between pb-2.5 mb-2.5 hairline-b font-mono text-[10px] tracking-widest uppercase">
-        <span className="font-semibold text-ink truncate">{kind}</span>
-        {sold ? (
-          <span className="px-1.5 py-0.5 rounded-sm font-bold bg-sold/15 text-sold">Sold</span>
-        ) : product.quantity === 1 ? (
-          <span className="px-1.5 py-0.5 rounded-sm font-bold bg-moss/15 text-moss">One of one</span>
-        ) : null}
-      </div>
-
-      {/* Photograph */}
-      <Link
-        href={`/p/${product.slug}`}
-        tabIndex={-1}
-        aria-hidden="true"
-        className="relative block w-full overflow-hidden rounded-sm bg-boneDark select-none hairline-box"
-        style={{ aspectRatio: ratio }}
-      >
-        {cover ? (
-          <Image
-            src={cover.url}
-            alt=""
-            fill
-            sizes={sizes}
-            priority={priority}
-            placeholder={cover.blurData ? "blur" : "empty"}
-            blurDataURL={cover.blurData ?? undefined}
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
-            style={{ objectPosition: `${(cover.focalX ?? 0.5) * 100}% ${(cover.focalY ?? 0.5) * 100}%` }}
-          />
-        ) : null}
-      </Link>
-
-      {/* Title, price, facts */}
-      <div className="pt-3.5 flex-1 flex flex-col justify-between">
-        <div>
-          <div className="flex items-baseline justify-between gap-2 mb-1">
-            <Link
-              href={`/p/${product.slug}`}
-              className="font-serif text-xl sm:text-2xl font-medium text-ink hover:text-terracotta transition-colors leading-snug line-clamp-2"
-            >
-              {title}
-            </Link>
-            <span className={cn("font-mono text-xs sm:text-sm font-bold shrink-0", sold ? "text-sold" : "text-ink")}>
-              {price}
-            </span>
-          </div>
-
-          {dimensions ? (
-            <div className="flex items-center gap-2 font-mono text-[11px] text-umber pt-1">
-              <span className="truncate">{dimensions}</span>
-            </div>
+    <article className={cn("group relative flex flex-col", className)}>
+      {/* Photograph with the kind's surface texture; lifts on hover */}
+      <ViewTransition name={`piece-${product.id}`}>
+        <Link
+          href={`/p/${product.slug}`}
+          tabIndex={-1}
+          aria-hidden="true"
+          className={cn(
+            "relative block w-full overflow-hidden rounded-[2px] bg-plate select-none hairline-box",
+            "transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:-translate-y-1.5 group-hover:shadow-[0_18px_40px_-16px_rgba(15,18,22,0.4)]",
+            surfaceClass(kind),
+          )}
+          style={{ aspectRatio: ratio }}
+        >
+          {cover ? (
+            <Image
+              src={cover.url}
+              alt=""
+              fill
+              sizes={sizes}
+              priority={priority}
+              placeholder={cover.blurData ? "blur" : "empty"}
+              blurDataURL={cover.blurData ?? undefined}
+              className="object-cover"
+              style={{ objectPosition: `${(cover.focalX ?? 0.5) * 100}% ${(cover.focalY ?? 0.5) * 100}%` }}
+            />
           ) : null}
-        </div>
+        </Link>
+      </ViewTransition>
 
-        {/* Actions */}
-        <div className="pt-4 mt-3 hairline-t flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleDossierClick}
-            className="flex-1 py-2 px-3 bg-linen hover:bg-boneDark text-ink font-mono text-[11px] uppercase tracking-wider hairline-box rounded-sm transition-colors text-center cursor-pointer"
+      {/* Wall label — the paper tag that morphs onto the piece page */}
+      <ViewTransition name={`piece-label-${product.id}`}>
+        <div className="wall-label relative z-10 -mt-6 mx-3 grid gap-1.5 p-3.5 transition-colors duration-500 group-hover:bg-pour group-hover:[--ink:var(--pour-ink)]">
+          <Link
+            href={`/p/${product.slug}`}
+            className="display-wide block text-lg leading-snug text-ink line-clamp-2 transition-colors group-hover:text-pour-ink"
           >
-            Quick look
-          </button>
-
-          {!sold ? (
-            <button
-              type="button"
-              onClick={handleFolioClick}
-              className={cn(
-                "py-2 px-3 font-mono text-[11px] uppercase tracking-wider rounded-sm transition-colors cursor-pointer",
-                inFolio
-                  ? "bg-moss text-linen"
-                  : "bg-terracotta hover:bg-terracottaDark text-linen",
-              )}
-              aria-label={inFolio ? `Remove ${title} from saved` : `Save ${title}`}
-            >
-              {inFolio ? "✓ Saved" : "Save"}
-            </button>
-          ) : null}
+            {title}
+          </Link>
+          <span className="tag block truncate">{kind}{dimensions ? ` · ${dimensions}` : ""}</span>
+          <span className={cn("nums block text-sm font-bold", sold ? "text-sold" : "text-ink")}>{price}</span>
+          <div className="flex items-center justify-end gap-1 border-t border-line pt-1.5">
+              <button
+                type="button"
+                onClick={handleDossierClick}
+                className="tag inline-flex min-h-11 items-center px-2 text-ink-soft transition-colors hover:text-ink cursor-pointer"
+              >
+                Quick look
+              </button>
+              {!sold ? (
+                <button
+                  type="button"
+                  onClick={handleFolioClick}
+                  className={cn(
+                    "tag inline-flex min-h-11 items-center px-2 transition-colors cursor-pointer",
+                    inFolio ? "text-ok" : "text-pour hover:text-ink",
+                  )}
+                  aria-label={inFolio ? `Remove ${title} from saved` : `Save ${title}`}
+                >
+                  {inFolio ? "✓ Saved" : "Save"}
+                </button>
+              ) : null}
+          </div>
         </div>
-      </div>
+      </ViewTransition>
     </article>
   );
 }

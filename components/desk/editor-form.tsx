@@ -80,10 +80,6 @@ export function EditorForm({
         Dimensions
         <input className="field" name="field:dimensions" placeholder="e.g. 24 × 36 in (61 × 91 cm)" defaultValue={attributes.dimensions || attributes.size || ""} />
       </label>
-      <label className="grid gap-1">
-        Stripe Payment Link (for instant checkout without inquiry)
-        <input className="field font-mono text-sm" name="field:stripe_url" placeholder="https://buy.stripe.com/..." defaultValue={attributes.stripe_url || attributes.stripe_payment_link || ""} />
-      </label>
       {fields.map((field) =>
         field.key && field.key !== "medium" && field.key !== "dimensions" ? (
           <label key={field.key} className="grid gap-1">

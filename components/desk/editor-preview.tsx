@@ -1,10 +1,14 @@
 import { PieceCard } from "@/components/shop/piece-card";
 import { draftPiece, duplicatePiece, hidePiece, publishPiece, sellPiece, trashPiece } from "@/lib/desk-actions";
+import { hasRealTitle } from "@/lib/piece-title";
 import type { PublicProduct } from "@/lib/types";
 
 export function EditorPreview({ productId, preview }: { productId: string; preview: PublicProduct }) {
   return (
     <aside className="grid content-start gap-4 lg:sticky lg:top-6">
+      {!hasRealTitle(preview.title) ? (
+        <p className="desk-pill w-fit" data-tone="warn">Needs a name</p>
+      ) : null}
       <div className="border border-line p-3">
         <p className="caption mb-2">On phones</p>
         <div className="max-w-[390px]">

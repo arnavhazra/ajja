@@ -40,6 +40,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -47,3 +48,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local review artifacts + enhance outputs (keep seed/enhance/prompt.md)
+artifacts/
+seed/enhance/*
+!seed/enhance/prompt.md

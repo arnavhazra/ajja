@@ -1,82 +1,49 @@
 "use client";
 
 import { useState } from "react";
+import type { ShopSettings } from "@/lib/settings";
 
-const FAQ_ITEMS = [
-  {
-    num: "01",
-    title: "Packing & delivery",
-    content:
-      "Every piece is wrapped and packed by hand. How it reaches you — collection, courier, timing — is agreed with you directly before anything leaves the studio.",
-  },
-  {
-    num: "02",
-    title: "Studio visits",
-    content:
-      "You can visit the studio in Collegeville, Pennsylvania by appointment to see a piece in daylight before you decide.",
-  },
-  {
-    num: "03",
-    title: "Paying for a piece",
-    content:
-      "Nothing is paid on this site. Once we agree a price, payment is arranged with the studio directly — by whatever method suits us both.",
-  },
-  {
-    num: "04",
-    title: "Custom work",
-    content:
-      "Commissions start with a conversation about size, wood or canvas, and where the piece will live. Ask the studio what is possible.",
-  },
-];
-
-export function AcquisitionFaq() {
+/** Questions answered only by what the owner actually wrote in the desk. */
+export function AcquisitionFaq({ settings }: { settings: ShopSettings }) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
-  const toggle = (i: number) => {
-    setOpenIndex(openIndex === i ? null : i);
-  };
+  const items: { num: string; title: string; content: string }[] = [];
+  if (settings.leadTime.trim()) items.push({ num: "01", title: "Timing", content: settings.leadTime });
+  if (settings.holds.trim()) items.push({ num: "02", title: "Holds", content: settings.holds });
+  if (settings.commissions.trim()) items.push({ num: "03", title: "Custom work", content: settings.commissions });
+  for (const faq of settings.faqs) items.push({ num: String(items.length + 1).padStart(2, "0"), title: faq.q, content: faq.a });
+  if (settings.policies.buying.trim()) items.push({ num: String(items.length + 1).padStart(2, "0"), title: "Buying", content: settings.policies.buying });
+  if (settings.policies.collection.trim()) items.push({ num: String(items.length + 1).padStart(2, "0"), title: "Collection & delivery", content: settings.policies.collection });
+  if (settings.policies.returns.trim()) items.push({ num: String(items.length + 1).padStart(2, "0"), title: "Returns", content: settings.policies.returns });
+
+  if (!items.length) return null;
 
   return (
-    <section id="buying" className="py-16 sm:py-24 hairline-b bg-linen">
+    <section id="buying" className="hairline-b py-16 sm:py-24">
       <div className="shell max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-terracotta mb-2 font-bold">
-            How it works
-          </p>
-          <h2 className="font-serif text-3xl sm:text-5xl text-ink font-normal mb-3">
-            Buying, delivery &amp; care
-          </h2>
-          <p className="text-sm text-umber max-w-lg mx-auto font-sans leading-relaxed">
-            There is no checkout here. Every piece starts with a conversation.
-          </p>
+        <div className="mb-12">
+          <p className="tag text-pour">03 — Good to know</p>
+          <h2 className="display-wide mt-2 text-3xl sm:text-4xl">Buying, delivery &amp; care</h2>
         </div>
-
-        <div className="space-y-4">
-          {FAQ_ITEMS.map((item, index) => {
-            const isOpen = openIndex === index;
-            return (
-              <div key={item.num} className="bg-bone hairline-box rounded-sm overflow-hidden transition-colors">
-                <button
-                  type="button"
-                  onClick={() => toggle(index)}
-                  className="w-full px-6 py-5 flex items-center justify-between text-left cursor-pointer hover:bg-boneDark transition-colors"
-                  aria-expanded={isOpen}
-                >
-                  <div className="flex items-center gap-4">
-                    <span className="font-mono text-xs font-bold text-terracotta">{item.num}</span>
-                    <span className="font-serif text-xl sm:text-2xl text-ink font-medium">{item.title}</span>
-                  </div>
-                  <span className="font-mono text-lg text-umber shrink-0 pl-4">{isOpen ? "−" : "+"}</span>
-                </button>
-                {isOpen ? (
-                  <div className="px-6 pb-6 pt-2 hairline-t bg-linen/50 text-sm text-umber font-sans leading-relaxed">
-                    <p>{item.content}</p>
-                  </div>
-                ) : null}
-              </div>
-            );
-          })}
-        </div>
+        <ol className="grid gap-0">
+          {items.map((item, index) => (
+            <li key={item.num + item.title} className="hairline-b last:border-b-0">
+              <button
+                type="button"
+                onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                aria-expanded={openIndex === index}
+                className="flex min-h-11 w-full items-baseline justify-between gap-6 py-5 text-left cursor-pointer"
+              >
+                <span className="flex items-baseline gap-4">
+                  <span className="nums tag">{item.num}</span>
+                  <span className="display-wide text-xl sm:text-2xl">{item.title}</span>
+                </span>
+                <span aria-hidden="true" className="text-ink-soft">{openIndex === index ? "−" : "+"}</span>
+              </button>
+              {openIndex === index ? <p className="caption pb-6 pl-10 text-lg">{item.content}</p> : null}
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );
