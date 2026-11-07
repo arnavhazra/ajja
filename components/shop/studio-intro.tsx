@@ -1,73 +1,61 @@
 import Image from "next/image";
+import { pieceKind, pieceRef } from "@/lib/piece-title";
 import type { ShopSettings } from "@/lib/settings";
 import type { PublicProduct } from "@/lib/types";
 
 export function StudioIntro({ settings, detail }: { settings: ShopSettings; detail?: PublicProduct | null }) {
-  // The maker block is only real bio + town — hide it entirely until the owner writes one.
+  // The bench block is only real bio + town — hide it entirely until the owner writes one.
   if (!settings.story.trim()) return null;
   const photoUrl = settings.ownerPhoto || detail?.images[0]?.url || "";
   const photoAlt = settings.ownerPhoto ? `${settings.ownerName} in the studio` : (detail?.images[0]?.alt || "A piece from the studio");
+  const detailKind = detail ? pieceKind(detail.categoryName, detail.attributes) : null;
 
   return (
-    <section id="studio" className="py-16 sm:py-24 hairline-b bg-linen">
-      <div className="shell grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-        <div className="lg:col-span-6">
-          <div className="bg-bone p-4 sm:p-6 hairline-box rounded-sm shadow-sm">
-            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-sm bg-ink">
-              {photoUrl ? (
-                <Image
-                  src={photoUrl}
-                  alt={photoAlt}
-                  fill
-                  sizes="(min-width: 1024px) 45vw, 100vw"
-                  className="object-cover grayscale contrast-125 brightness-95 hover:scale-105 transition-transform duration-1000"
-                />
-              ) : null}
-              <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-ink/10 pointer-events-none" />
-            </div>
-
-            <div className="pt-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-widest text-umber">
-              <span>From the bench</span>
-              <span>{settings.town}, {settings.region}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="lg:col-span-6 lg:pl-4">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <span className="w-6 h-[1px] bg-terracotta" />
-            <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-terracotta font-bold">
-              The studio
-            </span>
-          </div>
-
-          <h2 className="font-serif text-4xl sm:text-5xl text-ink font-normal leading-[1.12] mb-6">
-            Made by hand in {settings.town}.
+    <section id="studio" className="hairline-b scroll-mt-[78px]">
+      <div className={photoUrl ? "shell bench" : "shell pb-[clamp(36px,6vh,64px)]"}>
+        <div>
+          <p className="kicker">from the bench — {settings.town}, {settings.region}</p>
+          <h2 className="disp mt-[10px]">
+            Made by hand <span className="sten">in</span> {settings.town}.
           </h2>
-
-          <div className="space-y-4 text-sm sm:text-base text-umber leading-[1.75] mb-10 font-sans">
-            <p>{settings.story}</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 py-6 hairline-t hairline-b mb-8">
+          <p className="story prose">{settings.story}</p>
+          <div className="honesty">
             <div>
-              <h3 className="font-mono text-xs uppercase tracking-widest text-ink font-bold mb-1.5">
-                Photographed as it is
-              </h3>
-              <p className="text-xs text-umber leading-relaxed font-sans">
-                What you see on this site is the piece itself, in the studio. No staging, no stock photographs.
-              </p>
+              <b>photographed as it is</b>
+              <span>What you see on this site is the piece itself, in the studio. No staging, no stock photographs.</span>
             </div>
             <div>
-              <h3 className="font-mono text-xs uppercase tracking-widest text-ink font-bold mb-1.5">
-                Ask first
-              </h3>
-              <p className="text-xs text-umber leading-relaxed font-sans">
-                {settings.paymentNote}
-              </p>
+              <b>ask first</b>
+              <span>{settings.paymentNote}</span>
             </div>
           </div>
         </div>
+
+        {photoUrl ? (
+          <figure className="bench-photo">
+            <div className="ph relative overflow-hidden">
+              <Image
+                src={photoUrl}
+                alt={photoAlt}
+                fill
+                sizes="(min-width: 900px) 42vw, 100vw"
+                className="object-cover"
+                style={
+                  detail
+                    ? { objectPosition: `${(detail.images[0]?.focalX ?? 0.5) * 100}% ${(detail.images[0]?.focalY ?? 0.5) * 100}%` }
+                    : undefined
+                }
+              />
+            </div>
+            {detail ? (
+              <figcaption className="cap type">
+                <span className="tick" aria-hidden="true" style={{ background: detail.pigment }} />
+                no. {pieceRef(detail.id)}
+                {detailKind ? ` — ${detailKind}, in the studio` : ", in the studio"}
+              </figcaption>
+            ) : null}
+          </figure>
+        ) : null}
       </div>
     </section>
   );

@@ -11,7 +11,7 @@ export default async function ProductImage({ params }: { params: Promise<{ slug:
   const { slug } = await params;
   const { product } = await loadProduct(slug);
   const title = pieceTitle(product?.title ?? "", product?.categorySlug, product?.attributes, product?.id ?? product?.slug);
-  const price = formatMoney(product?.priceMinor ?? null, product?.currency) ?? "Inquire for price";
+  const price = formatMoney(product?.priceMinor ?? null, product?.currency) ?? "price on asking";
   return new ImageResponse(
     <div
       style={{
@@ -20,7 +20,7 @@ export default async function ProductImage({ params }: { params: Promise<{ slug:
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-end",
-        background: product?.pigment ?? "#2a44c4",
+        background: product?.pigment ?? "#43571c",
         color: product?.pigmentInk ?? "#ffffff",
         padding: 64,
         fontFamily: "Georgia",

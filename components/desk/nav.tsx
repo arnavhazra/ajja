@@ -24,7 +24,7 @@ export async function DeskNav({ email }: { email: string }) {
     <header className="desk-side no-print">
       <div className="desk-bar">
         <p className="display text-3xl">
-          Ajja<span className="text-cobalt">.</span> <span className="desk-tag">Desk</span>
+          Ajja<span className="text-sap">.</span> <span className="desk-tag">Desk</span>
         </p>
         <Link className="desk-link desk-view" href="/" target="_blank" rel="noreferrer">
           View the shop
@@ -32,7 +32,7 @@ export async function DeskNav({ email }: { email: string }) {
       </div>
       <DeskNavLinks prefix={prefix} sections={sections} />
       <div className="desk-foot">
-        <p className="desk-signed-in truncate text-sm text-ink-soft">{email}</p>
+        <p className="desk-signed-in truncate text-sm text-tar-soft">{email}</p>
         <div className="flex flex-wrap gap-2">
           <Link className="btn btn-secondary min-h-11 px-4 text-sm" href={`${prefix}/help`}>
             Help

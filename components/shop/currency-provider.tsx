@@ -110,7 +110,7 @@ export function CurrencySelector({ className }: { className?: string }) {
 
   return (
     <div
-      className={`inline-flex items-center rounded-full border border-line bg-gesso/70 p-0.5 text-xs font-mono backdrop-blur-sm ${className ?? ""}`}
+      className={`inline-flex items-center rounded-full border border-line bg-wall/70 p-0.5 text-xs font-mono backdrop-blur-sm ${className ?? ""}`}
       role="group"
       aria-label="Currency selection"
     >
@@ -124,8 +124,8 @@ export function CurrencySelector({ className }: { className?: string }) {
             aria-pressed={active}
             className={`rounded-full px-2 py-0.5 transition-colors cursor-pointer ${
               active
-                ? "bg-ink font-semibold text-gesso"
-                : "text-ink-soft hover:text-ink"
+                ? "bg-tar font-semibold text-wall"
+                : "text-tar-soft hover:text-tar"
             }`}
           >
             {code}

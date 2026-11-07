@@ -127,7 +127,7 @@ async function Editor({
             >
               {readiness.label}
             </span>
-            {isHero ? <span className="desk-pill bg-cobalt text-white">★ Homepage hero</span> : null}
+            {isHero ? <span className="desk-pill bg-sap text-white">★ Homepage hero</span> : null}
             {product.status === "published" ? (
               <a
                 href={`/p/${product.slug}`}
@@ -142,7 +142,7 @@ async function Editor({
         </div>
         {!readiness.isReady ? (
           <nav className="flex flex-wrap items-center gap-2" aria-label="What this piece still needs">
-            <span className="text-sm text-ink-soft">To finish:</span>
+            <span className="text-sm text-tar-soft">To finish:</span>
             {readiness.missing.map((item) => {
               const key = item.toLowerCase();
               return (

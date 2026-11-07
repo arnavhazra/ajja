@@ -235,7 +235,7 @@ function FolioDrawer() {
     <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label="Saved pieces">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-night/50 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-vat/50 backdrop-blur-sm transition-opacity"
         onClick={() => setIsOpen(false)}
         aria-hidden="true"
       />
@@ -243,12 +243,12 @@ function FolioDrawer() {
       {/* Drawer */}
       <div
         ref={panelRef}
-        className="relative flex h-full w-full max-w-md flex-col bg-gesso shadow-2xl safe-bottom border-l border-line"
+        className="relative flex h-full w-full max-w-md flex-col bg-wall shadow-2xl safe-bottom border-l border-line"
       >
         <div className="flex items-center justify-between border-b border-line px-6 py-4">
           <div>
             <h2 className="display-wide text-xl">Saved pieces</h2>
-            <p className="caption text-xs text-ink-soft">
+            <p className="caption text-xs text-tar-soft">
               {items.length === 1 ? "1 piece saved" : `${items.length} pieces saved`}
             </p>
           </div>
@@ -264,9 +264,9 @@ function FolioDrawer() {
         <div className="flex-1 overflow-y-auto p-6">
           {items.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center">
-              <span className="inline-block size-3 rounded-full bg-pour/40 mb-3" />
-              <p className="font-serif italic text-lg text-ink-soft">Nothing saved yet.</p>
-              <p className="text-xs text-ink-soft max-w-xs mt-1">
+              <span className="inline-block size-3 rounded-full bg-pigment/40 mb-3" />
+              <p className="text-lg text-tar-soft">Nothing saved yet.</p>
+              <p className="text-xs text-tar-soft max-w-xs mt-1">
                 Tap &ldquo;Save&rdquo; on any piece to keep it here, then ask about them all in one note.
               </p>
             </div>
@@ -275,11 +275,11 @@ function FolioDrawer() {
               {items.map((item) => (
                 <li key={item.id} className="flex gap-4 border-b border-line pb-4">
                   {item.imageUrl ? (
-                    <div className="relative size-20 shrink-0 overflow-hidden rounded-[2px] bg-plate">
+                    <div className="relative size-20 shrink-0 overflow-hidden rounded-[2px] bg-wall-deep">
                       <Image src={item.imageUrl} alt={item.title} fill sizes="80px" className="object-cover" />
                     </div>
                   ) : (
-                    <div className="size-20 shrink-0 rounded-[2px] bg-plate" />
+                    <div className="size-20 shrink-0 rounded-[2px] bg-wall-deep" />
                   )}
                   <div className="flex flex-1 flex-col justify-between min-w-0">
                     <div>
@@ -290,12 +290,12 @@ function FolioDrawer() {
                       >
                         {item.title}
                       </Link>
-                      {item.kind ? <p className="caption text-xs text-ink-soft truncate">{item.kind}</p> : null}
-                      {item.dimensions ? <p className="font-mono text-[11px] text-ink-soft truncate">{item.dimensions}</p> : null}
+                      {item.kind ? <p className="caption text-xs text-tar-soft truncate">{item.kind}</p> : null}
+                      {item.dimensions ? <p className="font-mono text-[11px] text-tar-soft truncate">{item.dimensions}</p> : null}
                     </div>
                     <div className="flex items-center justify-between pt-1">
-                      <span className="nums text-xs font-semibold text-ink">
-                        {item.status === "sold" ? "Sold" : item.priceMinor ? format(item.priceMinor) : "Ask for price"}
+                      <span className="nums text-xs font-semibold text-tar">
+                        {item.status === "sold" ? "sold" : item.priceMinor ? format(item.priceMinor) : "price on asking"}
                       </span>
                       <button
                         type="button"
@@ -313,7 +313,7 @@ function FolioDrawer() {
         </div>
 
         {items.length > 0 ? (
-          <div className="border-t border-line bg-plate/40 p-6 space-y-4">
+          <div className="border-t border-line bg-wall-deep/40 p-6 space-y-4">
             {pricedCount > 0 ? (
               <div className="flex items-baseline justify-between">
                 <span className="caption text-sm">Total of priced pieces</span>
@@ -324,14 +324,14 @@ function FolioDrawer() {
               <button
                 type="button"
                 onClick={handleInquireAll}
-                className="btn btn-pour w-full text-center min-h-11 cursor-pointer"
+                className="btn btn-pigment w-full text-center min-h-11 cursor-pointer"
               >
                 Ask about these pieces ({items.length})
               </button>
               <button
                 type="button"
                 onClick={clear}
-                className="flex min-h-11 w-full items-center justify-center text-center text-xs text-ink-soft hover:text-ink cursor-pointer py-1"
+                className="flex min-h-11 w-full items-center justify-center text-center text-xs text-tar-soft hover:text-tar cursor-pointer py-1"
               >
                 Clear saved pieces
               </button>

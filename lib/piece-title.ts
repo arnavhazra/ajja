@@ -8,6 +8,11 @@ function shortRef(ref?: string | null) {
   return clean.slice(0, 6).toLowerCase() || "000000";
 }
 
+/** The six-character inventory number shown in typed captions ("no. f8930a"). */
+export function pieceRef(ref?: string | null) {
+  return shortRef(ref);
+}
+
 export function pieceTitle(
   title?: string | null,
   categoryOrHint?: string | null,

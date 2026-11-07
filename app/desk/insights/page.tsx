@@ -50,8 +50,8 @@ function Bars({ title, rows }: { title: string; rows: { label: string; count: nu
             <p>
               {row.label}: <span className="nums">{row.count}</span>
             </p>
-            <div className="h-3 bg-plate" role="img" aria-label={`${row.label}: ${row.count}`}>
-              <div className="h-3 bg-cobalt" aria-hidden="true" style={{ width: `${(row.count / max) * 100}%` }} />
+            <div className="h-3 bg-wall-deep" role="img" aria-label={`${row.label}: ${row.count}`}>
+              <div className="h-3 bg-sap" aria-hidden="true" style={{ width: `${(row.count / max) * 100}%` }} />
             </div>
           </li>
         ))}

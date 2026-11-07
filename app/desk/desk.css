@@ -28,7 +28,7 @@
   z-index: 30;
   display: grid;
   gap: 0.75rem;
-  background: var(--plate);
+  background: var(--wall-deep);
   border-bottom: 1px solid var(--line);
   padding: max(0.9rem, env(safe-area-inset-top)) 1rem 0.75rem;
 }
@@ -41,12 +41,12 @@
 }
 
 .desk-tag {
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-text), Georgia, serif;
   font-style: italic;
   font-size: 1rem;
   font-weight: 400;
   letter-spacing: 0;
-  color: var(--ink-soft);
+  color: var(--tar-soft);
 }
 
 .desk-nav {
@@ -74,8 +74,8 @@
   justify-content: center;
   margin-left: 0.45rem;
   border-radius: 999px;
-  background: var(--plate-deep);
-  color: var(--ink);
+  background: var(--wall-sink);
+  color: var(--tar);
   font-size: 0.7rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -83,7 +83,7 @@
 }
 
 .desk-badge-current {
-  background: var(--gesso);
+  background: var(--wall);
 }
 
 .desk-nav::-webkit-scrollbar {
@@ -98,18 +98,18 @@
   border-radius: 999px;
   padding: 0 0.9rem;
   font-size: 0.925rem;
-  color: var(--ink-soft);
+  color: var(--tar-soft);
   transition: background-color 160ms ease-out, color 160ms ease-out;
 }
 
 .desk-link:hover {
-  background: var(--plate-deep);
-  color: var(--ink);
+  background: var(--wall-sink);
+  color: var(--tar);
 }
 
 .desk-link[aria-current="page"] {
-  background: var(--ink);
-  color: var(--gesso);
+  background: var(--tar);
+  color: var(--wall);
 }
 
 .desk-view {
@@ -130,7 +130,7 @@
     grid-template-columns: 16rem minmax(0, 1fr);
     /* paint the sidebar column to the document's full height so the sticky
        side's colour never stops at the first viewport */
-    background: linear-gradient(to right, var(--plate) 0 16rem, transparent 16rem);
+    background: linear-gradient(to right, var(--wall-deep) 0 16rem, transparent 16rem);
   }
 
   .desk-side {
@@ -169,7 +169,7 @@
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--ink-soft);
+    color: var(--tar-soft);
   }
 
   .desk-foot {
@@ -215,9 +215,9 @@
   place-items: center;
   overflow: hidden;
   border-radius: 0.6rem;
-  background: var(--plate-deep);
+  background: var(--wall-sink);
   font-size: 0.7rem;
-  color: var(--ink-soft);
+  color: var(--tar-soft);
 }
 
 .desk-thumb img {
@@ -275,10 +275,10 @@
   max-width: 68ch;
   margin: 0;
   padding: 0.85rem 1.1rem;
-  background: var(--plate);
-  border-left: 3px solid var(--cobalt);
+  background: var(--wall-deep);
+  border-left: 3px solid var(--sap);
   border-radius: 0.5rem;
-  color: var(--ink-soft);
+  color: var(--tar-soft);
 }
 
 .desk-review {
@@ -297,7 +297,7 @@
 .desk input[type="checkbox"] {
   width: 1.35rem;
   height: 1.35rem;
-  accent-color: var(--accent);
+  accent-color: var(--sap);
 }
 
 .desk-signin {
@@ -354,14 +354,14 @@
   border-radius: 999px;
   padding: 0 0.85rem;
   font-size: 0.85rem;
-  color: var(--ink-soft);
+  color: var(--tar-soft);
   text-decoration: none;
 }
 
 .desk-chip[aria-current="true"] {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--gesso);
+  background: var(--tar);
+  border-color: var(--tar);
+  color: var(--wall);
 }
 
 .desk-chip .nums {
@@ -387,7 +387,7 @@
   align-items: end;
   gap: 0.6rem 1rem;
   padding: 0.9rem 1rem;
-  background: var(--gesso);
+  background: var(--wall);
   border: 1px solid var(--line-strong);
   border-radius: 0.75rem;
   box-shadow: 0 12px 32px rgba(30, 27, 24, 0.18);
@@ -395,7 +395,7 @@
 
 .desk-skeleton {
   border-radius: 0.5rem;
-  background: linear-gradient(90deg, var(--plate) 25%, var(--plate-deep) 50%, var(--plate) 75%);
+  background: linear-gradient(90deg, var(--wall-deep) 25%, var(--wall-sink) 50%, var(--wall-deep) 75%);
   background-size: 200% 100%;
   animation: desk-shimmer 1.2s ease-in-out infinite;
 }

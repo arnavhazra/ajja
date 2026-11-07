@@ -17,20 +17,20 @@ function ShopSkeleton() {
   return (
     <main className="shell min-h-[80svh] py-24" aria-busy="true" aria-label="Loading the shop">
       <div className="grid animate-pulse gap-10 lg:grid-cols-2">
-        <div className="h-[60svh] bg-bone" />
+        <div className="h-[60svh] bg-wall-deep" />
         <div className="grid content-start gap-4 py-8">
-          <div className="h-4 w-24 bg-bone-dark" />
-          <div className="h-12 w-3/4 bg-bone-dark" />
-          <div className="h-4 w-full bg-bone" />
-          <div className="h-4 w-2/3 bg-bone" />
-          <div className="mt-6 h-11 w-40 bg-bone-dark" />
+          <div className="h-4 w-24 bg-wall-sink" />
+          <div className="h-12 w-3/4 bg-wall-sink" />
+          <div className="h-4 w-full bg-wall-deep" />
+          <div className="h-4 w-2/3 bg-wall-deep" />
+          <div className="mt-6 h-11 w-40 bg-wall-sink" />
         </div>
       </div>
       <div className="mt-24 grid animate-pulse grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
         {Array.from({ length: 8 }, (_, i) => (
           <div key={i} className="grid gap-3">
-            <div className="aspect-[4/5] bg-bone" />
-            <div className="h-4 w-3/4 bg-bone" />
+            <div className="aspect-[4/5] bg-wall-deep" />
+            <div className="h-4 w-3/4 bg-wall-deep" />
           </div>
         ))}
       </div>
@@ -113,6 +113,10 @@ async function Home({
       <AcquisitionFaq settings={settings} />
 
       <CommissionForm responseNote={settings.responseNote} initialMessage={initialMessage} />
+
+      <a className="ask-chip no-print" href="#inquire">
+        ask →
+      </a>
 
       <MotionScan />
     </main>

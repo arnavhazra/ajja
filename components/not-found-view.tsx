@@ -6,9 +6,9 @@ import { getSettings, hasPricedProducts } from "@/lib/public-data";
 export function MissingPage() {
   return (
     <main className="shell grid min-h-[70svh] content-center py-24">
-      <p className="display text-[clamp(6rem,22vw,20rem)] leading-[0.8] text-pour">404</p>
+      <p className="display text-[clamp(6rem,22vw,20rem)] leading-[0.8] text-pigment">404</p>
       <h1 className="display-wide mt-8 text-4xl md:text-5xl">That page is not here.</h1>
-      <p className="prose-serif mt-4 max-w-prose text-ink-soft">The piece may have moved, or the address may be wrong.</p>
+      <p className="prose mt-4 max-w-prose text-tar-soft">The piece may have moved, or the address may be wrong.</p>
       <div className="mt-8 flex flex-wrap gap-3">
         <Link className="btn btn-primary" href="/#works">
           See the works

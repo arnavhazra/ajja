@@ -41,7 +41,7 @@ export function FolioActionButton({
       className={cn(
         "btn min-h-11 transition-all cursor-pointer",
         inFolio
-          ? "border-pour bg-pour text-pour-ink font-semibold"
+          ? "border-pigment bg-pigment text-pigment-ink font-semibold"
           : "btn-secondary",
         className,
       )}

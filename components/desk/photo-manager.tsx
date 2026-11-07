@@ -30,7 +30,7 @@ export function PhotoManager({
               <span className="nums text-sm font-semibold">Photo #{index + 1}</span>
               {index === 0 ? <span className="desk-pill">Cover</span> : null}
               {heroImage === image.url ? (
-                <span className="desk-pill bg-cobalt text-white">★ Homepage hero</span>
+                <span className="desk-pill bg-sap text-white">★ Homepage hero</span>
               ) : null}
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -90,7 +90,7 @@ export function PhotoManager({
               </button>
             </form>
 
-            <div className="flex flex-col justify-between rounded-sm border border-line bg-plate/40 p-4">
+            <div className="flex flex-col justify-between rounded-sm border border-line bg-wall-deep/40 p-4">
               <form action={cropImage} className="grid gap-3">
                 <input type="hidden" name="imageId" value={image.id} />
                 <p className="text-sm font-semibold">Fine crop margins</p>
@@ -141,7 +141,7 @@ export function PhotoManager({
           })()}
 
           {enhancedMap[image.id] && enhancedById.get(enhancedMap[image.id]) ? (
-            <div className="grid gap-2 border border-line bg-card p-3">
+            <div className="grid gap-2 border border-line bg-wall p-3">
               <p className="text-sm font-semibold">Original / Enhanced</p>
               <div className="grid grid-cols-2 gap-3">
                 <figure>

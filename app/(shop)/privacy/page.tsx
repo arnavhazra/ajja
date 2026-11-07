@@ -10,7 +10,7 @@ export default async function PrivacyPage() {
       <header className="border-b border-line pb-10">
         <h1 className="display text-[clamp(3rem,8vw,7rem)]">Privacy</h1>
       </header>
-      <div className="prose-serif measure mt-10 grid gap-5 text-ink-soft">
+      <div className="prose max-w-[65ch] mt-10 grid gap-5 text-tar-soft">
         <p>This shop does not ask you to make an account.</p>
         <p>
           If you send a message, the name, phone or email, and message are saved so they can be answered. Messages are kept for{" "}

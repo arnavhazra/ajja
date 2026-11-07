@@ -120,29 +120,29 @@ export function MacroLoupeImage({ image, title, ratio, priority = false, onOpenD
         >
           {/* Subtle crosshair in the center of the loupe */}
           <span className="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
-            <span className="w-2.5 h-[1px] bg-ink" />
-            <span className="h-2.5 w-[1px] bg-ink" />
+            <span className="w-2.5 h-[1px] bg-tar" />
+            <span className="h-2.5 w-[1px] bg-tar" />
           </span>
         </div>
 
         {/* Floating Macro Loupe Badge */}
         <div className="absolute top-3 left-3 flex items-center gap-2 pointer-events-none z-10">
-          <span className="rounded-full bg-gesso/90 px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-ink backdrop-blur-sm border border-line">
+          <span className="rounded-full bg-wall/90 px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-tar backdrop-blur-sm border border-line">
             {isLocked ? "2.6× Loupe [Locked]" : "2.6× Macro Loupe (Hover)"}
           </span>
         </div>
       </div>
 
       {/* Control bar under image */}
-      <div className="mt-2 flex items-center justify-between text-xs text-ink-soft">
+      <div className="mt-2 flex items-center justify-between text-xs text-tar-soft">
         <button
           type="button"
           onClick={toggleLock}
           className={cn(
             "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[11px] transition-colors cursor-pointer",
             isLocked
-              ? "border-pour bg-pour text-pour-ink font-semibold"
-              : "border-line bg-gesso/70 text-ink hover:border-line-strong",
+              ? "border-pigment bg-pigment text-pigment-ink font-semibold"
+              : "border-line bg-wall/70 text-tar hover:border-line-strong",
           )}
         >
           <span className="size-2 rounded-full bg-current" />
@@ -153,7 +153,7 @@ export function MacroLoupeImage({ image, title, ratio, priority = false, onOpenD
           <button
             type="button"
             onClick={onOpenDialog}
-            className="font-mono text-[11px] text-ink-soft hover:text-ink underline cursor-pointer"
+            className="font-mono text-[11px] text-tar-soft hover:text-tar underline cursor-pointer"
           >
             Full screen ↗
           </button>

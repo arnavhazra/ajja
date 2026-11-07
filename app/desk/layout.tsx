@@ -22,9 +22,9 @@ export default function DeskLayout({ children }: { children: React.ReactNode }) 
 
 async function DeskFrame({ children }: { children: React.ReactNode }) {
   const session = await getSession();
-  if (!session) return <div id="content" className="desk min-h-dvh bg-paper">{children}</div>;
+  if (!session) return <div id="content" className="desk min-h-dvh bg-wall">{children}</div>;
   return (
-    <div className="desk desk-shell min-h-dvh bg-paper">
+    <div className="desk desk-shell min-h-dvh bg-wall">
       <DeskNav email={session.email} />
       <div id="content" className="desk-main">{children}</div>
     </div>

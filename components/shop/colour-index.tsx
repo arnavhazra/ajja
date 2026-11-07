@@ -1,11 +1,11 @@
 "use client";
 
-import { pieceTitle } from "@/lib/piece-title";
+import { pieceRef, pieceTitle } from "@/lib/piece-title";
 import { dedupeByPigment, sortByHue } from "@/lib/pigment-math";
 import type { PublicProduct } from "@/lib/types";
 import { useWallFilter } from "./wall-filter";
 
-/** The pigment shelf — swatch jars by hue. Pick one and the wall keeps only that colour. */
+/** The shelf — one jar per piece colour. Pick a jar and the wall keeps only its family. */
 export function ColourIndex({ products }: { products: PublicProduct[] }) {
   const { pigment, setPigment } = useWallFilter();
   const unique = sortByHue(dedupeByPigment(products, (product) => product.pigment), (product) => product.pigment);
@@ -13,50 +13,45 @@ export function ColourIndex({ products }: { products: PublicProduct[] }) {
 
   const choose = (hex: string) => {
     setPigment(pigment === hex ? null : hex);
-    document.getElementById("works")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById("works")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
   };
 
   return (
-    <section aria-labelledby="colour-title" className="hairline-b py-16 md:py-24">
+    <section id="shelf" aria-labelledby="shelf-title" className="hairline-b scroll-mt-[78px]">
       <div className="shell">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="sec-head">
           <div>
-            <p className="tag text-pour">02 — The pigment shelf</p>
-            <h2 id="colour-title" className="display-wide mt-2 text-3xl md:text-4xl">
-              Colour, jar by jar
+            <p className="kicker">the pigment shelf</p>
+            <h2 id="shelf-title" className="disp mt-[10px]">
+              Colour, <span className="sten">jar</span> by jar
             </h2>
           </div>
-          <p className="caption max-w-sm text-lg">
-            Each jar holds the colour of one piece. Pick a jar and the wall keeps only its family.
-          </p>
+          <p className="sub type">Each jar holds the colour of one piece. Pick a jar and the wall keeps only its family.</p>
         </div>
-        <ul className="mt-10 flex flex-wrap gap-x-5 gap-y-7" aria-label="Pieces by colour">
+        <div className="jars" role="group" aria-label="Pieces by colour">
           {unique.map((product) => {
             const title = pieceTitle(product.title, product.categorySlug, product.attributes, product.id);
             const active = pigment === product.pigment;
             return (
-              <li key={product.id}>
-                <button
-                  type="button"
-                  className="jar"
-                  aria-pressed={active}
-                  aria-label={`${title}, colour ${product.pigment.toUpperCase()}${active ? ", filtering the wall" : ""}`}
-                  onClick={() => choose(product.pigment)}
-                >
-                  <span className="jar-swatch" style={{ background: product.pigment }} aria-hidden="true" />
-                  <span className="jar-name tag" aria-hidden="true">
-                    {product.pigment.toUpperCase()}
-                  </span>
-                </button>
-              </li>
+              <button
+                key={product.id}
+                type="button"
+                className="jar"
+                style={{ "--pig": product.pigment } as React.CSSProperties}
+                aria-pressed={active}
+                aria-label={`${title}, colour ${product.pigment.toUpperCase()}${active ? ", filtering the wall" : ""}`}
+                onClick={() => choose(product.pigment)}
+              >
+                <span className="jar-sw" style={{ background: product.pigment }} aria-hidden="true" />
+                <span className="jar-tx" aria-hidden="true">
+                  <b>{product.pigment.toUpperCase()}</b>
+                  no. {pieceRef(product.id)}
+                </span>
+              </button>
             );
           })}
-        </ul>
-        {pigment ? (
-          <button type="button" className="tag mt-4 inline-flex min-h-11 items-center text-ink underline" onClick={() => setPigment(null)}>
-            Show every colour
-          </button>
-        ) : null}
+        </div>
       </div>
     </section>
   );

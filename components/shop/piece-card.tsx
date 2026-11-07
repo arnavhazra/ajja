@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ViewTransition, type MouseEvent } from "react";
+import { ViewTransition, type CSSProperties, type MouseEvent } from "react";
 import { cn } from "@/lib/cn";
 import { formatMoney } from "@/lib/money";
-import { pieceKind, pieceTitle } from "@/lib/piece-title";
+import { hasRealTitle, pieceKind, pieceRef, pieceTitle } from "@/lib/piece-title";
 import type { PublicProduct } from "@/lib/types";
 import { useCurrency } from "./currency-provider";
 import { useFolio } from "./collectors-folio";
@@ -19,32 +19,27 @@ type Props = {
   index?: number;
 };
 
-function surfaceClass(kind: string) {
-  const hint = kind.toLowerCase();
-  if (hint.includes("ceramic") || hint.includes("glaze") || hint.includes("pot")) return "surface-glaze";
-  if (hint.includes("wood") || hint.includes("pine") || hint.includes("walnut")) return "surface-wood";
-  return "surface-canvas";
-}
-
 export function PieceCard({
   product,
   priority = false,
-  sizes = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw",
+  sizes = "(min-width: 1180px) 22vw, (min-width: 900px) 30vw, (min-width: 560px) 46vw, 94vw",
   className,
+  index = 0,
 }: Props) {
   const { format } = useCurrency();
   const { hasItem, toggleItem, setIsOpen: setFolioOpen } = useFolio();
   const { openDossier } = useDossier();
 
   const cover = product.images[0];
-  const title = pieceTitle(product.title, product.categorySlug, product.attributes, product.id);
-  const kind = pieceKind(product.categoryName, product.attributes) || "Studio piece";
-  const dimensions = product.attributes.dimensions || product.attributes.size || "";
+  const named = hasRealTitle(product.title);
+  const title = named ? product.title.trim() : `no. ${pieceRef(product.id)}`;
+  const fullTitle = pieceTitle(product.title, product.categorySlug, product.attributes, product.id);
+  const kind = pieceKind(product.categoryName, product.attributes);
   const sold = product.status === "sold";
   const inFolio = hasItem(product.id);
 
   const dynamicPrice = format(product.priceMinor);
-  const price = sold ? "Sold" : (dynamicPrice ?? (formatMoney(product.priceMinor, product.currency) ?? "Ask for price"));
+  const price = sold ? "sold" : (dynamicPrice ?? formatMoney(product.priceMinor, product.currency) ?? "price on asking");
   const ratio = cover?.width && cover?.height ? `${cover.width} / ${cover.height}` : "4 / 5";
 
   const handleFolioClick = (e: MouseEvent) => {
@@ -53,11 +48,11 @@ export function PieceCard({
     toggleItem({
       id: product.id,
       slug: product.slug,
-      title,
+      title: fullTitle,
       priceMinor: product.priceMinor,
       imageUrl: cover?.url,
       kind: kind ?? undefined,
-      dimensions,
+      dimensions: product.attributes.dimensions || product.attributes.size || "",
     });
     if (!inFolio) setFolioOpen(true);
   };
@@ -69,24 +64,17 @@ export function PieceCard({
   };
 
   return (
-    <article className={cn("group relative flex flex-col", className)}>
-      {/* Photograph with the kind's surface texture; lifts on hover */}
+    <figure
+      className={cn("piece", className)}
+      style={{ "--pig": product.pigment, "--pig-ink": product.pigmentInk, "--reveal-delay": `${(index % 4) * 60}ms` } as CSSProperties}
+      data-reveal=""
+    >
       <ViewTransition name={`piece-${product.id}`}>
-        <Link
-          href={`/p/${product.slug}`}
-          tabIndex={-1}
-          aria-hidden="true"
-          className={cn(
-            "relative block w-full overflow-hidden rounded-[2px] bg-plate select-none hairline-box",
-            "transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:-translate-y-1.5 group-hover:shadow-[0_18px_40px_-16px_rgba(15,18,22,0.4)]",
-            surfaceClass(kind),
-          )}
-          style={{ aspectRatio: ratio }}
-        >
+        <Link href={`/p/${product.slug}`} className="ph" style={{ aspectRatio: ratio }} aria-label={fullTitle}>
           {cover ? (
             <Image
               src={cover.url}
-              alt=""
+              alt={cover.alt || fullTitle}
               fill
               sizes={sizes}
               priority={priority}
@@ -98,42 +86,35 @@ export function PieceCard({
           ) : null}
         </Link>
       </ViewTransition>
-
-      {/* Wall label — the paper tag that morphs onto the piece page */}
-      <ViewTransition name={`piece-label-${product.id}`}>
-        <div className="wall-label relative z-10 -mt-6 mx-3 grid gap-1.5 p-3.5 transition-colors duration-500 group-hover:bg-pour group-hover:[--ink:var(--pour-ink)]">
-          <Link
-            href={`/p/${product.slug}`}
-            className="display-wide block text-lg leading-snug text-ink line-clamp-2 transition-colors group-hover:text-pour-ink"
-          >
-            {title}
-          </Link>
-          <span className="tag block truncate">{kind}{dimensions ? ` · ${dimensions}` : ""}</span>
-          <span className={cn("nums block text-sm font-bold", sold ? "text-sold" : "text-ink")}>{price}</span>
-          <div className="flex items-center justify-end gap-1 border-t border-line pt-1.5">
-              <button
-                type="button"
-                onClick={handleDossierClick}
-                className="tag inline-flex min-h-11 items-center px-2 text-ink-soft transition-colors hover:text-ink cursor-pointer"
-              >
-                Quick look
-              </button>
-              {!sold ? (
-                <button
-                  type="button"
-                  onClick={handleFolioClick}
-                  className={cn(
-                    "tag inline-flex min-h-11 items-center px-2 transition-colors cursor-pointer",
-                    inFolio ? "text-ok" : "text-pour hover:text-ink",
-                  )}
-                  aria-label={inFolio ? `Remove ${title} from saved` : `Save ${title}`}
-                >
-                  {inFolio ? "✓ Saved" : "Save"}
-                </button>
-              ) : null}
-          </div>
+      <figcaption>
+        <ViewTransition name={`piece-label-${product.id}`}>
+          <span className="cap">
+            <span className="tick" aria-hidden="true" />
+            <Link href={`/p/${product.slug}`} className="cap-line inline-flex min-h-11 min-w-0 flex-1 items-center">
+              <span className="truncate">
+                {title}
+                {kind ? ` — ${kind}` : ""}
+              </span>
+            </Link>
+            <span className="cap-price">{price}</span>
+          </span>
+        </ViewTransition>
+        <div className="cap-acts">
+          {!sold ? (
+            <button
+              type="button"
+              onClick={handleFolioClick}
+              className={cn("cap-act", inFolio && "saved")}
+              aria-label={inFolio ? `Remove ${fullTitle} from saved` : `Save ${fullTitle}`}
+            >
+              {inFolio ? "saved" : "save"}
+            </button>
+          ) : null}
+          <button type="button" onClick={handleDossierClick} className="cap-act" aria-label={`Quick look at ${fullTitle}`}>
+            quick look
+          </button>
         </div>
-      </ViewTransition>
-    </article>
+      </figcaption>
+    </figure>
   );
 }

@@ -104,7 +104,7 @@ export function PhotoUpload({ productId }: { productId?: string }) {
         />
       </label>
       {!productId ? (
-        <label className="flex min-h-11 items-center gap-2 text-sm text-ink-soft">
+        <label className="flex min-h-11 items-center gap-2 text-sm text-tar-soft">
           <input type="checkbox" checked={grouped} onChange={(e) => setGrouped(e.target.checked)} />
           Put all of these photos on one piece
         </label>

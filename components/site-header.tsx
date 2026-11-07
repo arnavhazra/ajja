@@ -2,29 +2,21 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/cn";
 import { CurrencySelector } from "@/components/shop/currency-provider";
 import { useFolio } from "@/components/shop/collectors-folio";
 
 const NAV_LINKS = [
-  { href: "/#works", label: "Works" },
-  { href: "/#studio", label: "The studio" },
-  { href: "/#buying", label: "Buying" },
-  { href: "/#inquire", label: "Ask us" },
+  { href: "/#works", label: "the wall" },
+  { href: "/#shelf", label: "the shelf" },
+  { href: "/#studio", label: "the bench" },
+  { href: "/#buying", label: "the terms" },
+  { href: "/#inquire", label: "send a note" },
 ] as const;
 
 export function SiteHeader({ name, hasPrices }: { name: string; hasPrices: boolean }) {
-  const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const { items, setIsOpen: setFolioOpen } = useFolio();
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -34,32 +26,24 @@ export function SiteHeader({ name, hasPrices }: { name: string; hasPrices: boole
   }, [mobileMenuOpen]);
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-40 w-full hairline-b transition-all duration-300 no-print",
-        scrolled ? "bg-linen/95 backdrop-blur-md shadow-sm" : "bg-linen/90 backdrop-blur-sm",
-      )}
-    >
-      <div className="shell flex h-16 items-center justify-between gap-4">
-        <Link href="/" className="font-serif text-2xl font-semibold tracking-tight text-ink hover:text-terracotta transition-colors">
+    <header className="mast sticky top-0 z-40 w-full border-b border-line bg-wall no-print">
+      <div className="shell flex min-h-[60px] items-center gap-[22px]">
+        <Link href="/" className="word inline-flex min-h-11 items-center text-tar">
           {name}
+          <span>.</span>
         </Link>
 
-        <nav aria-label="Sections" className="hidden lg:flex items-center gap-1">
+        <nav aria-label="Sections" className="mast-nav">
           {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-umber hover:text-ink transition-colors"
-            >
+            <Link key={link.href} href={link.href}>
               {link.label}
             </Link>
           ))}
         </nav>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="ml-auto flex items-center gap-[18px] text-[13.5px]">
           {hasPrices ? (
-            <div className="hidden sm:block">
+            <div className="hidden md:block">
               <CurrencySelector />
             </div>
           ) : null}
@@ -67,78 +51,81 @@ export function SiteHeader({ name, hasPrices }: { name: string; hasPrices: boole
           <button
             type="button"
             onClick={() => setFolioOpen(true)}
-            className="group relative inline-flex min-h-11 items-center gap-1.5 rounded-sm hairline-box bg-bone px-3 font-mono text-[11px] uppercase tracking-wider text-ink hover:bg-boneDark transition-colors cursor-pointer"
+            className="hidden min-h-11 items-center gap-1 text-tar-soft hover:text-tar cursor-pointer sm:inline-flex"
             aria-label={`Saved ${items.length} ${items.length === 1 ? "piece" : "pieces"}`}
           >
-            Saved{" "}
-            <span
-              className={cn(
-                "inline-flex size-5 items-center justify-center rounded-full text-[10px] font-bold transition-transform nums",
-                items.length > 0 ? "bg-terracotta text-linen" : "bg-plate-deep text-umber",
-              )}
-            >
-              {items.length}
-            </span>
+            saved <b className="font-bold text-tar">({items.length})</b>
           </button>
+
+          <Link href="/#inquire" className="ask hidden sm:inline-flex">
+            ask the studio →
+          </Link>
 
           <button
             type="button"
             onClick={() => setMobileMenuOpen(true)}
-            className="lg:hidden inline-flex min-h-11 items-center rounded-sm hairline-box bg-bone px-3 font-mono text-[11px] uppercase tracking-wider text-ink cursor-pointer"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center border border-line px-3 font-bold cursor-pointer lg:hidden"
             aria-expanded={mobileMenuOpen}
+            aria-label="Menu"
           >
-            Menu
+            menu
           </button>
         </div>
       </div>
 
       <dialog
         ref={dialogRef}
-        className="sheet lg:hidden bg-linen text-ink p-0 backdrop:bg-night/60"
+        className="sheet lg:hidden fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none bg-wall p-0 text-tar backdrop:bg-vat/60"
         aria-label="Menu"
         onClose={() => setMobileMenuOpen(false)}
         onClick={(e) => {
           if (e.target === dialogRef.current) setMobileMenuOpen(false);
         }}
       >
-        <div className="safe-bottom grid gap-5 p-6 bg-linen">
-          <div className="flex items-center justify-between hairline-b pb-4">
-            <span className="font-serif text-2xl font-semibold">{name}</span>
+        <div className="safe-bottom grid gap-5 p-6 bg-wall">
+          <div className="flex items-center justify-between border-b border-line pb-4">
+            <span className="word">{name}<span>.</span></span>
             <button
               type="button"
-              className="btn btn-quiet min-h-9 px-2 text-xs cursor-pointer"
+              className="btn btn-quiet min-h-11 px-2 text-sm cursor-pointer"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Close
+              close
             </button>
           </div>
 
           {hasPrices ? (
-            <div className="flex flex-wrap items-center justify-between gap-3 py-2 border-b border-line">
-              <span className="font-mono text-xs text-umber">Currency</span>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line py-2">
+              <span className="text-sm text-tar-soft">currency</span>
               <CurrencySelector />
             </div>
           ) : null}
 
-          <nav aria-label="Menu links" className="grid gap-1 font-serif text-2xl">
+          <nav aria-label="Menu links" className="grid gap-1">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="py-3 border-b border-line hover:text-terracotta transition-colors"
+                className="disp inline-flex min-h-11 items-center border-b border-line py-3 text-3xl"
               >
                 {link.label}
               </Link>
             ))}
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setFolioOpen(true);
+              }}
+              className="inline-flex min-h-11 items-center py-3 text-left text-tar-soft cursor-pointer"
+            >
+              saved <b className="ml-1 font-bold text-tar">({items.length})</b>
+            </button>
           </nav>
 
-          <Link
-            href="/#inquire"
-            onClick={() => setMobileMenuOpen(false)}
-            className="btn btn-primary w-full text-center"
-          >
-            Ask the studio
+          <Link href="/#inquire" onClick={() => setMobileMenuOpen(false)} className="ask w-full justify-center min-h-11">
+            ask the studio →
           </Link>
         </div>
       </dialog>

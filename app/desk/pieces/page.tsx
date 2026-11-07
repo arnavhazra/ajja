@@ -128,7 +128,7 @@ async function Pieces({ searchParams }: { searchParams: Promise<Record<string, s
       </form>
       {!trash ? (
         <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Show pieces that need something">
-          <span className="text-sm text-ink-soft">Needs:</span>
+          <span className="text-sm text-tar-soft">Needs:</span>
           {NEEDS.map(({ key, label }) => (
             <Link
               key={key}

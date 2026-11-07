@@ -29,7 +29,7 @@ async function Home({ searchParams }: { searchParams: Promise<Record<string, str
     const tab = one(params.staff) === "1" ? "staff" : one(params.code) === "1" ? "code" : "password";
     const tabClass = (key: string) =>
       `tag inline-flex min-h-11 items-center rounded-[2px] px-4 ${
-        tab === key ? "bg-ink font-bold text-gesso" : "hairline-box text-ink-soft hover:text-ink"
+        tab === key ? "bg-tar font-bold text-wall" : "hairline-box text-tar-soft hover:text-tar"
       }`;
     return (
       <main className="desk-signin grid min-h-[75vh] place-items-center px-4 py-10">
@@ -94,11 +94,11 @@ async function Home({ searchParams }: { searchParams: Promise<Record<string, str
                   {item.imageUrl ? (
                     <Image src={item.imageUrl} alt="" width={44} height={44} className="size-11 rounded-[2px] border border-line object-cover" />
                   ) : (
-                    <span className="grid size-11 place-items-center rounded-[2px] border border-line bg-plate text-ink-soft">?</span>
+                    <span className="grid size-11 place-items-center rounded-[2px] border border-line bg-wall-deep text-tar-soft">?</span>
                   )}
                   <span className="min-w-0">
                     <span className="block truncate">{pieceTitle(item.title, null, item.attributes ?? {}, item.id)}</span>
-                    <span className="nums text-sm text-ink-soft">{item.count} views</span>
+                    <span className="nums text-sm text-tar-soft">{item.count} views</span>
                   </span>
                 </Link>
               </li>
@@ -126,7 +126,7 @@ async function Home({ searchParams }: { searchParams: Promise<Record<string, str
 
 function NextCard({ href, count, label, extra, empty }: { href: string; count: number; label: string; extra?: string; empty: string }) {
   return (
-    <Link href={href} className="hairline-box grid gap-1 bg-card p-4 transition-colors hover:bg-plate">
+    <Link href={href} className="hairline-box grid gap-1 bg-wall p-4 transition-colors hover:bg-wall-deep">
       <span className="display text-4xl nums">{count}</span>
       <span className="tag">{label}{extra ? ` — ${extra}` : ""}</span>
       <span className="caption text-sm">{count > 0 ? "Tap to open the list." : empty}</span>
@@ -149,7 +149,7 @@ function Sparkline({ points, labels }: { points: number[]; labels: string[] }) {
         aria-label={`Views over the last 7 days: ${points.join(", ")}, ${total} total`}
         className="h-14 w-full"
       >
-        <path d={d} fill="none" stroke="var(--cobalt)" strokeWidth="1.5" />
+        <path d={d} fill="none" stroke="var(--sap)" strokeWidth="1.5" />
       </svg>
       <figcaption className="flex justify-between tag">
         <span>{labels[0]?.slice(5)}</span>
@@ -163,7 +163,7 @@ function CheckItem({ prefix, label, href, done, itemKey }: { prefix: string; lab
   return (
     <li>
       <form action={toggleChecklist} className="flex items-center justify-between gap-3 border-b border-line pb-2">
-        <Link className={`inline-flex min-h-11 items-center ${done ? "text-ink-soft line-through" : ""}`} href={`${prefix}${href}`}>
+        <Link className={`inline-flex min-h-11 items-center ${done ? "text-tar-soft line-through" : ""}`} href={`${prefix}${href}`}>
           {label}
         </Link>
         <input type="hidden" name="key" value={itemKey} />

@@ -90,7 +90,7 @@ async function ProductBody({
   ].filter((item): item is [string, string] => item !== null);
 
   return (
-    <main style={{ "--pour": product.pigment, "--pour-ink": product.pigmentInk } as CSSProperties}>
+    <main style={{ "--pigment": product.pigment, "--pigment-ink": product.pigmentInk } as CSSProperties}>
       <EventBeacon type="view" productId={product.id} />
       <JsonLd
         data={{
@@ -122,10 +122,10 @@ async function ProductBody({
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[70svh]"
-        style={{ background: "linear-gradient(to bottom, color-mix(in srgb, var(--pour) 14%, var(--gesso)), var(--gesso))" }}
+        style={{ background: "linear-gradient(to bottom, color-mix(in srgb, var(--pigment) 14%, var(--wall)), var(--wall))" }}
       />
       <div className="shell pb-24 pt-4 md:pb-32">
-        <Link href="/#works" className="inline-flex min-h-11 items-center gap-2 text-sm text-ink-soft">
+        <Link href="/#works" className="inline-flex min-h-11 items-center gap-2 text-sm text-tar-soft">
           <span aria-hidden="true">←</span>
           <span className="ink-link">All works</span>
         </Link>
@@ -139,17 +139,17 @@ async function ProductBody({
             <ViewTransition name={`piece-label-${product.id}`}>
               <div className="wall-label grid gap-3 p-5" data-reveal="">
                 <p className="tag flex items-center gap-2">
-                  <span aria-hidden="true" className="size-3 rounded-full bg-pour" />
+                  <span aria-hidden="true" className="size-3 rounded-full bg-pigment" />
                   {sold ? "Sold" : "In the studio"}
                 </p>
                 <h1 className="display text-[clamp(2.5rem,4.5vw,4.25rem)]">{title}</h1>
                 <p className="nums text-2xl">
-                  <DynamicPrice priceMinor={product.priceMinor} fallback={price ?? "Ask for the price"} sold={sold} />
+                  <DynamicPrice priceMinor={product.priceMinor} fallback={price ?? "price on asking"} sold={sold} />
                 </p>
               </div>
             </ViewTransition>
             {product.description || attributes.details ? (
-              <div className="prose-serif grid gap-4 text-ink-soft" data-reveal="">
+              <div className="prose grid gap-4 text-tar-soft" data-reveal="">
                 {product.description ? <p>{product.description}</p> : null}
                 {attributes.details ? <p>{attributes.details}</p> : null}
               </div>
@@ -174,7 +174,7 @@ async function ProductBody({
             ) : null}
             <div className="flex flex-wrap gap-3" data-reveal="">
               {!sold ? (
-                <a href="#enquire" className="btn btn-pour">
+                <a href="#enquire" className="btn btn-pigment">
                   Ask about this piece
                 </a>
               ) : null}
@@ -193,7 +193,7 @@ async function ProductBody({
       </div>
 
       {!sold ? (
-        <section id="enquire" aria-label={`Ask about ${title}`} className="scroll-mt-20 bg-plate py-20 md:py-28">
+        <section id="enquire" aria-label={`Ask about ${title}`} className="scroll-mt-20 bg-wall-deep py-20 md:py-28">
           <div className="shell grid gap-10 md:grid-cols-12 md:gap-6">
             <div className="md:col-span-4">
               <h2 className="display text-[clamp(2.5rem,5vw,4.5rem)]">Ask about it</h2>
@@ -222,8 +222,8 @@ async function ProductBody({
       ) : null}
 
       {!sold ? (
-        <div className="safe-bottom fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-line bg-gesso/95 p-3 backdrop-blur md:hidden">
-          <a className="btn btn-pour flex-1 text-center" href="#enquire">
+        <div className="safe-bottom fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-line bg-wall/95 p-3 backdrop-blur md:hidden">
+          <a className="btn btn-pigment flex-1 text-center" href="#enquire">
             Ask about piece
           </a>
           <FolioActionButton product={product} title={title} kind={kind ?? undefined} className="flex-none" />
@@ -237,7 +237,7 @@ async function ProductBody({
 /** Skeleton that mirrors the page structure so the streamed swap doesn't shift
  *  the footer — blocks match the real layout heights per breakpoint. */
 function ProductSkeleton() {
-  const bar = "bg-plate";
+  const bar = "bg-wall-deep";
   return (
     <main className="relative" aria-busy="true">
       <div className="shell pb-24 pt-4 md:pb-32">
@@ -264,14 +264,14 @@ function ProductSkeleton() {
           </div>
         </div>
       </div>
-      <section className="bg-plate py-20 md:py-28" aria-hidden="true">
+      <section className="bg-wall-deep py-20 md:py-28" aria-hidden="true">
         <div className="shell grid gap-10 md:grid-cols-12 md:gap-6">
           <div className="md:col-span-4">
-            <div className="h-14 w-56 bg-gesso" />
-            <div className="mt-4 h-5 w-40 bg-gesso" />
+            <div className="h-14 w-56 bg-wall" />
+            <div className="mt-4 h-5 w-40 bg-wall" />
           </div>
           <div className="md:col-span-7 md:col-start-6">
-            <div className="h-40 w-full bg-gesso" />
+            <div className="h-40 w-full bg-wall" />
           </div>
         </div>
       </section>

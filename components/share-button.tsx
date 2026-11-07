@@ -31,7 +31,7 @@ export function ShareButton({ label }: { label: string }) {
         Share
       </button>
       {note ? (
-        <span role="status" className="text-sm text-ink-soft">
+        <span role="status" className="text-sm text-tar-soft">
           {note}
         </span>
       ) : null}

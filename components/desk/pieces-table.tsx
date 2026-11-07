@@ -142,7 +142,7 @@ export function PiecesTable({
     return (
       <div className="grid gap-3 border-t border-line pt-8">
         <p className="text-lg font-semibold">No pieces in this list.</p>
-        <p className="text-ink-soft">
+        <p className="text-tar-soft">
           {trash ? "The trash is empty." : "Try clearing the search or filters, or add a new piece."}
         </p>
         {!trash ? (
@@ -184,14 +184,14 @@ export function PiecesTable({
                   }}
                 />
                 <Link
-                  className="text-sm text-ink-soft underline hover:text-ink"
+                  className="text-sm text-tar-soft underline hover:text-tar"
                   href={`${prefix}/pieces/${row.id}`}
                   aria-label={`Open ${row.displayTitle}`}
                 >
                   Open
                 </Link>
               </div>
-              <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-ink-soft">
+              <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-tar-soft">
                 {!propOf(row, "title").trim() ? <span className="text-xs">Shown as “{row.displayTitle}” until you name it</span> : null}
                 {row.featured ? <span className="desk-pill">Featured</span> : null}
                 {!row.ready ? (
@@ -200,7 +200,7 @@ export function PiecesTable({
                   </span>
                 ) : null}
                 {row.status === "published" ? (
-                  <a href={`/p/${row.slug}`} target="_blank" rel="noreferrer" className="text-xs text-ink-soft hover:text-ink underline">
+                  <a href={`/p/${row.slug}`} target="_blank" rel="noreferrer" className="text-xs text-tar-soft hover:text-tar underline">
                     view live ↗
                   </a>
                 ) : null}
@@ -310,7 +310,7 @@ export function PiecesTable({
 
       {!trash ? (
         <div className="flex items-center gap-2">
-          <label className="flex min-h-11 items-center gap-2 text-sm text-ink-soft">
+          <label className="flex min-h-11 items-center gap-2 text-sm text-tar-soft">
             <input type="checkbox" checked={selected.size === rows.length && rows.length > 0} onChange={toggleAll} />
             Select all
           </label>

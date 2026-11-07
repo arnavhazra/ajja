@@ -50,7 +50,7 @@ export function PieceViewer({ images, title }: { images: PublicImage[]; title: s
                 aria-current={i === index}
                 className={cn(
                   "relative block size-16 overflow-hidden rounded-[2px] outline-offset-2 transition-opacity md:size-20 cursor-pointer",
-                  i === index ? "ring-2 ring-pour" : "opacity-60 hover:opacity-100",
+                  i === index ? "ring-2 ring-pigment" : "opacity-60 hover:opacity-100",
                 )}
               >
                 <Image src={item.url} alt="" fill sizes="80px" className="object-cover" />
@@ -63,7 +63,7 @@ export function PieceViewer({ images, title }: { images: PublicImage[]; title: s
       <dialog
         ref={dialogRef}
         aria-label={`${title}, full screen`}
-        className="m-0 h-dvh max-h-none w-screen max-w-none bg-night p-0 text-gesso backdrop:bg-night"
+        className="m-0 h-dvh max-h-none w-screen max-w-none bg-vat p-0 text-wall backdrop:bg-vat"
         onClick={(event) => {
           if (event.target === event.currentTarget) dialogRef.current?.close();
         }}
@@ -90,22 +90,22 @@ export function PieceViewer({ images, title }: { images: PublicImage[]; title: s
             />
           </div>
           <div className="safe-bottom pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 p-4">
-            <p className="pointer-events-auto rounded-full bg-night/70 px-4 py-2 text-sm backdrop-blur">
+            <p className="pointer-events-auto rounded-full bg-vat/70 px-4 py-2 text-sm backdrop-blur">
               {title}
-              {images.length > 1 ? <span className="nums ml-2 text-gesso/60">{index + 1}/{images.length}</span> : null}
+              {images.length > 1 ? <span className="nums ml-2 text-wall/60">{index + 1}/{images.length}</span> : null}
             </p>
             <div className="pointer-events-auto flex gap-2">
               {images.length > 1 ? (
                 <>
-                  <button type="button" className="btn min-h-11 bg-night/70 px-4 text-gesso backdrop-blur cursor-pointer" onClick={() => setIndex((i) => (i - 1 + images.length) % images.length)}>
+                  <button type="button" className="btn min-h-11 bg-vat/70 px-4 text-wall backdrop-blur cursor-pointer" onClick={() => setIndex((i) => (i - 1 + images.length) % images.length)}>
                     Previous
                   </button>
-                  <button type="button" className="btn min-h-11 bg-night/70 px-4 text-gesso backdrop-blur cursor-pointer" onClick={() => setIndex((i) => (i + 1) % images.length)}>
+                  <button type="button" className="btn min-h-11 bg-vat/70 px-4 text-wall backdrop-blur cursor-pointer" onClick={() => setIndex((i) => (i + 1) % images.length)}>
                     Next
                   </button>
                 </>
               ) : null}
-              <button type="button" className="btn min-h-11 bg-gesso px-4 text-ink cursor-pointer" onClick={() => dialogRef.current?.close()}>
+              <button type="button" className="btn min-h-11 bg-wall px-4 text-tar cursor-pointer" onClick={() => dialogRef.current?.close()}>
                 Close
               </button>
             </div>

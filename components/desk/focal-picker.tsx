@@ -59,7 +59,7 @@ export function FocalPicker({ url, initialX = 0.5, initialY = 0.5, alt = "Artwor
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        className="group relative h-64 w-full cursor-crosshair select-none overflow-hidden rounded-sm border border-line bg-plate md:h-72"
+        className="group relative h-64 w-full cursor-crosshair select-none overflow-hidden rounded-sm border border-line bg-wall-deep md:h-72"
         title="Click or drag to position the focal center"
       >
         <Image
@@ -71,7 +71,7 @@ export function FocalPicker({ url, initialX = 0.5, initialY = 0.5, alt = "Artwor
         />
 
         {/* Semi-transparent scrim on hover to make crosshair pop */}
-        <div className="pointer-events-none absolute inset-0 bg-ink/5 transition-opacity group-hover:bg-ink/15" />
+        <div className="pointer-events-none absolute inset-0 bg-tar/5 transition-opacity group-hover:bg-tar/15" />
 
         {/* Visual crosshair indicator */}
         <div
@@ -81,7 +81,7 @@ export function FocalPicker({ url, initialX = 0.5, initialY = 0.5, alt = "Artwor
           {/* Outer focus ring */}
           <div className="absolute inset-0 rounded-full border-2 border-white shadow-[0_0_4px_rgba(0,0,0,0.6)]" />
           {/* Inner targeting dot */}
-          <div className="absolute left-1/2 top-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-pour shadow-[0_0_3px_#000]" />
+          <div className="absolute left-1/2 top-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-pigment shadow-[0_0_3px_#000]" />
           {/* Crosshair guidelines */}
           <div className="absolute -left-2 top-1/2 h-0.5 w-2 -translate-y-1/2 bg-white/80 shadow-[0_0_2px_#000]" />
           <div className="absolute -right-2 top-1/2 h-0.5 w-2 -translate-y-1/2 bg-white/80 shadow-[0_0_2px_#000]" />
@@ -90,7 +90,7 @@ export function FocalPicker({ url, initialX = 0.5, initialY = 0.5, alt = "Artwor
         </div>
 
         {/* Coordinate badge badge */}
-        <div className="pointer-events-none absolute bottom-2 right-2 rounded bg-ink/75 px-2 py-0.5 text-xs text-gesso backdrop-blur-xs">
+        <div className="pointer-events-none absolute bottom-2 right-2 rounded bg-tar/75 px-2 py-0.5 text-xs text-wall backdrop-blur-xs">
           Center: {Math.round(focal.x * 100)}% × {Math.round(focal.y * 100)}%
         </div>
       </div>

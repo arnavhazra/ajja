@@ -18,9 +18,9 @@ function EnquiryFormInner({ productId, productName, initialMessage, onSendAnothe
   if (state.ok) {
     return (
       <div role="status" className="note-card grid min-h-80 content-center gap-4 rounded-[2px] p-8 md:p-10">
-        <span aria-hidden="true" className="size-4 rounded-full bg-pour" />
+        <span aria-hidden="true" className="size-4 rounded-full bg-pigment" />
         <p className="display-wide text-3xl">Thank you. Your note is with the studio.</p>
-        <p className="text-ink-soft">{state.message}</p>
+        <p className="text-tar-soft">{state.message}</p>
         <button type="button" onClick={onSendAnother} className="btn btn-secondary w-fit min-h-11">
           Send another
         </button>
@@ -32,7 +32,7 @@ function EnquiryFormInner({ productId, productName, initialMessage, onSendAnothe
     <form id="message" action={action} className="note-card grid gap-5 rounded-[2px] p-6 md:p-10">
       {productName ? (
         <p className="display-wide text-2xl">
-          About <span className="text-pour">{productName}</span>
+          About <span className="text-pigment">{productName}</span>
         </p>
       ) : null}
       <div className="grid gap-5 sm:grid-cols-2">
@@ -58,7 +58,7 @@ function EnquiryFormInner({ productId, productName, initialMessage, onSendAnothe
         />
       </label>
       <details className="group">
-        <summary className="inline-flex min-h-11 cursor-pointer list-none items-center text-sm text-ink-soft [&::-webkit-details-marker]:hidden">
+        <summary className="inline-flex min-h-11 cursor-pointer list-none items-center text-sm text-tar-soft [&::-webkit-details-marker]:hidden">
           <span className="ink-link">Is it a gift? Add a note</span>
         </summary>
         <textarea className="field mt-2" name="giftNote" maxLength={500} aria-label="Gift note" />
@@ -72,7 +72,7 @@ function EnquiryFormInner({ productId, productName, initialMessage, onSendAnothe
       ) : null}
       <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
         <p className="field-hint max-w-xs">Nothing is paid on this website.</p>
-        <button className="btn btn-pour" type="submit" disabled={pending}>
+        <button className="btn btn-pigment" type="submit" disabled={pending}>
           {pending ? "Sending…" : "Send"}
         </button>
       </div>
