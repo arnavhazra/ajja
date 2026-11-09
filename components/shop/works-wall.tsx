@@ -4,6 +4,7 @@ import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { Flip } from "gsap/Flip";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { cn } from "@/lib/cn";
 import { pourData, pourOf } from "@/lib/pour";
 import type { PublicProduct } from "@/lib/types";
@@ -93,6 +94,24 @@ export function WorksWall({ products }: { products: PublicProduct[] }) {
       absolute: true,
       onEnter: (els) => gsap.fromTo(els, { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.5, delay: 0.25 }),
     });
+  }, [active]);
+
+  // Filtering changes the wall's height; everything pinned below it needs new start points.
+  useLayoutEffect(() => {
+    if (!active) return;
+    let frame = 0;
+    const refresh = () => {
+      frame = requestAnimationFrame(() => {
+        ScrollTrigger.refresh();
+        requestAnimationFrame(() => ScrollTrigger.refresh());
+      });
+    };
+    refresh();
+    const timer = window.setTimeout(refresh, 300);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
   }, [active]);
 
   let feature = 0;

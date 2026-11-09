@@ -1195,6 +1195,9 @@ html:has(.pour-room) .foot { display: none; }
 }
 .pour-room .cap,
 .pour-room .piece:hover .cap {
+  font-family: var(--font-prose);
+  font-size: 17px;
+  line-height: 1.4;
   gap: 10px;
   padding: 10px 0 0;
   background: transparent;

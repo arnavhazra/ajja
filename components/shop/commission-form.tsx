@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import Image from "next/image";
 import { useFolio, type FolioItem } from "./collectors-folio";
 import { sendEnquiry } from "@/lib/public-actions";
@@ -33,7 +33,15 @@ function CommissionFormInner({
 }: Props & { onSendAnother: () => void }) {
   const [state, action, pending] = useActionState(sendEnquiry, { ok: false, message: "" });
   const { items } = useFolio();
+  const messageRef = useRef<HTMLTextAreaElement>(null);
   const chips = items.length ? items : saved;
+  const notePieces = () => {
+    const field = messageRef.current;
+    if (!field) return;
+    const titles = chips.map((item) => item.title).filter((title, index, all) => all.indexOf(title) === index && !field.value.includes(title));
+    if (!titles.length) return;
+    field.value = `${field.value.trimEnd()}\n\nPieces: ${titles.join(", ")}`;
+  };
 
   if (state.ok) {
     return (
@@ -51,7 +59,7 @@ function CommissionFormInner({
   }
 
   return (
-    <form action={action} className="pr-form">
+    <form action={action} className="pr-form" onSubmit={notePieces}>
       {productId ? <input type="hidden" name="productId" value={productId} /> : null}
       {productName ? (
         <p className="pr-form-about">
@@ -82,6 +90,7 @@ function CommissionFormInner({
         <textarea
           id="note-message"
           name="message"
+          ref={messageRef}
           required
           maxLength={2500}
           defaultValue={initialMessage ?? (productName ? `I would like to ask about ${productName}.` : "")}
