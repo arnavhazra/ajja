@@ -968,7 +968,6 @@ html:has(.pour-room) .ask {
   transition: background 0.18s, color 0.18s;
 }
 html:has(.pour-room) .ask:hover { background: var(--pour); color: var(--pour-ink); }
-html:has(.pour-room) .foot { display: none; }
 
 /* ---------- Voices ---------- */
 .pr-label {

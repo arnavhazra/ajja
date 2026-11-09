@@ -1,4 +1,5 @@
 import { SiteFooter } from "@/components/site-footer";
+import { FooterSlot } from "@/components/shop/footer-slot";
 import { SiteHeader } from "@/components/site-header";
 import { ShopProviders } from "@/components/shop/shop-providers";
 import { getSettings, hasPricedProducts, loadManifest } from "@/lib/public-data";
@@ -16,7 +17,9 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
       <div id="content" className="flex-1">
         {children}
       </div>
-      <SiteFooter settings={settings} pigments={pigments} />
+      <FooterSlot>
+        <SiteFooter settings={settings} pigments={pigments} />
+      </FooterSlot>
     </ShopProviders>
   );
 }
