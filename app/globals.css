@@ -1080,6 +1080,7 @@ html:has(.pour-room) .ask:hover { background: var(--pour); color: var(--pour-ink
   gap: 10px;
   width: min(100%, calc((88svh - 40px) * var(--ratio, 0.8)));
   padding-top: 8px;
+  font-family: var(--font-prose);
   font-size: 14px;
   color: var(--ink-soft);
 }
@@ -1290,7 +1291,7 @@ html:has(.pour-room) .ask:hover { background: var(--pour); color: var(--pour-ink
   pointer-events: none;
 }
 .pr-swatch-preview img { width: 100%; height: auto; max-height: 34svh; object-fit: cover; box-shadow: 0 0 0 2px var(--gesso); }
-.pr-swatch-preview-label { font-size: 12px; font-weight: 600; line-height: 1.3; }
+.pr-swatch-preview-label { font-family: var(--font-prose); font-size: 12px; font-weight: 600; line-height: 1.3; }
 .pr-swatch[data-preview] .pr-swatch-preview, .pr-swatch:focus-visible .pr-swatch-preview { opacity: 1; transform: none; transition-delay: 0.12s; }
 .pr-swatch-end { display: grid; place-items: end start; flex: 0 0 auto; padding: 0 0 14px 20px; }
 
@@ -1306,7 +1307,7 @@ html:has(.pour-room) .ask:hover { background: var(--pour); color: var(--pour-ink
   background: var(--plate);
 }
 .pr-photo-inner { position: absolute; inset: -7% 0; }
-.pr-cap { display: flex; align-items: center; gap: 10px; padding-top: 12px; font-size: 14px; color: var(--ink-soft); }
+.pr-cap { display: flex; align-items: center; gap: 10px; padding-top: 12px; font-family: var(--font-prose); font-size: 14px; color: var(--ink-soft); }
 .pr-story {
   margin-top: 32px;
   max-width: 30ch;
