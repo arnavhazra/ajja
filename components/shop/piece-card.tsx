@@ -41,6 +41,7 @@ export function PieceCard({
   const dynamicPrice = format(product.priceMinor);
   const price = sold ? "sold" : (dynamicPrice ?? formatMoney(product.priceMinor, product.currency) ?? "price on asking");
   const ratio = cover?.width && cover?.height ? `${cover.width} / ${cover.height}` : "4 / 5";
+  const ratioValue = cover?.width && cover?.height ? cover.width / cover.height : 0.8;
 
   const handleFolioClick = (e: MouseEvent) => {
     e.preventDefault();
@@ -66,8 +67,17 @@ export function PieceCard({
   return (
     <figure
       className={cn("piece", className)}
-      style={{ "--pig": product.pigment, "--pig-ink": product.pigmentInk, "--reveal-delay": `${(index % 4) * 60}ms` } as CSSProperties}
+      style={
+        {
+          "--pig": product.pigment,
+          "--pig-ink": product.pigmentInk,
+          "--r": ratioValue,
+          "--reveal-delay": `${(index % 4) * 60}ms`,
+        } as CSSProperties
+      }
       data-reveal=""
+      data-flip-id={product.id}
+      data-sold={sold ? "" : undefined}
     >
       <ViewTransition name={`piece-${product.id}`}>
         <Link href={`/p/${product.slug}`} className="ph" style={{ aspectRatio: ratio }} aria-label={fullTitle}>
