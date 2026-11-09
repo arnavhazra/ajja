@@ -35,12 +35,17 @@ function CommissionFormInner({
   const { items } = useFolio();
   const messageRef = useRef<HTMLTextAreaElement>(null);
   const chips = items.length ? items : saved;
+  // The server accepts 2,000 characters; keep the piece list and trim the prose to fit.
   const notePieces = () => {
     const field = messageRef.current;
     if (!field) return;
-    const titles = chips.map((item) => item.title).filter((title, index, all) => all.indexOf(title) === index && !field.value.includes(title));
+    const titles = [...new Set(chips.map((item) => item.title))];
     if (!titles.length) return;
-    field.value = `${field.value.trimEnd()}\n\nPieces: ${titles.join(", ")}`;
+    const line = `Pieces: ${titles.join(", ")}`;
+    const body = field.value.replace(/\n\nPieces: [^\n]*$/, "").trimEnd();
+    const room = 2000 - line.length - 2;
+    const kept = body.length > room ? `${body.slice(0, Math.max(0, room)).trimEnd()}…` : body;
+    field.value = `${kept}\n\n${line}`;
   };
 
   if (state.ok) {
@@ -92,7 +97,7 @@ function CommissionFormInner({
           name="message"
           ref={messageRef}
           required
-          maxLength={2500}
+          maxLength={2000}
           defaultValue={initialMessage ?? (productName ? `I would like to ask about ${productName}.` : "")}
           placeholder="Which piece, or what would you like made — size, wood, where it will live?"
         />
