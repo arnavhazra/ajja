@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { dedupeByPigment, deltaE, sortByHue } from "@/lib/pigment-math";
+import { contrastRatio } from "@/lib/contrast";
+import { dedupeByPigment, deltaE, legiblePigment, sortByHue } from "@/lib/pigment-math";
 
 describe("pigment deltaE", () => {
   it("is zero for identical colours", () => {
@@ -25,5 +26,22 @@ describe("hue sort", () => {
     expect(sorted[0]).toBe("#a0442d"); // red-orange first
     expect(sorted[sorted.length - 1]).toBe("#8a8a8a"); // grey last
     expect(sorted.indexOf("#3e5c47")).toBeLessThan(sorted.indexOf("#2a44c4")); // green before blue
+  });
+});
+
+describe("legible pigment", () => {
+  it("keeps a pigment that already reads on the wall", () => {
+    expect(legiblePigment("#2a44c4", "#ecede8", "#18222c")).toBe("#2a44c4");
+  });
+
+  it("darkens a pale pour until it reaches AA on gesso", () => {
+    const text = legiblePigment("#f59e0b", "#ecede8", "#18222c");
+    expect(text).not.toBe("#f59e0b");
+    expect(contrastRatio(text, "#ecede8")).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("lightens a deep pour on the night wall", () => {
+    const text = legiblePigment("#31430f", "#14191f", "#ecede8");
+    expect(contrastRatio(text, "#14191f")).toBeGreaterThanOrEqual(4.5);
   });
 });

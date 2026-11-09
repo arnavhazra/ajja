@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Big_Shoulders, Big_Shoulders_Stencil, Courier_Prime } from "next/font/google";
+import { Big_Shoulders, Big_Shoulders_Stencil, Bricolage_Grotesque, Courier_Prime, Newsreader } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { getSettings } from "@/lib/public-data";
 import { siteUrl } from "@/lib/site-url";
@@ -25,6 +25,23 @@ const ledger = Courier_Prime({
   style: ["normal", "italic"],
   display: "optional",
   variable: "--font-type",
+});
+
+// Wet Edge shop front: Bricolage Grotesque for display/UI, Newsreader for prose.
+// Scoped to .pour-room on the home page; desk and piece pages keep the ledger voices.
+const bricolage = Bricolage_Grotesque({
+  subsets: ["latin"],
+  axes: ["opsz", "wdth"],
+  display: "optional",
+  variable: "--font-bricolage",
+});
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  axes: ["opsz"],
+  style: ["normal", "italic"],
+  display: "optional",
+  variable: "--font-newsreader",
 });
 
 export const viewport: Viewport = {
@@ -53,7 +70,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-scroll-behavior="smooth" className={`${display.variable} ${stencil.variable} ${ledger.variable} scroll-smooth h-full`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${display.variable} ${stencil.variable} ${ledger.variable} ${bricolage.variable} ${newsreader.variable} scroll-smooth h-full`}>
       <body className="flex min-h-dvh flex-col bg-wall font-sans text-tar antialiased">
         <a className="skip-link" href="#content">
           Skip to content

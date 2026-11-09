@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import Image from "next/image";
+import { useFolio, type FolioItem } from "./collectors-folio";
 import { sendEnquiry } from "@/lib/public-actions";
 import { EventBeacon } from "@/components/event-beacon";
 
@@ -9,6 +11,7 @@ type Props = {
   productName?: string;
   responseNote?: string;
   initialMessage?: string;
+  saved?: FolioItem[];
 };
 
 export function CommissionForm(props: Props) {
@@ -16,93 +19,99 @@ export function CommissionForm(props: Props) {
   return <CommissionFormInner key={round} {...props} onSendAnother={() => setRound((n) => n + 1)} />;
 }
 
+function Honeypot() {
+  return <input className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" name="company" />;
+}
+
 function CommissionFormInner({
   productId,
   productName,
   responseNote,
   initialMessage,
+  saved = [],
   onSendAnother,
 }: Props & { onSendAnother: () => void }) {
   const [state, action, pending] = useActionState(sendEnquiry, { ok: false, message: "" });
+  const { items } = useFolio();
+  const chips = items.length ? items : saved;
+
+  if (state.ok) {
+    return (
+      <div role="status" className="pr-form pr-form-done">
+        <span className="pr-dot pr-dot-lg" aria-hidden="true" />
+        <p className="pr-form-done-title">Thank you — your note is with the studio.</p>
+        <p className="pr-form-fine">{state.message || responseNote || "We will write back as soon as we can."}</p>
+        <button type="button" onClick={onSendAnother} className="pr-btn pr-btn-quiet">
+          Send another note
+        </button>
+        <Honeypot />
+        <EventBeacon type="form" productId={productId} />
+      </div>
+    );
+  }
 
   return (
-    <section id="inquire" className="note-sec hairline-b scroll-mt-[78px]">
-      <div className="shell note-grid">
-        <div className="note-side">
-          <p className="kicker">ask the studio</p>
-          <h2 className="disp mt-[10px]">
-            Send a note<span className="text-sap">.</span>
-          </h2>
-          <p>Tell us which piece, or describe what you would like made. Messages go straight to the studio.</p>
-          <p className="comm">studio visits by appointment — mention it in your note.</p>
-        </div>
+    <form action={action} className="pr-form">
+      {productId ? <input type="hidden" name="productId" value={productId} /> : null}
+      {productName ? (
+        <p className="pr-form-about">
+          <span>About</span>
+          <strong>{productName}</strong>
+        </p>
+      ) : null}
 
-        {state.ok ? (
-          <div role="status" className="note-card self-start">
-            <span className="inline-block size-3 bg-ok mb-4" aria-hidden="true" />
-            <p className="display text-2xl sm:text-3xl">Thank you — your note is with the studio.</p>
-            <p className="type mt-3 text-sm text-tar-soft">
-              {state.message || responseNote || "We will write back as soon as we can."}
-            </p>
-            <button type="button" onClick={onSendAnother} className="btn btn-secondary mt-6 min-h-11">
-              Send another
-            </button>
-            <EventBeacon type="form" productId={productId} />
-          </div>
-        ) : (
-          <form action={action} className="note-card self-start">
-            {productName ? (
-              <p className="f-row">
-                <span className="text-[13px] text-tar-soft">about</span>
-                <strong className="text-sap">{productName}</strong>
-              </p>
-            ) : null}
-
-            <div className="f-row">
-              <label htmlFor="note-name">your name *</label>
-              <input id="note-name" name="name" type="text" required maxLength={120} autoComplete="name" />
-            </div>
-            <div className="f-row">
-              <label htmlFor="note-contact">phone or email *</label>
-              <input id="note-contact" name="contact" type="text" required maxLength={160} autoComplete="email" />
-            </div>
-            <div className="f-row">
-              <label htmlFor="note-subject">subject</label>
-              <input
-                id="note-subject"
-                name="subject"
-                type="text"
-                defaultValue={productName ? `Asking about ${productName}` : "A question for the studio"}
-              />
-            </div>
-            <div className="f-row">
-              <label htmlFor="note-message">message *</label>
-              <textarea
-                id="note-message"
-                name="message"
-                required
-                maxLength={2500}
-                defaultValue={initialMessage ?? (productName ? `I would like to ask about ${productName}.` : "")}
-                placeholder="which piece, or what would you like made — size, wood, where it will live?"
-              />
-            </div>
-
-            <input type="hidden" name="productId" value={productId ?? ""} />
-            <input className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" name="company" />
-
-            {state.message ? (
-              <p role="alert" className="mt-3 border-l-2 border-sold pl-3 text-sm text-sold">
-                {state.message}
-              </p>
-            ) : null}
-
-            <p className="fine">nothing is paid on this site — your note goes straight to the studio.</p>
-            <button className="send" type="submit" disabled={pending}>
-              {pending ? "Sending…" : "Send"}
-            </button>
-          </form>
-        )}
+      <div className="pr-field">
+        <label htmlFor="note-name">Your name *</label>
+        <input id="note-name" name="name" type="text" required maxLength={120} autoComplete="name" />
       </div>
-    </section>
+      <div className="pr-field">
+        <label htmlFor="note-contact">Phone or email *</label>
+        <input id="note-contact" name="contact" type="text" required maxLength={160} autoComplete="email" />
+      </div>
+      <div className="pr-field">
+        <label htmlFor="note-subject">Subject</label>
+        <input
+          id="note-subject"
+          name="subject"
+          type="text"
+          defaultValue={productName ? `Asking about ${productName}` : "A question for the studio"}
+        />
+      </div>
+      <div className="pr-field">
+        <label htmlFor="note-message">Message *</label>
+        <textarea
+          id="note-message"
+          name="message"
+          required
+          maxLength={2500}
+          defaultValue={initialMessage ?? (productName ? `I would like to ask about ${productName}.` : "")}
+          placeholder="Which piece, or what would you like made — size, wood, where it will live?"
+        />
+      </div>
+
+      {chips.length ? (
+        <div className="pr-chips" aria-label="Pieces included in this note">
+          {chips.slice(0, 4).map((item) => (
+            <span key={item.id} className="pr-chip" title={item.title}>
+              {item.imageUrl ? <Image src={item.imageUrl} alt="" width={28} height={28} className="object-cover" /> : null}
+              <span className="pr-chip-title">{item.title}</span>
+            </span>
+          ))}
+          {chips.length > 4 ? <span className="pr-chip pr-chip-more">+{chips.length - 4} more</span> : null}
+        </div>
+      ) : null}
+
+      <Honeypot />
+      {state.message ? (
+        <p role="alert" className="pr-form-error">
+          {state.message}
+        </p>
+      ) : null}
+
+      <button className="pr-btn pr-btn-wide" type="submit" disabled={pending}>
+        {pending ? "Sending…" : "Send to the studio"}
+      </button>
+      <p className="pr-form-fine">Nothing is paid on this site — your note goes straight to the studio.</p>
+    </form>
   );
 }

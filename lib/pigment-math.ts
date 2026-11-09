@@ -84,3 +84,39 @@ export function sortByHue<T>(items: T[], hex: (item: T) => string): T[] {
     return ka.h - kb.h || kb.s - ka.s || ka.l - kb.l;
   });
 }
+
+function relativeLuminance(rgb: Rgb) {
+  return 0.2126 * srgbToLinear(rgb.r) + 0.7152 * srgbToLinear(rgb.g) + 0.0722 * srgbToLinear(rgb.b);
+}
+
+function contrast(a: Rgb, b: Rgb) {
+  const la = relativeLuminance(a);
+  const lb = relativeLuminance(b);
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+function toHex({ r, g, b }: Rgb) {
+  return `#${[r, g, b].map((v) => Math.round(v).toString(16).padStart(2, "0")).join("")}`;
+}
+
+/**
+ * The pigment pushed toward `toward` (ink on a light wall, gesso on a dark one)
+ * just far enough to reach `min` contrast against `ground`. Keeps the hue legible
+ * when a pale pour is used as text or a focus ring.
+ */
+export function legiblePigment(hex: string, ground: string, toward: string, min = 4.5): string {
+  const pigment = hexToRgb(hex);
+  const bg = hexToRgb(ground);
+  const target = hexToRgb(toward);
+  if (!pigment || !bg || !target) return toward;
+  for (let step = 0; step <= 20; step += 1) {
+    const t = step / 20;
+    const mixed = {
+      r: pigment.r + (target.r - pigment.r) * t,
+      g: pigment.g + (target.g - pigment.g) * t,
+      b: pigment.b + (target.b - pigment.b) * t,
+    };
+    if (contrast(mixed, bg) >= min) return toHex(mixed);
+  }
+  return toward;
+}

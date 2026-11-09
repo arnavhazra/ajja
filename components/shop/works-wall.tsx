@@ -1,23 +1,37 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { gsap } from "gsap";
+import { Flip } from "gsap/Flip";
 import { cn } from "@/lib/cn";
-import { PieceCard } from "./piece-card";
-import { useWallFilter } from "./wall-filter";
+import { pourData, pourOf } from "@/lib/pour";
 import type { PublicProduct } from "@/lib/types";
+import { PieceCard } from "./piece-card";
 
 type Filter = { key: string; label: string; count: number };
 
+const FEATURE_EVERY = 5;
+
+/**
+ * The hang: every piece at its own proportions, centred on one hanging line
+ * per row. Every fifth piece hangs wide across two columns, alternating sides.
+ * Filters reorder the wall with GSAP Flip.
+ */
 export function WorksWall({ products }: { products: PublicProduct[] }) {
   const [active, setActive] = useState("all");
-  const { pigment, setPigment, matches } = useWallFilter();
+  const wallRef = useRef<HTMLDivElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
+  const pillRef = useRef<HTMLSpanElement>(null);
+  const flipState = useRef<Flip.FlipState | null>(null);
 
   const filters = useMemo<Filter[]>(() => {
     const groups = new Map<string, Filter>();
     let sold = 0;
+    let available = 0;
     for (const product of products) {
       if (product.status === "sold") sold += 1;
+      else available += 1;
       if (product.categorySlug && product.categoryName) {
         const current = groups.get(product.categorySlug);
         groups.set(product.categorySlug, {
@@ -27,88 +41,134 @@ export function WorksWall({ products }: { products: PublicProduct[] }) {
         });
       }
     }
-    const list: Filter[] = [{ key: "all", label: "all", count: products.length }];
-    if (groups.size > 0) list.push(...groups.values());
-    if (sold > 0) list.push({ key: "sold", label: "sold", count: sold });
+    const list: Filter[] = [{ key: "all", label: "All", count: products.length }];
+    if (sold > 0 && available > 0) list.push({ key: "available", label: "Available", count: available });
+    if (groups.size > 1) list.push(...groups.values());
+    if (sold > 0) list.push({ key: "sold", label: "Sold", count: sold });
     return list;
   }, [products]);
 
-  const keep = (product: PublicProduct) => {
-    if (!matches(product.pigment)) return false;
-    if (active === "all") return true;
-    if (active === "sold") return product.status === "sold";
-    return product.categorySlug === active;
+  const filtered = useMemo(() => {
+    const seen = new Set<string>();
+    return products.filter((product) => {
+      if (seen.has(product.id)) return false;
+      seen.add(product.id);
+      if (active === "all") return true;
+      if (active === "available") return product.status !== "sold";
+      if (active === "sold") return product.status === "sold";
+      return product.categorySlug === active;
+    });
+  }, [products, active]);
+
+  const choose = (key: string) => {
+    if (key === active) return;
+    const wall = wallRef.current;
+    if (wall && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      gsap.registerPlugin(Flip);
+      flipState.current = Flip.getState(wall.querySelectorAll("[data-flip-id]"));
+    }
+    setActive(key);
   };
 
-  const seen = new Set<string>();
-  const filtered = products.filter(keep).filter((product) => (seen.has(product.id) ? false : (seen.add(product.id), true)));
+  useLayoutEffect(() => {
+    const bar = barRef.current;
+    const pill = pillRef.current;
+    const on = bar?.querySelector<HTMLElement>('[aria-pressed="true"]');
+    if (bar && pill && on) {
+      pill.style.width = `${on.offsetWidth}px`;
+      pill.style.transform = `translateX(${on.offsetLeft}px)`;
+      pill.dataset.ready = "true";
+    }
+    const state = flipState.current;
+    const wall = wallRef.current;
+    if (!state || !wall) return;
+    flipState.current = null;
+    // Freshly mounted pieces skip their scroll reveal; Flip fades them in instead.
+    wall.querySelectorAll("[data-reveal]").forEach((el) => el.classList.add("revealed"));
+    Flip.from(state, {
+      targets: wall.querySelectorAll("[data-flip-id]"),
+      duration: 0.7,
+      ease: "power3.inOut",
+      stagger: 0.02,
+      absolute: true,
+      onEnter: (els) => gsap.fromTo(els, { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.5, delay: 0.25 }),
+    });
+  }, [active]);
+
+  let feature = 0;
 
   return (
-    <section id="works" className="hairline-b scroll-mt-[78px]">
+    <section id="works" className="pr-section pr-works scroll-mt-[60px]" aria-labelledby="works-title">
       <div className="shell">
-        <div className="sec-head">
+        <header className="pr-head">
           <div>
-            <p className="kicker">the wall</p>
-            <h2 className="disp mt-[10px]">
-              The works<span className="text-sap">.</span>
+            <p className="pr-label">The wall</p>
+            <h2 id="works-title" className="pr-h2" data-reveal="">
+              The works <sup className="pr-count nums">{products.length}</sup>
             </h2>
           </div>
-          <p className="sub type">
-            Each piece hangs as it was photographed. Choose a work to see it closer, or ask the studio about it.
+          <p className="pr-head-note">
+            Each piece hangs at its own proportions, photographed as it is. Choose a work to see it closer, or ask the
+            studio about it.
           </p>
-        </div>
+        </header>
+      </div>
 
-        <div className="filters" role="group" aria-label="Hang only">
-          <span className="py-[6px] text-tar-soft">hang:</span>
-          {filters.map((filter) => {
-            const isActive = active === filter.key;
+      {filters.length > 1 ? (
+        <div className="pr-filterbar">
+          <div className="shell">
+            <div ref={barRef} className="pr-filters" role="group" aria-label="Show only">
+              <span ref={pillRef} className="pr-pill" aria-hidden="true" />
+              {filters.map((filter) => (
+                <button
+                  key={filter.key}
+                  type="button"
+                  className="pr-filter"
+                  aria-pressed={active === filter.key}
+                  onClick={() => choose(filter.key)}
+                >
+                  {filter.label} <span className="nums">{filter.count}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="shell">
+        <div ref={wallRef} className="pr-hang">
+          {filtered.map((product, index) => {
+            const wide = index % FEATURE_EVERY === 0 && filtered.length > 2;
+            const side = wide ? (feature++ % 2 === 0 ? "start" : "end") : undefined;
             return (
-              <button
-                key={filter.key}
-                type="button"
-                aria-pressed={isActive}
-                onClick={() => setActive(filter.key)}
-                className={cn("flt", isActive && "on")}
+              <div
+                key={product.id}
+                className={cn("pr-slot", wide && "is-wide")}
+                data-side={side}
+                {...(wide ? pourData(pourOf(product.pigment, product.pigmentInk)) : {})}
               >
-                {filter.label.toLowerCase()} ({filter.count})
-              </button>
+                <PieceCard
+                  product={product}
+                  index={index}
+                  priority={index < 2}
+                  className={wide ? "is-wide" : undefined}
+                  sizes={
+                    wide
+                      ? "(min-width: 600px) 64vw, 94vw"
+                      : "(min-width: 960px) 30vw, (min-width: 600px) 46vw, 94vw"
+                  }
+                />
+              </div>
             );
           })}
-          {pigment ? (
-            <span className="inline-flex min-h-11 items-center gap-2 text-sm text-tar">
-              <span className="inline-block size-3" style={{ background: pigment }} aria-hidden="true" />
-              filtered by a colour
-              <button
-                type="button"
-                className="inline-flex min-h-11 items-center px-1 underline underline-offset-4 cursor-pointer"
-                onClick={() => setPigment(null)}
-              >
-                show every colour
-              </button>
-            </span>
-          ) : null}
         </div>
+        {filtered.length === 0 ? <p className="pr-empty">Nothing on the wall matches that yet.</p> : null}
 
-        {/* The wall — photographs at their real proportions, typed captions */}
-        <div className="wall">
-          {filtered.map((product, index) => (
-            <PieceCard
-              key={product.id}
-              product={product}
-              index={index}
-              priority={index < 3}
-              sizes="(min-width: 1180px) 22vw, (min-width: 900px) 30vw, (min-width: 560px) 46vw, 94vw"
-            />
-          ))}
-        </div>
-        {filtered.length === 0 ? (
-          <p className="type mt-4 text-sm text-tar-soft">Nothing on the wall matches that yet — try another colour or filter.</p>
-        ) : null}
-
-        <p className="more type">
-          need a different size, or a piece made for you? tell the studio what you have in mind — a size, a wood, a
-          place it will live — and we will tell you what is possible.{" "}
-          <Link href="#inquire">ask about a commission →</Link>
+        <p className="pr-more">
+          Need a different size, or a piece made for you? Tell the studio what you have in mind.{" "}
+          <Link href="#inquire" className="pr-link">
+            Ask about a commission
+          </Link>
         </p>
       </div>
     </section>
