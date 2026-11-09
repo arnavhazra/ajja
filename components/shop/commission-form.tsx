@@ -34,18 +34,29 @@ function CommissionFormInner({
   const [state, action, pending] = useActionState(sendEnquiry, { ok: false, message: "" });
   const { items } = useFolio();
   const messageRef = useRef<HTMLTextAreaElement>(null);
+  const appendedRef = useRef<string | null>(null);
   const chips = items.length ? items : saved;
-  // The server accepts 2,000 characters; keep the piece list and trim the prose to fit.
+  // The server accepts 2,000 characters. Only ever remove the exact line this
+  // form appended before — a visitor's own "Pieces:" paragraph is left alone.
   const notePieces = () => {
     const field = messageRef.current;
     if (!field) return;
-    const titles = [...new Set(chips.map((item) => item.title))];
-    if (!titles.length) return;
-    const line = `Pieces: ${titles.join(", ")}`;
-    const body = field.value.replace(/\n\nPieces: [^\n]*$/, "").trimEnd();
-    const room = 2000 - line.length - 2;
-    const kept = body.length > room ? `${body.slice(0, Math.max(0, room)).trimEnd()}…` : body;
-    field.value = `${kept}\n\n${line}`;
+    const all = [...new Set(chips.map((item) => item.title))];
+    if (!all.length) return;
+    const shown = all.slice(0, 8);
+    const extra = all.length - shown.length;
+    const line = `Pieces: ${shown.join(", ")}${extra > 0 ? ` (+${extra} more)` : ""}`;
+    let body = field.value;
+    if (appendedRef.current) {
+      const at = body.lastIndexOf(appendedRef.current);
+      if (at >= 0) body = `${body.slice(0, at)}${body.slice(at + appendedRef.current.length)}`;
+    }
+    const suffix = `\n\n${line}`;
+    const room = Math.max(0, 2000 - suffix.length);
+    const trimmed = body.trim();
+    const kept = trimmed.length > room ? `${trimmed.slice(0, Math.max(0, room - 1)).trimEnd()}…` : trimmed;
+    field.value = `${kept}${suffix}`;
+    appendedRef.current = suffix;
   };
 
   if (state.ok) {
