@@ -23,6 +23,12 @@ async function HomeEditor({ searchParams }: { searchParams: Promise<Record<strin
       manifest.flatMap((piece) => piece.images.map((image) => [image.url, { url: image.url, label: piece.title.trim() || "Untitled photograph" }] as const)),
     ).values(),
   ];
+  // The manifest only lists pieces on the site. Keep the currently saved
+  // photographs selectable anyway so saving the page can't silently clear a
+  // portrait or hero that belongs to a draft or an unlisted photo.
+  for (const url of [settings.heroImage, settings.ownerPhoto]) {
+    if (url && !photos.some((photo) => photo.url === url)) photos.push({ url, label: "Current photograph — not listed on the site" });
+  }
   return (
     <main className="desk-page max-w-3xl">
       <Flash note={one(params.note)} undo="" back="/home" />
