@@ -32,15 +32,25 @@ export function MacroLoupeImage({ image, title, ratio, priority = false, onOpenD
     const lensWidth = lens.offsetWidth || 170;
     const lensHeight = lens.offsetHeight || 170;
 
+    // The photograph is fit-contained: map the pointer onto the rendered
+    // image rect, not the letterboxed element.
+    const naturalW = image.width || rect.width;
+    const naturalH = image.height || rect.height;
+    const fit = Math.min(rect.width / naturalW, rect.height / naturalH);
+    const drawnW = naturalW * fit;
+    const drawnH = naturalH * fit;
+    const offsetX = (rect.width - drawnW) / 2;
+    const offsetY = (rect.height - drawnH) / 2;
+
     lens.style.left = `${x}px`;
     lens.style.top = `${y}px`;
     lens.style.backgroundImage = `url('${image.url}')`;
-    lens.style.backgroundSize = `${rect.width * zoomLevel}px ${rect.height * zoomLevel}px`;
+    lens.style.backgroundSize = `${drawnW * zoomLevel}px ${drawnH * zoomLevel}px`;
 
-    const bgX = -(x * zoomLevel - lensWidth / 2);
-    const bgY = -(y * zoomLevel - lensHeight / 2);
+    const bgX = -((x - offsetX) * zoomLevel - lensWidth / 2);
+    const bgY = -((y - offsetY) * zoomLevel - lensHeight / 2);
     lens.style.backgroundPosition = `${bgX}px ${bgY}px`;
-  }, [image.url, zoomLevel]);
+  }, [image.url, image.width, image.height, zoomLevel]);
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "touch" && !isLocked) return;
@@ -108,8 +118,7 @@ export function MacroLoupeImage({ image, title, ratio, priority = false, onOpenD
           sizes="(min-width: 768px) 58vw, 100vw"
           placeholder={image.blurData ? "blur" : "empty"}
           blurDataURL={image.blurData ?? undefined}
-          className="object-cover"
-          style={{ objectPosition: `${(image.focalX ?? 0.5) * 100}% ${(image.focalY ?? 0.5) * 100}%` }}
+          className="object-contain photo-dissolve"
         />
 
         {/* 2.6x Optical Macro Lens */}

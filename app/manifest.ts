@@ -1,16 +1,15 @@
 import type { MetadataRoute } from "next";
-import { getSettings } from "@/lib/public-data";
+import { brand } from "@/lib/brand";
 
-export default async function manifest(): Promise<MetadataRoute.Manifest> {
-  const settings = await getSettings();
+export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: settings.businessName,
-    short_name: settings.businessName,
-    description: settings.heroText,
+    name: brand.name,
+    short_name: brand.name,
+    description: brand.description,
     start_url: "/",
     display: "standalone",
-    background_color: "#E6E8E0",
-    theme_color: "#211D16",
+    background_color: "#F6F0E5",
+    theme_color: "#30261E",
     lang: "en",
     icons: [
       { src: "/icon", sizes: "32x32", type: "image/png" },

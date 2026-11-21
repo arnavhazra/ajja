@@ -31,7 +31,7 @@ async function CheatSheet() {
       <div className="no-print">
         <PrintButton />
       </div>
-      <h1 className="text-4xl">Ajja desk, one page</h1>
+      <h1 className="text-4xl">megele.art desk, one page</h1>
       <ol className="grid list-decimal gap-3 pl-6">
         {steps.map((step) => (
           <li key={step}>{step}</li>

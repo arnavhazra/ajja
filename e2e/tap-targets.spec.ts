@@ -1,6 +1,9 @@
 import { expect, test } from "@playwright/test";
 import { neon } from "@neondatabase/serverless";
 import { hashPassword } from "../lib/password";
+import { e2eDbIsolated } from "./isolated-db";
+
+test.skip(!e2eDbIsolated(), "DATABASE_URL is not confirmed isolated — set E2E_ISOLATED_DB=1 or use a local database");
 
 const adminEmail = (process.env.DEV_ADMIN_EMAIL || process.env.OWNER_EMAIL || "e2e-taps@example.test").toLowerCase();
 const adminPassword = "e2e-taps-password-long";
@@ -43,20 +46,20 @@ async function expectBigEnough(locator: ReturnType<import("@playwright/test").Pa
   }
 }
 
-test("works wall filters and card actions are at least 44px", async ({ page }) => {
+test("material index rows are at least 44px", async ({ page }) => {
   for (const width of [390, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/");
-    const works = page.locator("#works:visible").first();
-    await expect(works).toBeVisible();
-    await expectBigEnough(works.locator("button"), `works buttons at ${width}px`);
+    const index = page.locator(".idx:visible").first();
+    await expect(index).toBeVisible();
+    await expectBigEnough(index.locator("a"), `index links at ${width}px`);
   }
 });
 
 test("folio sheet traps focus and closes on escape", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+  await page.setViewportSize({ width: 1280, height: 844 });
   await page.goto("/");
-  await page.getByRole("button", { name: /^Save/ }).first().click();
+  await page.getByRole("button", { name: /^Saved \d+ piece/ }).first().click();
   const dialog = page.getByRole("dialog", { name: "Saved pieces" });
   await expect(dialog).toBeVisible();
   const focusInside = await page.evaluate(() => {

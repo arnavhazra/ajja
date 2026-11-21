@@ -29,6 +29,11 @@ export function pieceTitle(
   return `${kind} · No. ${shortRef(ref)}`;
 }
 
+/** Provisional slugs (piece-*) are placeholders — safe to replace. An established slug never moves on rename. */
+export function isProvisionalSlug(slug?: string | null) {
+  return Boolean(slug?.startsWith("piece-"));
+}
+
 export function pieceKind(categoryName: string | null, attributes?: Record<string, string>) {
   return attributes?.medium || categoryName || null;
 }

@@ -3,6 +3,9 @@ import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { neon } from "@neondatabase/serverless";
 import { hashPassword } from "../lib/password";
+import { e2eDbIsolated } from "./isolated-db";
+
+test.skip(!e2eDbIsolated(), "DATABASE_URL is not confirmed isolated — set E2E_ISOLATED_DB=1 or use a local database");
 
 const SCREENSHOT_DIR = path.resolve(process.cwd(), "screenshots");
 mkdirSync(SCREENSHOT_DIR, { recursive: true });
@@ -47,11 +50,11 @@ test.describe("Visual Audit & AI Screenshot Capture", () => {
 
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, "01-storefront-desktop-full.png"), fullPage: true });
 
-    const works = page.locator("#works");
-    if (await works.count()) {
-      await works.scrollIntoViewIfNeeded();
+    const index = page.locator(".idx");
+    if (await index.count()) {
+      await index.scrollIntoViewIfNeeded();
       await page.waitForTimeout(300);
-      await page.screenshot({ path: path.join(SCREENSHOT_DIR, "02-storefront-desktop-works.png") });
+      await page.screenshot({ path: path.join(SCREENSHOT_DIR, "02-storefront-desktop-index.png") });
     }
 
     const footer = page.locator("footer");

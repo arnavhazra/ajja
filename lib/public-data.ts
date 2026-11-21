@@ -147,6 +147,35 @@ export async function loadStudio() {
   return hydrate(rows);
 }
 
+export async function loadCategories() {
+  "use cache";
+  cacheTag("catalog");
+  cacheLife("minutes");
+  return getDb().select().from(categories).orderBy(asc(categories.sortOrder), asc(categories.name));
+}
+
+export async function loadCategory(slug: string) {
+  "use cache";
+  cacheTag("catalog");
+  cacheLife("minutes");
+  const [row] = await getDb().select().from(categories).where(eq(categories.slug, slug)).limit(1);
+  return row ?? null;
+}
+
+/** Every public piece in one art form, available before sold, featured first. */
+export async function loadCategoryPieces(categoryId: string) {
+  "use cache";
+  cacheTag("catalog");
+  cacheLife("minutes");
+  const rows = await getDb()
+    .select()
+    .from(products)
+    .where(and(listed(), eq(products.categoryId, categoryId)))
+    .orderBy(sql`case when ${products.status} = 'sold' then 1 else 0 end`, desc(products.featured), desc(products.createdAt))
+    .limit(300);
+  return hydrate(rows);
+}
+
 export async function loadRelated(product: PublicProduct) {
   "use cache";
   cacheTag("catalog");

@@ -4,7 +4,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { cn } from "@/lib/cn";
-import { bulkApply, moveFeatured, restorePiece, saveInlineField, toggleFeatured, undoInline } from "@/lib/desk-actions";
+import {
+  bulkApply,
+  draftPiece,
+  duplicatePiece,
+  hidePiece,
+  moveFeatured,
+  publishPiece,
+  restorePiece,
+  saveInlineField,
+  sellPiece,
+  toggleFeatured,
+  trashPiece,
+  undoInline,
+} from "@/lib/desk-actions";
 
 export type DeskPieceRow = {
   id: string;
@@ -186,9 +199,9 @@ export function PiecesTable({
                 <Link
                   className="text-sm text-tar-soft underline hover:text-tar"
                   href={`${prefix}/pieces/${row.id}`}
-                  aria-label={`Open ${row.displayTitle}`}
+                  aria-label={`Edit ${row.displayTitle}`}
                 >
-                  Open
+                  Edit
                 </Link>
               </div>
               <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-tar-soft">
@@ -271,36 +284,85 @@ export function PiecesTable({
                   </button>
                 </form>
               ) : (
-                <span className="flex gap-1">
-                  <form action={toggleFeatured}>
+                <span className="flex flex-wrap items-center gap-1">
+                  {row.status === "draft" ? (
+                    <Link className="btn btn-secondary min-h-11 px-3 text-xs" href={`${prefix}/add?piece=${row.id}`}>
+                      Continue draft
+                    </Link>
+                  ) : null}
+                  <form action={sellPiece}>
                     <input type="hidden" name="id" value={row.id} />
-                    <button
-                      className={cn("btn btn-quiet min-h-11 px-2 text-xs", row.featured && "text-ok")}
-                      type="submit"
-                      aria-label={row.featured ? `Unfeature ${row.displayTitle}` : `Feature ${row.displayTitle}`}
-                      aria-pressed={row.featured}
-                    >
-                      ★
+                    <input type="hidden" name="back" value="/pieces" />
+                    <button className="btn btn-secondary min-h-11 px-3 text-xs" type="submit">
+                      Mark as sold
                     </button>
                   </form>
-                  {row.featured ? (
-                    <>
-                      <form action={moveFeatured}>
+                  <form action={hidePiece}>
+                    <input type="hidden" name="id" value={row.id} />
+                    <input type="hidden" name="back" value="/pieces" />
+                    <button className="btn btn-secondary min-h-11 px-3 text-xs" type="submit">
+                      Hide
+                    </button>
+                  </form>
+                  <details className="desk-more">
+                    <summary className="btn btn-quiet min-h-11 px-3 text-xs">More</summary>
+                    <span className="desk-more-menu">
+                      <form action={publishPiece}>
                         <input type="hidden" name="id" value={row.id} />
-                        <input type="hidden" name="direction" value="up" />
-                        <button className="btn btn-quiet min-h-11 px-2 text-xs" type="submit" aria-label="Move featured up">
-                          ↑
+                        <input type="hidden" name="back" value="/pieces" />
+                        <button className="btn btn-quiet min-h-11 px-3 text-xs" type="submit">
+                          Put on the site
                         </button>
                       </form>
-                      <form action={moveFeatured}>
+                      <form action={draftPiece}>
                         <input type="hidden" name="id" value={row.id} />
-                        <input type="hidden" name="direction" value="down" />
-                        <button className="btn btn-quiet min-h-11 px-2 text-xs" type="submit" aria-label="Move featured down">
-                          ↓
+                        <input type="hidden" name="back" value="/pieces" />
+                        <button className="btn btn-quiet min-h-11 px-3 text-xs" type="submit">
+                          Move back to draft
                         </button>
                       </form>
-                    </>
-                  ) : null}
+                      <form action={toggleFeatured}>
+                        <input type="hidden" name="id" value={row.id} />
+                        <button
+                          className={cn("btn btn-quiet min-h-11 px-3 text-xs", row.featured && "text-ok")}
+                          type="submit"
+                          aria-pressed={row.featured}
+                        >
+                          {row.featured ? "Unfeature" : "Feature"}
+                        </button>
+                      </form>
+                      {row.featured ? (
+                        <>
+                          <form action={moveFeatured}>
+                            <input type="hidden" name="id" value={row.id} />
+                            <input type="hidden" name="direction" value="up" />
+                            <button className="btn btn-quiet min-h-11 px-3 text-xs" type="submit" aria-label="Move featured up">
+                              Move featured up
+                            </button>
+                          </form>
+                          <form action={moveFeatured}>
+                            <input type="hidden" name="id" value={row.id} />
+                            <input type="hidden" name="direction" value="down" />
+                            <button className="btn btn-quiet min-h-11 px-3 text-xs" type="submit" aria-label="Move featured down">
+                              Move featured down
+                            </button>
+                          </form>
+                        </>
+                      ) : null}
+                      <form action={duplicatePiece}>
+                        <input type="hidden" name="id" value={row.id} />
+                        <button className="btn btn-quiet min-h-11 px-3 text-xs" type="submit">
+                          Duplicate
+                        </button>
+                      </form>
+                      <form action={trashPiece}>
+                        <input type="hidden" name="id" value={row.id} />
+                        <button className="btn btn-quiet min-h-11 px-3 text-xs" type="submit">
+                          Move to trash
+                        </button>
+                      </form>
+                    </span>
+                  </details>
                 </span>
               )}
             </div>

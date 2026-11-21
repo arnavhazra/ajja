@@ -1,12 +1,85 @@
-/* Private desk only. Colours, radius, and shadow come from the shop tokens. */
+/* Private desk only. Colours, radius, and shadow come from the shop tokens.
+   Accessibility floor: 20px body, 1.5 line height, 56px controls, 3px cobalt
+   focus, single column, permanent labels, native controls. */
 
 .desk {
   color-scheme: light;
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+.desk :focus-visible {
+  outline: 3px solid var(--cobalt);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .desk .btn {
   touch-action: manipulation;
+  min-height: 56px;
   transition: transform 160ms ease-out, opacity 160ms ease-out;
+}
+
+.desk .field {
+  min-height: 56px;
+  font-size: 1rem;
+}
+
+.desk .desk-link {
+  min-height: 56px;
+}
+
+.desk-choice {
+  display: grid;
+  gap: 0.4rem;
+  border: 1px solid var(--line-strong);
+  background: var(--wall);
+  padding: 1.4rem 1.5rem;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 160ms ease-out, border-color 160ms ease-out;
+}
+
+.desk-choice:hover {
+  background: var(--wall-deep);
+}
+
+.desk-choice-note {
+  font-family: var(--font-reader), "Newsreader", Georgia, serif;
+  color: var(--tar-soft);
+  font-size: 1rem;
+}
+
+.desk-more {
+  position: relative;
+}
+
+.desk-more summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.desk-more summary::-webkit-details-marker {
+  display: none;
+}
+
+.desk-more-menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  border: 1px solid var(--line-strong);
+  background: var(--wall);
+  position: absolute;
+  right: 0;
+  z-index: 30;
+  min-width: 13rem;
+  box-shadow: 0 12px 32px rgba(36, 27, 19, 0.18);
+}
+
+.desk-more[open] > summary {
+  background: var(--wall-deep);
+  color: var(--tar);
 }
 
 .desk .btn:active {

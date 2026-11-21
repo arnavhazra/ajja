@@ -251,7 +251,7 @@ async function sendCode(email: string, code: string) {
     body: JSON.stringify({
       from,
       to: email,
-      subject: "Your Ajja sign-in code",
+      subject: "Your megele.art sign-in code",
       text: `Your code is ${code}. It lasts 10 minutes.`,
     }),
   });

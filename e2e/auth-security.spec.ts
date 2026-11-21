@@ -2,6 +2,9 @@ import { expect, test } from "@playwright/test";
 import { neon } from "@neondatabase/serverless";
 import { hashPassword } from "../lib/password";
 import { totpCode } from "../lib/totp";
+import { e2eDbIsolated } from "./isolated-db";
+
+test.skip(!e2eDbIsolated(), "DATABASE_URL is not confirmed isolated — set E2E_ISOLATED_DB=1 or use a local database");
 
 const adminEmail = "e2e-security@example.test";
 const adminPassword = "e2e-security-password-123";

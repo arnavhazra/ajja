@@ -24,7 +24,7 @@ export async function sendEnquiry(_state: { ok: boolean; message: string }, form
   if (!parsed.success) {
     return { ok: false, message: parsed.error.issues[0]?.message ?? "Check the form and try again." };
   }
-  if (parsed.data.company) return { ok: true, message: "Message saved. Ajja will read it." };
+  if (parsed.data.company) return { ok: true, message: "Message saved. The studio will read it." };
   const headerList = await headers();
   const ip = headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "0";
   const hash = dayHash(ip, headerList.get("user-agent") ?? "", process.env.SESSION_SECRET ?? "ajja");
@@ -44,7 +44,7 @@ export async function sendEnquiry(_state: { ok: boolean; message: string }, form
   });
   await db.insert(auditLog).values({ action: "New message", entity: "enquiry", entityId: productId, meta: {} });
   await notifyOwner(parsed.data.name, parsed.data.contact, parsed.data.message);
-  return { ok: true, message: "Message saved. Ajja will read it." };
+  return { ok: true, message: "Message saved. The studio will read it." };
 }
 
 async function notifyOwner(name: string, contact: string, message: string) {

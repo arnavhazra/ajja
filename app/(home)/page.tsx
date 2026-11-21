@@ -1,66 +1,39 @@
+import Image from "next/image";
+import Link from "next/link";
 import { Suspense } from "react";
 import { JsonLd } from "@/components/json-ld";
 import { MotionScan } from "@/components/motion-scan";
-import { Hero } from "@/components/shop/hero";
-import { PourMotion } from "@/components/shop/pour-motion";
-import { WorksWall } from "@/components/shop/works-wall";
-import { ColourIndex } from "@/components/shop/colour-index";
 import { StudioIntro } from "@/components/shop/studio-intro";
 import { AcquisitionFaq } from "@/components/shop/acquisition-faq";
 import { CommissionForm } from "@/components/shop/commission-form";
-import { PourFooter } from "@/components/shop/pour-footer";
+import { brand } from "@/lib/brand";
+import { buildIndex, coverForCategory, type IndexEntry } from "@/lib/category-index";
 import { enquiryPrefillMessage, parsePiecesParam } from "@/lib/folio";
 import { formatMoney } from "@/lib/money";
-import { hasRealTitle, pieceKind, pieceRef } from "@/lib/piece-title";
-import { pourCss, pourData, pourOf } from "@/lib/pour";
-import { getSettings, loadManifest, loadSaved } from "@/lib/public-data";
+import { pieceTitle } from "@/lib/piece-title";
+import { getSettings, loadCategories, loadManifest, loadSaved } from "@/lib/public-data";
 import { siteUrl } from "@/lib/site-url";
-import type { FolioItem } from "@/components/shop/collectors-folio";
-import type { PublicProduct, PublicImage } from "@/lib/types";
 
-function ShopSkeleton() {
+function IndexSkeleton() {
   return (
-    <main className="shell min-h-[80svh] py-24" aria-busy="true" aria-label="Loading the shop">
-      <div className="grid animate-pulse gap-10 lg:grid-cols-12">
-        <div className="aspect-[4/5] bg-wall-deep lg:col-span-7 lg:row-span-2" />
-        <div className="grid content-start gap-4 py-8 lg:col-span-5">
-          <div className="h-4 w-40 bg-wall-sink" />
-          <div className="h-16 w-full bg-wall-sink" />
-          <div className="h-16 w-3/4 bg-wall-sink" />
-          <div className="h-4 w-full bg-wall-deep" />
-          <div className="h-4 w-2/3 bg-wall-deep" />
-          <div className="mt-6 h-11 w-40 bg-sap" />
-        </div>
-        <div className="h-24 bg-wall-deep lg:col-span-5" />
+    <main className="shell min-h-[80svh] py-12" aria-busy="true" aria-label="Loading the index">
+      <div className="grid animate-pulse gap-3 py-6">
+        <div className="h-4 w-40 bg-wall-sink" />
+        <div className="h-10 w-2/3 bg-wall-deep" />
       </div>
-      <div className="mt-24 grid animate-pulse grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
-        {Array.from({ length: 8 }, (_, i) => (
-          <div key={i} className="grid gap-3">
-            <div className="aspect-[4/5] bg-wall-deep" />
-            <div className="h-4 w-3/4 bg-wall-sink" />
+      <div className="grid animate-pulse border-t border-line-strong">
+        {Array.from({ length: 4 }, (_, i) => (
+          <div key={i} className="flex items-center justify-between gap-6 border-b border-line py-8">
+            <div className="grid gap-2">
+              <div className="h-8 w-56 bg-wall-deep" />
+              <div className="h-4 w-32 bg-wall-deep" />
+            </div>
+            <div className="aspect-[4/3] w-36 bg-wall-deep" />
           </div>
         ))}
       </div>
     </main>
   );
-}
-
-function pieceLabel(product: PublicProduct) {
-  return hasRealTitle(product.title) ? product.title.trim() : `No. ${pieceRef(product.id)}`;
-}
-
-function folioItem(product: PublicProduct): FolioItem {
-  const cover: PublicImage | undefined = product.images[0];
-  const kind = pieceKind(product.categoryName, product.attributes);
-  return {
-    id: product.id,
-    slug: product.slug,
-    title: pieceLabel(product),
-    priceMinor: product.priceMinor,
-    imageUrl: cover?.url,
-    kind: kind ?? undefined,
-    dimensions: product.attributes.dimensions || product.attributes.size || "",
-  };
 }
 
 export default function HomePage({
@@ -69,9 +42,47 @@ export default function HomePage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   return (
-    <Suspense fallback={<ShopSkeleton />}>
+    <Suspense fallback={<IndexSkeleton />}>
       <Home searchParams={searchParams} />
     </Suspense>
+  );
+}
+
+function IndexRow({ entry, index }: { entry: IndexEntry; index: number }) {
+  return (
+    <li>
+      <Link href={`/category/${entry.slug}`} className="idx-row">
+        <span className="idx-lead">
+          <span className="idx-num" aria-hidden="true">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          <span>
+            <span className="idx-name block">{entry.name}</span>
+            <span className="idx-meta">
+              <span className="nums">
+                {entry.count} {entry.count === 1 ? "piece" : "pieces"}
+              </span>
+              {entry.intro ? <span>{entry.intro}</span> : null}
+            </span>
+          </span>
+        </span>
+        <span className="idx-cover" aria-hidden="true">
+          {entry.cover ? (
+            <Image
+              src={entry.cover.url}
+              alt=""
+              fill
+              sizes="(min-width: 641px) 18vw, 420px"
+              placeholder={entry.cover.blurData ? "blur" : "empty"}
+              blurDataURL={entry.cover.blurData ?? undefined}
+              style={{ objectPosition: `${entry.cover.focalX * 100}% ${entry.cover.focalY * 100}%` }}
+            />
+          ) : (
+            <span className="idx-cover-note">no photograph yet</span>
+          )}
+        </span>
+      </Link>
+    </li>
   );
 }
 
@@ -82,97 +93,44 @@ async function Home({
 }) {
   const params = await searchParams;
   const pieceSlugs = parsePiecesParam(Array.isArray(params.pieces) ? params.pieces[0] : params.pieces);
-  const [settings, products, saved] = await Promise.all([getSettings(), loadManifest(), loadSaved(pieceSlugs)]);
-
-  const ordered = [...products].sort((a, b) => {
-    if (a.status === "sold" && b.status !== "sold") return 1;
-    if (b.status === "sold" && a.status !== "sold") return -1;
-    if (a.featured !== b.featured) return a.featured ? -1 : 1;
-    return 0;
-  });
-  const lead =
-    ordered.find((product) => product.images.some((image) => image.url === settings.heroImage)) ??
-    ordered.find((product) => product.images.length > 0) ??
-    null;
-  const detail = ordered.find((product) => product.id !== lead?.id && product.images.length > 0) ?? lead;
-  const available = products.filter((product) => product.status !== "sold").length;
+  const [settings, products, categories, saved] = await Promise.all([
+    getSettings(),
+    loadManifest(),
+    loadCategories(),
+    loadSaved(pieceSlugs),
+  ]);
   const initialMessage = saved.length
     ? enquiryPrefillMessage(
         saved.map((product) => ({
-          title: pieceLabel(product),
+          title: pieceTitle(product.title, product.categorySlug, product.attributes, product.id),
           slug: product.slug,
           priceMinor: product.priceMinor,
         })),
-        (minor) => formatMoney(minor, settings.currency),
+        (minor) => formatMoney(minor, saved[0]?.currency ?? "USD"),
       )
     : undefined;
-  const leadPour = pourOf(lead?.pigment, lead?.pigmentInk);
-  const savedItems = saved.map(folioItem);
+
+  const entries = buildIndex(categories, products);
+  const allEntry: IndexEntry | null = products.length
+    ? {
+        id: "all",
+        slug: "all",
+        name: "All pieces",
+        intro: "everything in the studio, including pieces without an art form yet",
+        count: products.length,
+        cover: coverForCategory(null, products),
+      }
+    : null;
+
+  const detail = products.find((product) => product.status !== "sold" && product.images.length > 0) ?? products.find((product) => product.images.length > 0) ?? null;
 
   return (
-    <main className="pour-room">
-      <style>{`html{${pourCss(leadPour)}}`}</style>
-      <PourMotion />
-      <div className="contents">
-        <Hero settings={settings} lead={lead} count={available} />
-        <WorksWall products={ordered} />
-        <ColourIndex products={ordered.filter((product) => product.images.length > 0)} />
-        <StudioIntro settings={settings} detail={detail} />
-        <AcquisitionFaq settings={settings} />
-
-        <section
-          id="inquire"
-          className="pr-section pr-enquire shell scroll-mt-[60px]"
-          aria-labelledby="inquire-title"
-          {...(detail ? pourData(pourOf(detail.pigment, detail.pigmentInk)) : {})}
-        >
-          <div className="pr-enquire-copy">
-            <p className="pr-label">Ask the studio</p>
-            <h2 id="inquire-title" className="pr-h2" data-reveal="">
-              Send a note
-            </h2>
-            <p className="pr-lede">Tell us which piece, or describe what you would like made. Messages go straight to the studio.</p>
-            <p className="pr-enquire-note">Studio visits are by appointment in {settings.town}, {settings.region} — mention it in your note.</p>
-            <dl className="pr-facts">
-              {settings.email ? (
-                <div>
-                  <dt>Email</dt>
-                  <dd>
-                    <a className="pr-link" href={`mailto:${settings.email}`}>
-                      {settings.email}
-                    </a>
-                  </dd>
-                </div>
-              ) : null}
-              {settings.phone ? (
-                <div>
-                  <dt>Phone</dt>
-                  <dd className="nums">{settings.phone}</dd>
-                </div>
-              ) : null}
-              {settings.mapUrl ? (
-                <div>
-                  <dt>Map</dt>
-                  <dd>
-                    <a className="pr-link" href={settings.mapUrl} rel="noopener noreferrer">
-                      {settings.town}, {settings.region}
-                    </a>
-                  </dd>
-                </div>
-              ) : null}
-            </dl>
-          </div>
-          <div className="pr-enquire-form">
-            <CommissionForm responseNote={settings.responseNote} initialMessage={initialMessage} saved={savedItems} />
-          </div>
-        </section>
-      </div>
-
+    <main>
       <JsonLd
         data={{
           "@context": "https://schema.org",
-          "@type": ["ArtGallery", "Store"],
-          name: settings.businessName,
+          "@type": "ArtGallery",
+          name: brand.name,
           url: siteUrl(),
           address: {
             "@type": "PostalAddress",
@@ -185,10 +143,43 @@ async function Home({
         }}
       />
 
-      <PourFooter settings={settings} />
+      <section id="index" aria-labelledby="index-title" className="hairline-b">
+        <div className="shell">
+          <div className="index-head">
+            <div>
+              <p className="kicker">
+                {brand.name} — a family studio in {settings.town}, {settings.region}
+              </p>
+              <h1 id="index-title" className="disp mt-[10px] text-[clamp(2.6rem,6vw,5.5rem)]">
+                The material index<span className="text-sap">.</span>
+              </h1>
+            </div>
+            <p className="sub type">
+              Pieces grouped by what they are made of and how they are made. Every photograph is the piece itself —
+              nothing is paid on this site.
+            </p>
+          </div>
+          {entries.length || allEntry ? (
+            <ol className="idx">
+              {entries.map((entry, index) => (
+                <IndexRow key={entry.id} entry={entry} index={index} />
+              ))}
+              {allEntry ? <IndexRow entry={allEntry} index={entries.length} /> : null}
+            </ol>
+          ) : (
+            <p className="type py-10 text-tar-soft">No pieces are on the site yet — ask the studio what is in progress.</p>
+          )}
+        </div>
+      </section>
 
-      <a className="pr-chip-cta no-print" href="#inquire" aria-label="Ask the studio">
-        ask <span aria-hidden="true">→</span>
+      <StudioIntro settings={settings} detail={detail} />
+
+      <AcquisitionFaq settings={settings} />
+
+      <CommissionForm responseNote={settings.responseNote} initialMessage={initialMessage} />
+
+      <a className="ask-chip no-print" href="#inquire">
+        ask →
       </a>
 
       <MotionScan />

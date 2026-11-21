@@ -11,14 +11,12 @@ import { ShareButton } from "@/components/share-button";
 import { PieceCard } from "@/components/shop/piece-card";
 import { PieceViewer } from "@/components/shop/piece-viewer";
 import { DynamicPrice } from "@/components/shop/dynamic-price";
-import { FolioActionButton } from "@/components/shop/folio-action-button";
 import { ScaleVisualizer } from "@/components/shop/scale-visualizer";
 import { enquiryPrefillMessage, parsePiecesParam } from "@/lib/folio";
 import { formatMoney } from "@/lib/money";
 import { hasRealTitle, pieceKind, pieceTitle } from "@/lib/piece-title";
 import { getSettings, loadProduct, loadRelated, loadSaved } from "@/lib/public-data";
 import { siteUrl } from "@/lib/site-url";
-import { digits, pieceMessage, whatsAppHref } from "@/lib/whatsapp";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -29,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const title = pieceTitle(product.title, product.categorySlug, product.attributes, product.id);
   return {
     title,
-    description: product.description || (named ? undefined : `${title} — a piece in the Ajja studio in Collegeville, not yet named. Ask about it directly.`),
+    description: product.description || (named ? undefined : `${title} — a piece in the studio in Collegeville, not yet named. Ask about it directly.`),
     robots: named ? undefined : { index: false, follow: true },
     alternates: { canonical: `/p/${product.slug}` },
   };
@@ -78,9 +76,6 @@ async function ProductBody({
   const title = pieceTitle(product.title, product.categorySlug, attributes, product.id);
   const kind = pieceKind(product.categoryName, attributes);
   const canonical = `${siteUrl()}/p/${product.slug}`;
-  const whatsapp = digits(settings.whatsapp)
-    ? whatsAppHref(settings.whatsapp, pieceMessage({ shop: settings.businessName, title, price, url: canonical }))
-    : null;
   const facts = [
     kind ? ["Medium", kind] : null,
     attributes.size ? ["Size", attributes.size] : null,
@@ -114,8 +109,9 @@ async function ProductBody({
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Works", item: `${siteUrl()}/#works` },
-            { "@type": "ListItem", position: 2, name: title, item: canonical },
+            { "@type": "ListItem", position: 1, name: "The index", item: `${siteUrl()}/#index` },
+            { "@type": "ListItem", position: 2, name: product.categoryName ?? "All pieces", item: `${siteUrl()}/category/${product.categorySlug ?? "all"}` },
+            { "@type": "ListItem", position: 3, name: title, item: canonical },
           ],
         }}
       />
@@ -125,9 +121,12 @@ async function ProductBody({
         style={{ background: "linear-gradient(to bottom, color-mix(in srgb, var(--pigment) 14%, var(--wall)), var(--wall))" }}
       />
       <div className="shell pb-24 pt-4 md:pb-32">
-        <Link href="/#works" className="inline-flex min-h-11 items-center gap-2 text-sm text-tar-soft">
+        <Link
+          href={product.categorySlug ? `/category/${product.categorySlug}` : "/category/all"}
+          className="inline-flex min-h-11 items-center gap-2 text-sm text-tar-soft"
+        >
           <span aria-hidden="true">←</span>
-          <span className="ink-link">All works</span>
+          <span className="ink-link">{product.categoryName ?? "All pieces"}</span>
         </Link>
         <div className="mt-4 grid items-start gap-10 md:grid-cols-12 md:gap-6">
           <div className="md:col-span-7">
@@ -178,14 +177,6 @@ async function ProductBody({
                   Ask about this piece
                 </a>
               ) : null}
-              {!sold ? (
-                <FolioActionButton product={product} title={title} kind={kind ?? undefined} />
-              ) : null}
-              {whatsapp && !sold ? (
-                <a className="btn btn-secondary" href={whatsapp}>
-                  WhatsApp
-                </a>
-              ) : null}
               <ShareButton label={title} />
             </div>
           </div>
@@ -226,7 +217,6 @@ async function ProductBody({
           <a className="btn btn-pigment flex-1 text-center" href="#enquire">
             Ask about piece
           </a>
-          <FolioActionButton product={product} title={title} kind={kind ?? undefined} className="flex-none" />
         </div>
       ) : null}
       <MotionScan />

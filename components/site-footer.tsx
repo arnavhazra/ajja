@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { brand } from "@/lib/brand";
 import type { ShopSettings } from "@/lib/settings";
 
 export function SiteFooter({ settings, pigments = [] }: { settings: ShopSettings; pigments?: string[] }) {
@@ -15,8 +16,7 @@ export function SiteFooter({ settings, pigments = [] }: { settings: ShopSettings
         <div className="foot-top">
           <div>
             <p className="word">
-              {settings.businessName}
-              <span>.</span>
+              {brand.name}
             </p>
             <p className="mt-[14px] max-w-[26ch] text-[13.5px] text-vat-soft">
               a family studio in {settings.town}, {settings.region}
@@ -24,22 +24,23 @@ export function SiteFooter({ settings, pigments = [] }: { settings: ShopSettings
           </div>
 
           <nav className="foot-col" aria-label="The site">
-            <h3>the site</h3>
-            <Link href="/#works">all works</Link>
+            <p className="foot-col-label">the site</p>
+            <Link href="/#index">the index</Link>
+            <Link href="/category/all">all pieces</Link>
             <Link href="/#studio">the studio</Link>
             <Link href="/#buying">buying, delivery &amp; care</Link>
             <Link href="/#inquire">ask about a piece or a commission</Link>
           </nav>
 
           <nav className="foot-col" aria-label="Good to know">
-            <h3>good to know</h3>
+            <p className="foot-col-label">good to know</p>
             <Link href="/policies">buying, collection &amp; returns</Link>
             <Link href="/#studio">studio visits</Link>
             <Link href="/privacy">privacy</Link>
           </nav>
 
           <div className="foot-note">
-            <h3 className="foot-col text-[12.5px] font-normal text-vat-soft">&gt; the studio</h3>
+            <p className="foot-col-label foot-col">&gt; the studio</p>
             <p>Studio visits by appointment in {settings.town}, {settings.region}.</p>
             {settings.email ? (
               <a className="map" href={`mailto:${settings.email}`}>
@@ -54,7 +55,7 @@ export function SiteFooter({ settings, pigments = [] }: { settings: ShopSettings
         </div>
 
         <div className="foot-bot">
-          <span>© {settings.businessName}. Made by hand.</span>
+          <span>© {brand.name}. Made by hand.</span>
           <span>made by hand in {settings.town}, {settings.region}.</span>
         </div>
       </div>

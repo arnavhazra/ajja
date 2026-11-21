@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { DeskNavLinks, type DeskNavSection } from "@/components/desk/nav-links";
+import { brand } from "@/lib/brand";
 import { leaveDesk } from "@/lib/desk-actions";
 import { loadNavCounts } from "@/lib/desk-data";
 import { deskPrefix } from "@/lib/desk-path";
@@ -11,8 +12,14 @@ export async function DeskNav({ email }: { email: string }) {
       title: "Desk",
       links: [
         ["", "Today"],
-        ["/pieces", "Pieces"],
+        ["/add", "Add a piece"],
+        ["/pieces", "My pieces"],
         ["/messages", "Messages", counts.waiting],
+      ],
+    },
+    {
+      title: "More",
+      links: [
         ["/groups", "Groups"],
         ["/insights", "Numbers"],
         ["/files", "Files"],
@@ -24,7 +31,7 @@ export async function DeskNav({ email }: { email: string }) {
     <header className="desk-side no-print">
       <div className="desk-bar">
         <p className="display text-3xl">
-          Ajja<span className="text-sap">.</span> <span className="desk-tag">Desk</span>
+          {brand.name} <span className="desk-tag">Desk</span>
         </p>
         <Link className="desk-link desk-view" href="/" target="_blank" rel="noreferrer">
           View the shop

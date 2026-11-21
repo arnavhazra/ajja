@@ -6,9 +6,9 @@ import { CurrencySelector } from "@/components/shop/currency-provider";
 import { useFolio } from "@/components/shop/collectors-folio";
 
 const NAV_LINKS = [
-  { href: "/#works", label: "the wall" },
-  { href: "/#shelf", label: "the shelf" },
-  { href: "/#studio", label: "the bench" },
+  { href: "/#index", label: "the index" },
+  { href: "/category/all", label: "all pieces" },
+  { href: "/#studio", label: "the studio" },
   { href: "/#buying", label: "the terms" },
   { href: "/#inquire", label: "send a note" },
 ] as const;
@@ -30,7 +30,6 @@ export function SiteHeader({ name, hasPrices }: { name: string; hasPrices: boole
       <div className="shell flex min-h-[60px] items-center gap-[22px]">
         <Link href="/" className="word inline-flex min-h-11 items-center text-tar">
           {name}
-          <span>.</span>
         </Link>
 
         <nav aria-label="Sections" className="mast-nav">
@@ -84,7 +83,7 @@ export function SiteHeader({ name, hasPrices }: { name: string; hasPrices: boole
       >
         <div className="safe-bottom grid gap-5 p-6 bg-wall">
           <div className="flex items-center justify-between border-b border-line pb-4">
-            <span className="word">{name}<span>.</span></span>
+            <span className="word">{name}</span>
             <button
               type="button"
               className="btn btn-quiet min-h-11 px-2 text-sm cursor-pointer"

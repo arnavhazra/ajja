@@ -43,6 +43,15 @@ export const pieceSchema = z.object({
   internalNotes: z.string().trim().max(5000).default(""),
 });
 
+/** The "About this piece" stage of the add flow — only these fields move. */
+export const aboutPieceSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string().trim().min(1, "Name this piece.").max(160),
+  categoryId: z.string().uuid("Choose an art form.").or(z.literal("")).default(""),
+  description: z.string().trim().max(5000).default(""),
+  price: z.string().trim().max(20).default(""),
+});
+
 export const inlineEditSchema = z.object({
   id: z.string().uuid(),
   intent: z.enum(["title", "price", "status", "category"]),

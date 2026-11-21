@@ -3,9 +3,7 @@
 import { put } from "@vercel/blob/client";
 import { useState } from "react";
 import { addPhotoToPiece, ingestUpload } from "@/lib/desk-actions";
-
-const MAX_BYTES = 15 * 1024 * 1024;
-const MAX_FILES = 12;
+import { UPLOAD_ATTEMPTS, UPLOAD_MAX_FILES, planUpload } from "@/lib/upload-plan";
 
 async function uploadOne(file: File, signal: AbortSignal, onProgress: (pct: number) => void) {
   const tokenResponse = await fetch("/api/desk/upload-token", {
@@ -34,13 +32,13 @@ export function PhotoUpload({ productId }: { productId?: string }) {
     const files = Array.from(event.target.files ?? []);
     if (!files.length) return;
     setError("");
-    if (files.length > MAX_FILES) {
-      setError(`Pick ${MAX_FILES} photos or fewer at a time.`);
+    if (files.length > UPLOAD_MAX_FILES) {
+      setError(`Pick ${UPLOAD_MAX_FILES} photos or fewer at a time.`);
       return;
     }
-    const big = files.find((file) => file.size > MAX_BYTES);
-    if (big) {
-      setError(`${big.name} is larger than 15 MB.`);
+    const rejected = files.map((file) => planUpload(file)).find((plan) => plan.mode === "rejected");
+    if (rejected?.mode === "rejected") {
+      setError(rejected.message);
       return;
     }
 
@@ -50,7 +48,7 @@ export function PhotoUpload({ productId }: { productId?: string }) {
     try {
       // Sequential — one photo at a time keeps retries and progress honest.
       for (const [index, file] of files.entries()) {
-        for (let attempt = 1; attempt <= 3; attempt += 1) {
+        for (let attempt = 1; attempt <= UPLOAD_ATTEMPTS; attempt += 1) {
           try {
             setStatus(`Uploading ${index + 1} of ${files.length}${attempt > 1 ? ` — try ${attempt}` : ""}…`);
             const blob = await uploadOne(file, controller.signal, (pct) =>
@@ -69,8 +67,10 @@ export function PhotoUpload({ productId }: { productId?: string }) {
             }
             break;
           } catch (caught) {
-            if (attempt === 3) throw caught instanceof Error ? caught : new Error(`${file.name} did not upload.`);
-            setStatus(`Try ${attempt + 1} of 3 for ${file.name}…`);
+            if (attempt === UPLOAD_ATTEMPTS) {
+              throw caught instanceof Error ? caught : new Error(`${file.name} did not upload.`);
+            }
+            setStatus(`Try ${attempt + 1} of ${UPLOAD_ATTEMPTS} for ${file.name}…`);
           }
         }
       }
@@ -80,7 +80,7 @@ export function PhotoUpload({ productId }: { productId?: string }) {
       }
       setStatus("Done.");
       if (ids.length === 1) {
-        window.location.assign(new URL(`pieces/${ids[0]}`, window.location.href).toString());
+        window.location.assign(new URL(`add?piece=${ids[0]}`, window.location.href).toString());
       } else {
         window.location.assign(new URL("pieces?status=draft", window.location.href).toString());
       }

@@ -28,8 +28,9 @@ import { deskPrefix } from "./desk-path";
 import { enhanceKind, enhancePhoto, shouldEnhance } from "./enhance";
 import { assertBlobUrl, storeImage } from "./images";
 import { dollarsToMinor } from "./money";
-import { inlineEditSchema, passwordChangeSchema, passwordSignInSchema, pieceSchema } from "./schemas";
+import { aboutPieceSchema, inlineEditSchema, passwordChangeSchema, passwordSignInSchema, pieceSchema } from "./schemas";
 import { defaultSettings, type ShopSettings, withDefaults } from "./settings";
+import { isProvisionalSlug } from "./piece-title";
 import { pieceSlug, slugify } from "./slug";
 import { parseNewYork } from "./time";
 import { WEEKDAY_NAMES } from "./open-now";
@@ -417,29 +418,35 @@ export async function savePiece(formData: FormData) {
   return go(`/pieces/${current.id}`, note, undoId);
 }
 
-async function setStatus(id: string, status: "published" | "sold" | "hidden" | "draft", label: string) {
+async function setStatus(id: string, status: "published" | "sold" | "hidden" | "draft", label: string, back?: string) {
   const session = await actor();
   const undoId = await snapshot(id, label, session.email);
   await getDb().update(products).set({ status, updatedAt: new Date() }).where(eq(products.id, id));
   await audit(session.userId, label, "product", id);
   refresh();
-  return go(`/pieces/${id}`, label, undoId);
+  const target = back && back.startsWith("/") ? back : `/pieces/${id}`;
+  return go(target, label, undoId);
+}
+
+function backTo(formData: FormData) {
+  const back = String(formData.get("back") ?? "");
+  return back.startsWith("/") && !back.startsWith("//") ? back : undefined;
 }
 
 export async function publishPiece(formData: FormData) {
-  return setStatus(String(formData.get("id")), "published", "Put on the site");
+  return setStatus(String(formData.get("id")), "published", "Put on the site", backTo(formData));
 }
 
 export async function sellPiece(formData: FormData) {
-  return setStatus(String(formData.get("id")), "sold", "Marked sold");
+  return setStatus(String(formData.get("id")), "sold", "Marked sold", backTo(formData));
 }
 
 export async function hidePiece(formData: FormData) {
-  return setStatus(String(formData.get("id")), "hidden", "Hidden");
+  return setStatus(String(formData.get("id")), "hidden", "Hidden", backTo(formData));
 }
 
 export async function draftPiece(formData: FormData) {
-  return setStatus(String(formData.get("id")), "draft", "Moved back to draft");
+  return setStatus(String(formData.get("id")), "draft", "Moved back to draft", backTo(formData));
 }
 
 export async function trashPiece(formData: FormData) {
@@ -578,6 +585,54 @@ export async function saveInlineField(input: { id: string; intent: string; value
   await audit(session.userId, "Quick edit", "product", id);
   refresh();
   return { ok: true as const, message: "Saved.", undoId };
+}
+
+/**
+ * The "About this piece" stage of the add flow. Writes only the fields that
+ * stage owns — photo, status, and every other column stay exactly as they are.
+ */
+export async function saveAboutPiece(input: { id: string; title: string; categoryId: string; description: string; price: string }) {
+  "use server";
+  const session = await actor();
+  const parsed = aboutPieceSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false as const, message: parsed.error.issues[0]?.message ?? "Check this piece.", field: "" };
+  }
+  const price = money(parsed.data.price);
+  if (!price.ok) return { ok: false as const, message: price.message, field: "price" };
+  const db = getDb();
+  const [current] = await db.select().from(products).where(eq(products.id, parsed.data.id)).limit(1);
+  if (!current || current.deletedAt) return { ok: false as const, message: "That piece is not here.", field: "" };
+  if (parsed.data.categoryId) {
+    const [group] = await db.select({ id: categories.id }).from(categories).where(eq(categories.id, parsed.data.categoryId)).limit(1);
+    if (!group) return { ok: false as const, message: "That art form is not here.", field: "categoryId" };
+  }
+  const undoId = await snapshot(current.id, "About this piece", session.email);
+  let slug = current.slug;
+  const title = parsed.data.title.trim();
+  // Only provisional slugs (piece-*) are replaced — an established slug never
+  // moves on rename, so saved links stay put without needing a redirect.
+  if (title && isProvisionalSlug(current.slug)) {
+    const nextSlug = await uniqueSlug(title, current.id);
+    if (nextSlug !== current.slug) {
+      await db.insert(redirects).values({ fromPath: `/p/${current.slug}`, toPath: `/p/${nextSlug}` }).onConflictDoNothing();
+      slug = nextSlug;
+    }
+  }
+  await db
+    .update(products)
+    .set({
+      title,
+      slug,
+      categoryId: parsed.data.categoryId || null,
+      description: parsed.data.description,
+      priceMinor: price.value,
+      updatedAt: new Date(),
+    })
+    .where(eq(products.id, current.id));
+  await audit(session.userId, "About this piece", "product", current.id);
+  refresh();
+  return { ok: true as const, message: "Saved.", field: "", undoId };
 }
 
 async function restoreVersion(versionId: string) {

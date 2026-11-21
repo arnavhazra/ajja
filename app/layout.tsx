@@ -1,24 +1,24 @@
 import type { Metadata, Viewport } from "next";
-import { Big_Shoulders, Big_Shoulders_Stencil, Bricolage_Grotesque, Courier_Prime, Newsreader } from "next/font/google";
+import { Bricolage_Grotesque, Courier_Prime, Newsreader } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
-import { getSettings } from "@/lib/public-data";
+import { brand } from "@/lib/brand";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
-const display = Big_Shoulders({
+const display = Bricolage_Grotesque({
   subsets: ["latin"],
-  axes: ["opsz"],
   display: "optional",
   variable: "--font-display",
 });
 
-const stencil = Big_Shoulders_Stencil({
+const reader = Newsreader({
   subsets: ["latin"],
-  axes: ["opsz"],
+  style: ["normal", "italic"],
   display: "optional",
-  variable: "--font-stencil",
+  variable: "--font-reader",
 });
 
+// Ledger voice for the mono labels — globals.css --font-mono points at --font-type.
 const ledger = Courier_Prime({
   subsets: ["latin"],
   weight: ["400", "700"],
@@ -27,54 +27,38 @@ const ledger = Courier_Prime({
   variable: "--font-type",
 });
 
-// Wet Edge shop front: Bricolage Grotesque for display/UI, Newsreader for prose.
-// Scoped to .pour-room on the home page; desk and piece pages keep the ledger voices.
-const bricolage = Bricolage_Grotesque({
-  subsets: ["latin"],
-  axes: ["opsz", "wdth"],
-  display: "optional",
-  variable: "--font-bricolage",
-});
-
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  axes: ["opsz"],
-  style: ["normal", "italic"],
-  display: "optional",
-  variable: "--font-newsreader",
-});
-
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
   interactiveWidget: "resizes-content",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#E6E8E0" },
-    { media: "(prefers-color-scheme: dark)", color: "#21231D" },
+    { media: "(prefers-color-scheme: light)", color: "#F6F0E5" },
+    { media: "(prefers-color-scheme: dark)", color: "#241C15" },
   ],
 };
 
-export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSettings();
+export function generateMetadata(): Metadata {
   return {
     metadataBase: new URL(siteUrl()),
     title: {
-      default: `${settings.businessName} — handmade pieces from ${settings.town}, ${settings.region}`,
-      template: `%s — ${settings.businessName}`,
+      default: brand.title,
+      template: `%s — ${brand.name}`,
     },
-    description: `Paintings and woodwork made by hand in ${settings.town}, ${settings.region}. See the pieces, then ask the studio — nothing is paid online.`,
-    applicationName: settings.businessName,
+    description: brand.description,
+    applicationName: brand.name,
   };
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-scroll-behavior="smooth" className={`${display.variable} ${stencil.variable} ${ledger.variable} ${bricolage.variable} ${newsreader.variable} scroll-smooth h-full`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${display.variable} ${reader.variable} ${ledger.variable} scroll-smooth h-full`}>
       <body className="flex min-h-dvh flex-col bg-wall font-sans text-tar antialiased">
-        <a className="skip-link" href="#content">
-          Skip to content
-        </a>
+        <nav aria-label="Skip links">
+          <a className="skip-link" href="#content">
+            Skip to content
+          </a>
+        </nav>
         {children}
         <Analytics />
       </body>

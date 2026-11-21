@@ -1,6 +1,7 @@
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { ShopProviders } from "@/components/shop/shop-providers";
+import { brand } from "@/lib/brand";
 import { getSettings, hasPricedProducts, loadManifest } from "@/lib/public-data";
 
 export default async function ShopLayout({ children }: { children: React.ReactNode }) {
@@ -12,7 +13,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
       {settings.announcementLive && settings.announcement ? (
         <p className="bg-tar px-4 py-2.5 text-center text-sm text-wall">{settings.announcement}</p>
       ) : null}
-      <SiteHeader name={settings.businessName} hasPrices={hasPrices} />
+      <SiteHeader name={brand.name} hasPrices={hasPrices} />
       <div id="content" className="flex-1">
         {children}
       </div>

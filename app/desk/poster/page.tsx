@@ -5,6 +5,7 @@ import QRCode from "qrcode";
 import { PrintButton } from "@/components/desk/print-button";
 import { loadPosterPieces, requireDesk } from "@/lib/desk-data";
 import { getSettings } from "@/lib/public-data";
+import { brand } from "@/lib/brand";
 import { siteUrl } from "@/lib/site-url";
 
 export default function PosterPage() {
@@ -33,11 +34,11 @@ async function Poster() {
         <PrintButton />
       </div>
       <section className="grid min-h-[70dvh] place-items-center gap-4 border border-line p-8">
-        <p className="display text-5xl">{settings.businessName}</p>
+        <p className="display text-5xl">{brand.name}</p>
         <p>
           {settings.town}, {settings.region}
         </p>
-        <Image src={home} alt={`QR code for ${settings.businessName}`} width={320} height={320} unoptimized />
+        <Image src={home} alt={`QR code for ${brand.name}`} width={320} height={320} unoptimized />
       </section>
       <section className="grid grid-cols-2 gap-4 md:grid-cols-3">
         {stickers.length === 0 ? <p>No pieces are on the site yet, so there are no stickers.</p> : null}

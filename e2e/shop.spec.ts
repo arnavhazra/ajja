@@ -3,19 +3,30 @@ import AxeBuilder from "@axe-core/playwright";
 import { neon } from "@neondatabase/serverless";
 import sharp from "sharp";
 import { hashPassword } from "../lib/password";
+import { e2eDbIsolated } from "./isolated-db";
 
 const title = "Studio test piece";
 const slug = "studio-test-piece";
 const adminEmail = "e2e-desk@example.test";
 const adminPassword = "e2e-desk-password-long";
+// Unique fixture ids — cleanup never keys on a generic name that could hit real data.
+const uploadTitle = "E2E Uploaded Draft";
+const bigUploadTitle = "E2E Big Upload";
+const smallFile = "e2e-upload-small.jpg";
+const bigFile = "e2e-upload-big.jpg";
+const fixtureTitles = [title, uploadTitle, bigUploadTitle];
+const fixtureFiles = [smallFile, bigFile];
+
+let smallPhoto: Buffer;
 
 test.describe.configure({ mode: "serial" });
+test.skip(!e2eDbIsolated(), "DATABASE_URL is not confirmed isolated — set E2E_ISOLATED_DB=1 or use a local database");
 
 test.beforeAll(async () => {
   const sql = neon(process.env.DATABASE_URL ?? "");
-  await sql`delete from product_images where product_id in (select id from products where title = ${title} or attributes->>'originalFile' = 'tiny.jpg')`;
-  await sql`delete from product_versions where product_id in (select id from products where title = ${title} or attributes->>'originalFile' = 'tiny.jpg')`;
-  await sql`delete from products where title = ${title} or attributes->>'originalFile' = 'tiny.jpg'`;
+  await sql`delete from product_images where product_id in (select id from products where title = any(${fixtureTitles}) or attributes->>'originalFile' = any(${fixtureFiles}))`;
+  await sql`delete from product_versions where product_id in (select id from products where title = any(${fixtureTitles}) or attributes->>'originalFile' = any(${fixtureFiles}))`;
+  await sql`delete from products where title = any(${fixtureTitles}) or attributes->>'originalFile' = any(${fixtureFiles})`;
   await sql`delete from enquiries where name = 'Test buyer'`;
   await sql`delete from rate_limits where bucket like 'enquiry:%'`;
   await sql`delete from sessions where email = ${adminEmail}`;
@@ -27,7 +38,8 @@ test.beforeAll(async () => {
     await sql`insert into product_images (product_id, url, width, height, blur_data, alt, sort_order)
       values (${piece.id}, ${photo.url}, ${photo.width}, ${photo.height}, ${photo.blur_data}, ${title}, 0)`;
   }
-  await sharp({
+  // In-memory fixtures — the suite never writes files into the repo.
+  smallPhoto = await sharp({
     create: {
       width: 80,
       height: 100,
@@ -40,30 +52,36 @@ test.beforeAll(async () => {
     },
   })
     .jpeg()
-    .toFile("e2e/tiny.jpg");
+    .toBuffer();
 });
 
 test.afterAll(async () => {
   const sql = neon(process.env.DATABASE_URL ?? "");
-  await sql`delete from product_images where product_id in (select id from products where title = ${title} or attributes->>'originalFile' = 'tiny.jpg')`;
-  await sql`delete from product_versions where product_id in (select id from products where title = ${title} or attributes->>'originalFile' = 'tiny.jpg')`;
-  await sql`delete from products where title = ${title} or attributes->>'originalFile' = 'tiny.jpg'`;
+  await sql`delete from product_images where product_id in (select id from products where title = any(${fixtureTitles}) or attributes->>'originalFile' = any(${fixtureFiles}))`;
+  await sql`delete from product_versions where product_id in (select id from products where title = any(${fixtureTitles}) or attributes->>'originalFile' = any(${fixtureFiles}))`;
+  await sql`delete from products where title = any(${fixtureTitles}) or attributes->>'originalFile' = any(${fixtureFiles})`;
   await sql`delete from enquiries where name = 'Test buyer'`;
   await sql`delete from sessions where email = ${adminEmail}`;
   await sql`delete from admin_users where email = ${adminEmail}`;
   await sql`update site_settings set value = jsonb_set(value, '{whatsapp}', '""'::jsonb, true) where key = 'shop'`;
 });
 
-test("home, redirects, and a missing page", async ({ page }) => {
+test("home, redirects, category routes, and a missing page", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "The works" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /material index/i })).toBeVisible();
+  // The index opens on category links — no hero scroll — and All pieces is one of them.
+  await expect(page.locator('.idx a[href="/category/all"]')).toBeVisible();
   for (const old of ["/shop", "/studio", "/about", "/visit", "/sold", "/saved", "/search"]) {
     await page.goto(old);
     await expect(page).toHaveURL(/\/$/);
-    await expect(page.getByRole("heading", { name: "The works" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /material index/i })).toBeVisible();
   }
+  // /category/all lists only public pieces; unknown slugs are 404.
+  await page.goto("/category/all");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await page.goto("/category/not-a-real-art-form");
+  await expect(page.getByRole("heading", { name: "That page is not here" })).toBeVisible();
   await page.goto("/desk");
   await expect(page.getByRole("heading", { name: "That page is not here" })).toBeVisible();
   await expect(page.getByText("Sign in")).toHaveCount(0);
@@ -87,7 +105,7 @@ test("owner signs in with a password, prices, publishes, hides, undoes, and shar
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByRole("heading", { name: "Today" })).toBeVisible();
 
-  await page.getByRole("link", { name: "Pieces", exact: true }).click();
+  await page.getByRole("link", { name: "My pieces", exact: true }).click();
   await page.getByRole("link", { name: title }).click();
   await expect(page.getByRole("heading", { name: "Edit this piece" })).toBeVisible();
   await page.getByLabel("Price in dollars").fill("40");
@@ -103,16 +121,15 @@ test("owner signs in with a password, prices, publishes, hides, undoes, and shar
   await expect(page.getByRole("status")).toBeVisible();
 
   await page.goto(`/p/${slug}`);
-  const whatsapp = page.locator('main a[href*="wa.me"][href*="text="]').first();
-  await expect(whatsapp).toHaveAttribute("href", /wa\.me\/15555550100/);
-  const href = await whatsapp.getAttribute("href");
-  expect(decodeURIComponent(href ?? "")).toContain("Hello Ajja, I would like to ask about Studio test piece.");
-  expect(decodeURIComponent(href ?? "")).toContain("The price is $40.00.");
+  await expect(page.getByRole("heading", { name: title })).toBeVisible();
+  // One enquiry action — the note form — not a row of contact buttons.
+  await expect(page.locator('main a[href*="wa.me"]')).toHaveCount(0);
 
-  await page.getByLabel("Your name").fill("Test buyer");
-  await page.getByLabel("Phone or email").fill("test@example.com");
-  await page.getByLabel("Message").fill("Is the studio test piece still here?");
-  await page.getByRole("button", { name: "Send", exact: true }).click();
+  const enquire = page.locator("#enquire");
+  await enquire.getByLabel("Your name").fill("Test buyer");
+  await enquire.getByLabel("Phone or email").fill("test@example.com");
+  await enquire.getByLabel("Message").fill("Is the studio test piece still here?");
+  await enquire.getByRole("button", { name: "Send", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("Message saved");
 
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]).catch(() => undefined);
@@ -120,31 +137,42 @@ test("owner signs in with a password, prices, publishes, hides, undoes, and shar
   await expect(page.getByRole("status").filter({ hasText: "Link copied" })).toBeVisible();
 
   await page.goto(`/${path}/pieces`);
-  await page.getByRole("link", { name: title }).click();
+  await page.getByRole("link", { name: `Edit ${title}`, exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Edit this piece" })).toBeVisible();
   await page.getByRole("button", { name: "Hide" }).click();
   await expect(page.getByRole("status")).toContainText("Hidden");
   await page.getByRole("button", { name: "Undo" }).click();
   await expect(page.getByRole("status")).toContainText("undone");
 
-  await page.goto("/");
+  // The published piece is listed under All pieces, and hides show up on the index.
+  await page.goto("/category/all");
   await expect(page.getByText(title).first()).toBeVisible();
 });
 
-test("photo upload makes a draft", async ({ page }) => {
+test("photo upload makes a private draft that publishes through review", async ({ page }) => {
   test.skip(!process.env.BLOB_READ_WRITE_TOKEN, "Needs a Blob token");
   await page.goto(`/${process.env.ADMIN_PATH}`);
   await page.getByLabel("Email").fill(adminEmail);
   await page.getByLabel("Password").fill(adminPassword);
   await page.getByRole("button", { name: "Sign in" }).click();
-  await page.getByRole("link", { name: "Settings" }).click();
-  await page.getByRole("link", { name: "Add a piece" }).click();
-  await page.getByLabel("Choose photos").setInputFiles("e2e/tiny.jpg");
-  await expect(page.getByRole("heading", { name: "Edit this piece" })).toBeVisible({ timeout: 60_000 });
+  await page.getByRole("link", { name: "Add a piece", exact: true }).click();
+  await page.getByLabel("Choose photos").setInputFiles({ name: smallFile, mimeType: "image/jpeg", buffer: smallPhoto });
+  // Step 2 — about this piece. The draft is private until "Show on site".
+  await expect(page.getByRole("heading", { name: "About this piece" })).toBeVisible({ timeout: 60_000 });
+  await page.getByLabel("Name", { exact: true }).fill(uploadTitle);
+  await page.getByRole("button", { name: "Save and continue" }).click();
+  // Step 3 — review shows the visitor view before anything goes live.
+  await expect(page.getByRole("heading", { name: "Review" })).toBeVisible();
+  await expect(page.getByText(/only you can see this/i)).toBeVisible();
+  await page.getByRole("button", { name: "Show on site" }).click();
+  await expect(page.getByRole("status")).toContainText("Put on the site");
+  await page.goto("/category/all");
+  await expect(page.getByText(uploadTitle).first()).toBeVisible();
 });
 
 test("pages stay accessible", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  for (const path of ["/", "/policies", "/privacy", `/p/${slug}`]) {
+  for (const path of ["/", "/category/all", "/policies", "/privacy", `/p/${slug}`]) {
     await page.goto(path);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     const results = await new AxeBuilder({ page }).analyze();
@@ -158,16 +186,16 @@ test("pages stay accessible", async ({ page }) => {
   await page.getByLabel("Password").fill(adminPassword);
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByRole("heading", { name: "Today" })).toBeVisible();
-  for (const [link, route] of [
-    ["Pieces", "/pieces"],
-    ["Messages", "/messages"],
-    ["Groups", "/groups"],
-    ["Numbers", "/insights"],
-    ["Files", "/files"],
+  for (const [link, route, heading] of [
+    ["My pieces", "/pieces", "Pieces"],
+    ["Messages", "/messages", "Messages"],
+    ["Groups", "/groups", "Groups"],
+    ["Numbers", "/insights", "Numbers"],
+    ["Files", "/files", "Files"],
   ] as const) {
     await page.getByRole("link", { name: link }).first().click();
     await expect(page).toHaveURL(new RegExp(`${route}$`));
-    await expect(page.getByRole("heading", { level: 1, name: link })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
     const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations, link).toEqual([]);
   }
