@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { DeskRowsSkeleton } from "@/components/desk/skeleton";
-import { approveEnhancedCovers } from "@/lib/desk-actions";
 import { requireDesk } from "@/lib/desk-data";
 import { deskPrefix } from "@/lib/desk-path";
 
@@ -40,11 +39,6 @@ async function Settings() {
           </li>
         ))}
       </ul>
-      <form action={approveEnhancedCovers} className="mt-8">
-        <button className="btn btn-secondary min-h-11 px-4" type="submit">
-          Use tidied photos as covers everywhere
-        </button>
-      </form>
     </main>
   );
 }

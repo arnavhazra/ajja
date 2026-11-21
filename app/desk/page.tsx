@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import Link from "next/link";
 import { Flash, one } from "@/components/desk/flash";
+import { PasswordField } from "@/components/desk/password-field";
 import { completePasswordSignIn, completeSignIn, completeStaffSignIn, sendSignInCode } from "@/lib/desk-actions";
 import { loadDashboard } from "@/lib/desk-data";
 import { deskPrefix } from "@/lib/desk-path";
@@ -24,30 +25,47 @@ async function Home({ searchParams }: { searchParams: Promise<Record<string, str
     const emailCodeReady = Boolean(process.env.OWNER_EMAIL && process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
     const staffReady = Boolean(process.env.DEV_ADMIN_EMAIL && process.env.DEV_ADMIN_PASSWORD && process.env.DEV_ADMIN_TOTP_SECRET);
     const tab = one(params.staff) === "1" ? "staff" : one(params.code) === "1" ? "code" : "password";
-    const tabClass = (key: string) =>
-      `tag inline-flex min-h-11 items-center rounded-[2px] px-4 ${
-        tab === key ? "bg-tar font-bold text-wall" : "hairline-box text-tar-soft hover:text-tar"
-      }`;
     return (
       <main className="desk-signin grid min-h-[75vh] place-items-center px-4 py-10">
         <div className="w-full max-w-sm">
           <Flash note={note} undo="" back="/" />
-          <nav className="mb-6 flex flex-wrap gap-2" aria-label="Sign in methods">
-            <Link className={tabClass("password")} aria-current={tab === "password" ? "true" : undefined} href="?">
-              Password
-            </Link>
-            {emailCodeReady ? (
-              <Link className={tabClass("code")} aria-current={tab === "code" ? "true" : undefined} href="?code=1">
-                Email code
-              </Link>
-            ) : null}
-            {staffReady ? (
-              <Link className={tabClass("staff")} aria-current={tab === "staff" ? "true" : undefined} href="?staff=1">
-                Staff app code
-              </Link>
-            ) : null}
-          </nav>
-          {tab === "staff" ? <StaffForm /> : tab === "code" ? <OwnerForm defaultEmail={one(params.email) ?? ""} /> : <PasswordForm />}
+          {tab === "staff" ? (
+            <>
+              <StaffForm />
+              <p className="mt-6">
+                <Link className="ink-link text-sm text-tar-soft" href="?">
+                  ← Back to the usual sign in
+                </Link>
+              </p>
+            </>
+          ) : tab === "code" ? (
+            <>
+              <OwnerForm defaultEmail={one(params.email) ?? ""} />
+              <p className="mt-6">
+                <Link className="ink-link text-sm text-tar-soft" href="?">
+                  ← Back to password sign in
+                </Link>
+              </p>
+            </>
+          ) : (
+            <>
+              <PasswordForm />
+              {emailCodeReady ? (
+                <p className="mt-5">
+                  <Link className="ink-link text-sm text-tar-soft" href="?code=1">
+                    Forgot password? Email me a sign-in code
+                  </Link>
+                </p>
+              ) : null}
+              {staffReady ? (
+                <p className="mt-10">
+                  <Link className="ink-link text-xs text-tar-soft" href="?staff=1">
+                    Staff sign-in
+                  </Link>
+                </p>
+              ) : null}
+            </>
+          )}
         </div>
       </main>
     );
@@ -93,10 +111,7 @@ function PasswordForm() {
         <span className="field-label">Email</span>
         <input className="field" name="email" type="email" autoComplete="username" required />
       </label>
-      <label className="grid gap-1.5">
-        <span className="field-label">Password</span>
-        <input className="field" name="password" type="password" autoComplete="current-password" required />
-      </label>
+      <PasswordField />
       <button className="btn btn-primary" type="submit">
         Sign in
       </button>

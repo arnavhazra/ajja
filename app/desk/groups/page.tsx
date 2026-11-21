@@ -55,10 +55,7 @@ async function Groups({ searchParams }: { searchParams: Promise<Record<string, s
                 Intro
                 <textarea className="field" name="intro" defaultValue={group.intro} />
               </label>
-              <label className="grid gap-1">
-                Image address
-                <input className="field" name="imageUrl" defaultValue={group.imageUrl ?? ""} />
-              </label>
+              <input type="hidden" name="imageUrl" value={group.imageUrl ?? ""} />
               <label className="grid gap-1">
                 Extra questions
                 <input className="field" name="fields" defaultValue={fields.map((field) => field.label ?? "").filter(Boolean).join(", ")} />
@@ -124,16 +121,13 @@ function CollectionForm({
         Intro
         <textarea className="field" name="intro" defaultValue={collection?.intro ?? ""} />
       </label>
-      <label className="grid gap-1">
-        Image address
-        <input className="field" name="imageUrl" defaultValue={collection?.imageUrl ?? ""} />
-      </label>
+      <input type="hidden" name="imageUrl" value={collection?.imageUrl ?? ""} />
       <fieldset className="grid max-h-64 gap-2 overflow-auto">
         <legend>Pieces in this collection</legend>
         {pieces.map((piece) => (
           <label key={piece.id} className="flex min-h-12 items-center gap-3">
             <input type="checkbox" name="productId" value={piece.id} defaultChecked={selected.includes(piece.id)} />
-            {piece.title.trim() || "Studio Study"}
+            {piece.title.trim() || "Not named yet"}
           </label>
         ))}
       </fieldset>
