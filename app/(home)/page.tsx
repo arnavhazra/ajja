@@ -163,16 +163,19 @@ async function Home({
               </p>
             </div>
             {detail?.images[0] ? (
+              (() => {
+                const heroPhoto = detail.images.find((image) => image.url === settings.heroImage) ?? detail.images[0];
+                return (
               <figure className="index-hero m-0">
                 <Link href={`/p/${detail.slug}`} className="ph plate relative block aspect-[4/3] w-full" aria-label={pieceTitle(detail.title, detail.categorySlug, detail.attributes, detail.id)}>
                   <Image
-                    src={detail.images[0].url}
-                    alt={detail.images[0].alt || pieceTitle(detail.title, detail.categorySlug, detail.attributes, detail.id)}
+                    src={heroPhoto.url}
+                    alt={heroPhoto.alt || pieceTitle(detail.title, detail.categorySlug, detail.attributes, detail.id)}
                     fill
                     priority
                     sizes="(min-width: 900px) 40vw, 94vw"
-                    placeholder={detail.images[0].blurData ? "blur" : "empty"}
-                    blurDataURL={detail.images[0].blurData ?? undefined}
+                    placeholder={heroPhoto.blurData ? "blur" : "empty"}
+                    blurDataURL={heroPhoto.blurData ?? undefined}
                     className="object-contain p-3"
                   />
                 </Link>
@@ -181,6 +184,8 @@ async function Home({
                   <span> — in the studio</span>
                 </figcaption>
               </figure>
+                );
+              })()
             ) : null}
           </div>
           {entries.length || allEntry ? (
