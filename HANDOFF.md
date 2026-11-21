@@ -80,7 +80,7 @@ Cheat sheet: the secret desk path plus `/help/print` (`app/desk/help/print/page.
 
 The hero headline in settings is “Paintings, woodwork, and pieces made by hand.” The desk keeps `copyNeedsApproval` and shows “Needs your approval.” That line is on the desk. The public site does not show it.
 
-The home hero photograph is a priority `<Image>`; the WebGL ripple loads on top only for fine pointers without reduced motion. See `DESIGN.md`.
+The home hero photograph is a priority `<Image>` shown whole on its plate. See `DESIGN.md`.
 
 ## Backups
 
@@ -114,3 +114,12 @@ password: visit `/{ADMIN_PATH}?code=1`, enter the `OWNER_EMAIL` address from the
 env, and a one-time code is emailed to it. That door only appears when
 `OWNER_EMAIL` is set (it is, in `.env.local` / Vercel env). There is no
 password-reset email — the code door is the recovery path.
+
+## E2E environment
+
+`pnpm test:e2e` needs an isolated (non-production) Neon branch:
+
+- `E2E_ISOLATED=1` — confirms the suite targets a throwaway database
+- `E2E_DATABASE_URL` — pooled connection string for the isolated branch
+- `E2E_ADMIN_PATH` — desk path fixture (e.g. `e2e-desk-secret-path`)
+- `E2E_SESSION_SECRET` — session secret fixture (e.g. `e2e-fixture-secret-32chars`)
