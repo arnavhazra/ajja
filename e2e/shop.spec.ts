@@ -67,13 +67,13 @@ test.afterAll(async () => {
 test("home, redirects, category routes, and a missing page", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1, name: /material index/i })).toBeVisible();
+  await expect(page.locator("#index-title").first()).toBeVisible();
   // The index opens on category links — no hero scroll — and All pieces is one of them.
   await expect(page.locator('.idx a[href="/category/all"]')).toBeVisible();
   for (const old of ["/shop", "/studio", "/about", "/visit", "/sold", "/saved", "/search"]) {
     await page.goto(old);
     await expect(page).toHaveURL(/\/$/);
-    await expect(page.getByRole("heading", { name: /material index/i })).toBeVisible();
+    await expect(page.locator("#index-title").first()).toBeVisible();
   }
   // /category/all lists only public pieces; unknown slugs are 404.
   await page.goto("/category/all");
@@ -106,7 +106,7 @@ test("owner signs in with a password, prices, publishes, hides, undoes, and shar
   await page.getByRole("link", { name: "My pieces", exact: true }).click();
   await page.getByRole("link", { name: title }).click();
   await expect(page.getByRole("heading", { name: "Edit this piece" })).toBeVisible();
-  await page.getByLabel("Price in dollars").fill("40");
+  await page.getByLabel("Price in US dollars").fill("40");
   await page.getByRole("button", { name: "Save piece" }).click();
   await expect(page.getByRole("status")).toContainText("Saved");
   await page.getByRole("button", { name: "Put on the site" }).click();

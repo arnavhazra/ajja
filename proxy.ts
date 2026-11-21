@@ -2,28 +2,34 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  // The desk-marker headers are internal only — strip any that arrive from
-  // outside so nobody can spoof a rewrite or inject a prefix.
-  const incoming = new Headers(request.headers);
-  incoming.delete("x-ajja-desk");
-  incoming.delete("x-ajja-prefix");
-  incoming.delete("x-ajja-rewritten");
-
   const adminPath = process.env.ADMIN_PATH?.replace(/^\/+|\/+$/g, "");
+
+  // Internal rewrites re-enter the proxy. The marker carries the secret path
+  // itself so only a request that already survived the admin-path check is
+  // trusted — outsiders cannot spoof it without knowing the path, and any
+  // client-sent copy is stripped below.
+  const incoming = new Headers(request.headers);
+  const trusted = Boolean(adminPath) && incoming.get("x-ajja-rewritten") === adminPath;
+  if (!trusted) {
+    incoming.delete("x-ajja-desk");
+    incoming.delete("x-ajja-prefix");
+    incoming.delete("x-ajja-rewritten");
+  }
+
   const secret = adminPath ? `/${adminPath}` : "";
   if (secret && (pathname === secret || pathname.startsWith(`${secret}/`))) {
     const url = request.nextUrl.clone();
     url.pathname = `/desk${pathname.slice(secret.length)}` || "/desk";
     incoming.set("x-ajja-desk", "1");
     incoming.set("x-ajja-prefix", secret);
-    incoming.set("x-ajja-rewritten", "1");
+    incoming.set("x-ajja-rewritten", secret.slice(1));
     const response = NextResponse.rewrite(url, { request: { headers: incoming } });
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
     response.headers.set("Cache-Control", "private, no-store");
     return response;
   }
 
-  if (pathname === "/desk" || pathname.startsWith("/desk/")) {
+  if (!trusted && (pathname === "/desk" || pathname.startsWith("/desk/"))) {
     const url = request.nextUrl.clone();
     url.pathname = "/missing";
     return NextResponse.rewrite(url, { request: { headers: incoming } });
