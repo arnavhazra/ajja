@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useRef, useSyncExternalSto
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCurrency } from "./currency-provider";
+import { formatMoney } from "@/lib/money";
 import { folioTotals } from "@/lib/folio";
 
 export interface FolioItem {
@@ -148,7 +148,7 @@ const FOCUSABLE = "a[href], button:not([disabled]), textarea, input, select, [ta
 
 function FolioDrawer() {
   const { items, isOpen, setIsOpen, removeItem, clear } = useFolio();
-  const { format } = useCurrency();
+  const format = (minor: number) => formatMoney(minor, "USD");
   const router = useRouter();
   const panelRef = useRef<HTMLDivElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);

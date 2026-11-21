@@ -7,9 +7,7 @@ import { cn } from "@/lib/cn";
 import { formatMoney } from "@/lib/money";
 import { hasRealTitle, pieceKind, pieceRef, pieceTitle } from "@/lib/piece-title";
 import type { PublicProduct } from "@/lib/types";
-import { useCurrency } from "./currency-provider";
 import { useFolio } from "./collectors-folio";
-import { useDossier } from "./dossier-modal";
 
 type Props = {
   product: PublicProduct;
@@ -26,9 +24,7 @@ export function PieceCard({
   className,
   index = 0,
 }: Props) {
-  const { format } = useCurrency();
   const { hasItem, toggleItem, setIsOpen: setFolioOpen } = useFolio();
-  const { openDossier } = useDossier();
 
   const cover = product.images[0];
   const named = hasRealTitle(product.title);
@@ -38,8 +34,7 @@ export function PieceCard({
   const sold = product.status === "sold";
   const inFolio = hasItem(product.id);
 
-  const dynamicPrice = format(product.priceMinor);
-  const price = sold ? "sold" : (dynamicPrice ?? formatMoney(product.priceMinor, product.currency) ?? "price on asking");
+  const price = sold ? "sold" : (formatMoney(product.priceMinor, product.currency) ?? "price on asking");
   const ratio = cover?.width && cover?.height ? `${cover.width} / ${cover.height}` : "4 / 5";
   const ratioValue = cover?.width && cover?.height ? cover.width / cover.height : 0.8;
 
@@ -56,12 +51,6 @@ export function PieceCard({
       dimensions: product.attributes.dimensions || product.attributes.size || "",
     });
     if (!inFolio) setFolioOpen(true);
-  };
-
-  const handleDossierClick = (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    openDossier(product);
   };
 
   return (
@@ -120,9 +109,7 @@ export function PieceCard({
               {inFolio ? "saved" : "save"}
             </button>
           ) : null}
-          <button type="button" onClick={handleDossierClick} className="cap-act" aria-label={`Quick look at ${fullTitle}`}>
-            quick look
-          </button>
+
         </div>
       </figcaption>
     </figure>

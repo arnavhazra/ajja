@@ -791,7 +791,6 @@ details.term > .a { grid-column: 2; }
 @media (max-width: 900px) {
   .wall { columns: 2; }
   .bench, .note-grid { grid-template-columns: 1fr; }
-  .mast-nav { display: none; }
   .foot-top { grid-template-columns: 1fr 1fr; }
   .term { grid-template-columns: 1fr; gap: 6px; }
   .steps { grid-template-columns: 1fr; }

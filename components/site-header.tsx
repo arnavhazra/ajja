@@ -2,21 +2,21 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { CurrencySelector } from "@/components/shop/currency-provider";
 import { useFolio } from "@/components/shop/collectors-folio";
 
-const NAV_LINKS = [
-  { href: "/#index", label: "the index" },
-  { href: "/category/all", label: "all pieces" },
-  { href: "/#studio", label: "the studio" },
-  { href: "/#buying", label: "the terms" },
-  { href: "/#inquire", label: "send a note" },
-] as const;
-
-export function SiteHeader({ name, hasPrices }: { name: string; hasPrices: boolean }) {
+export function SiteHeader({ name, hasStory }: { name: string; hasStory: boolean }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const { items, setIsOpen: setFolioOpen } = useFolio();
+
+  const links = [
+    { href: "/#index", label: "the index" },
+    { href: "/category/all", label: "all pieces" },
+    ...(hasStory ? [{ href: "/#studio", label: "the studio" }] : []),
+    { href: "/#buying", label: "the terms" },
+    { href: "/#inquire", label: "send a note" },
+  ] as const;
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -32,8 +32,8 @@ export function SiteHeader({ name, hasPrices }: { name: string; hasPrices: boole
           {name}
         </Link>
 
-        <nav aria-label="Sections" className="mast-nav">
-          {NAV_LINKS.map((link) => (
+        <nav aria-label="Sections" className="mast-nav hidden lg:flex">
+          {links.map((link) => (
             <Link key={link.href} href={link.href}>
               {link.label}
             </Link>
@@ -41,11 +41,9 @@ export function SiteHeader({ name, hasPrices }: { name: string; hasPrices: boole
         </nav>
 
         <div className="ml-auto flex items-center gap-[18px] text-[13.5px]">
-          {hasPrices ? (
-            <div className="hidden md:block">
-              <CurrencySelector />
-            </div>
-          ) : null}
+          <Link href="/category/all" className="hidden min-h-11 items-center text-tar-soft hover:text-tar lg:inline-flex">
+            all pieces
+          </Link>
 
           <button
             type="button"
@@ -62,8 +60,9 @@ export function SiteHeader({ name, hasPrices }: { name: string; hasPrices: boole
 
           <button
             type="button"
+            ref={menuButtonRef}
             onClick={() => setMobileMenuOpen(true)}
-            className="inline-flex min-h-11 min-w-11 items-center justify-center border border-line px-3 font-bold cursor-pointer lg:hidden"
+            className="inline-flex min-h-11 items-center justify-center border border-line-strong px-3.5 text-sm font-semibold cursor-pointer"
             aria-expanded={mobileMenuOpen}
             aria-label="Menu"
           >
@@ -72,16 +71,29 @@ export function SiteHeader({ name, hasPrices }: { name: string; hasPrices: boole
         </div>
       </div>
 
+      <noscript>
+        <nav aria-label="Menu links" className="shell flex flex-wrap items-center gap-4 border-t border-line py-3 text-sm">
+          {links.map((link) => (
+            <a key={link.href} href={link.href}>
+              {link.label}
+            </a>
+          ))}
+        </nav>
+      </noscript>
+
       <dialog
         ref={dialogRef}
-        className="sheet lg:hidden fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none bg-wall p-0 text-tar backdrop:bg-vat/60"
+        className="fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none bg-transparent p-0 text-tar backdrop:bg-vat/60"
         aria-label="Menu"
-        onClose={() => setMobileMenuOpen(false)}
+        onClose={() => {
+          setMobileMenuOpen(false);
+          menuButtonRef.current?.focus();
+        }}
         onClick={(e) => {
           if (e.target === dialogRef.current) setMobileMenuOpen(false);
         }}
       >
-        <div className="safe-bottom grid gap-5 p-6 bg-wall">
+        <div className="safe-bottom ml-auto grid h-dvh w-full max-w-md content-start gap-5 bg-wall p-6">
           <div className="flex items-center justify-between border-b border-line pb-4">
             <span className="word">{name}</span>
             <button
@@ -93,15 +105,8 @@ export function SiteHeader({ name, hasPrices }: { name: string; hasPrices: boole
             </button>
           </div>
 
-          {hasPrices ? (
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line py-2">
-              <span className="text-sm text-tar-soft">currency</span>
-              <CurrencySelector />
-            </div>
-          ) : null}
-
           <nav aria-label="Menu links" className="grid gap-1">
-            {NAV_LINKS.map((link) => (
+            {links.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
