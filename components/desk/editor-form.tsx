@@ -51,7 +51,7 @@ export function EditorForm({
       </label>
       <label className="grid gap-1">
         Status
-        <select className="field" name="status" defaultValue={product.status}>
+        <select key={product.status} className="field" name="status" defaultValue={product.status}>
           <option value="draft">Draft</option>
           <option value="scheduled">Scheduled</option>
           <option value="published">On the site</option>
