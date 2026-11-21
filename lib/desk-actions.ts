@@ -25,13 +25,16 @@ import {
 import { after } from "next/server";
 import { z } from "zod";
 import { deskPrefix } from "./desk-path";
+import { dropBlobIfUnused } from "./blob-retention";
 import { enhanceKind, enhancePhoto, shouldEnhance } from "./enhance";
 import { assertBlobUrl, storeImage } from "./images";
 import { dollarsToMinor } from "./money";
+import { canPublishPiece } from "./piece-readiness";
 import { aboutPieceSchema, inlineEditSchema, passwordChangeSchema, passwordSignInSchema, pieceSchema } from "./schemas";
 import { defaultSettings, type ShopSettings, withDefaults } from "./settings";
 import { isProvisionalSlug } from "./piece-title";
 import { pieceSlug, slugify } from "./slug";
+import { slugRedirectPlan } from "./slug-redirects";
 import { parseNewYork } from "./time";
 import { WEEKDAY_NAMES } from "./open-now";
 
@@ -184,9 +187,24 @@ async function writeSettings(value: ShopSettings) {
   refresh();
 }
 
-async function dropBlobIfUnused(url: string) {
-  const rows = await getDb().select({ id: productImages.id }).from(productImages).where(eq(productImages.url, url)).limit(1);
-  if (!rows.length) await del(url).catch(() => undefined);
+async function imageCountOf(productId: string) {
+  return getDb().$count(productImages, eq(productImages.productId, productId));
+}
+
+/** The one publish/schedule gate, applied wherever a piece enters a public status. */
+async function publishGate(product: { id: string; title: string; deletedAt: Date | null }) {
+  return canPublishPiece(product, await imageCountOf(product.id));
+}
+
+/** Loop-free redirects when a slug moves — reverse edges are deleted first. */
+async function writeSlugRedirect(fromSlug: string, toSlug: string) {
+  const plan = slugRedirectPlan(fromSlug, toSlug);
+  if (!plan.writes.length) return;
+  const db = getDb();
+  for (const edge of plan.reverse) {
+    await db.delete(redirects).where(and(eq(redirects.fromPath, edge.fromPath), eq(redirects.toPath, edge.toPath)));
+  }
+  await db.insert(redirects).values(plan.writes).onConflictDoNothing();
 }
 
 export async function sendSignInCode(formData: FormData) {
@@ -272,20 +290,16 @@ export async function ingestUpload(url: string, filename: string) {
       currency: "USD",
       attributes: { originalFile: filename },
     });
-    const [ins] = await db
-      .insert(productImages)
-      .values({
-        productId: id,
-        url: image.url,
-        width: image.width,
-        height: image.height,
-        blurData: image.blurData,
-        alt: "",
-      })
-      .returning({ id: productImages.id });
+    await db.insert(productImages).values({
+      productId: id,
+      url: image.url,
+      width: image.width,
+      height: image.height,
+      blurData: image.blurData,
+      alt: "",
+    });
     await audit(session.userId, "Added a piece", "product", id, { file: filename });
     refresh();
-    after(() => enhanceUploadedPhoto(id, ins.id, image.url));
     return { ok: true as const, message: "Draft saved.", id };
   } catch (error) {
     return { ok: false as const, message: error instanceof Error ? error.message : "The photo could not be saved." };
@@ -305,7 +319,7 @@ export async function addPhotoToPiece(productId: string, url: string) {
     await del(url).catch(() => undefined);
     const undoId = await snapshot(productId, "Added a photo", session.email);
     const current = await db.select().from(productImages).where(eq(productImages.productId, productId));
-    const [ins] = await db
+    await db
       .insert(productImages)
       .values({
         productId,
@@ -315,11 +329,9 @@ export async function addPhotoToPiece(productId: string, url: string) {
         blurData: image.blurData,
         alt: "",
         sortOrder: current.length,
-      })
-      .returning({ id: productImages.id });
+      });
     await audit(session.userId, "Added a photo", "product", productId);
     refresh();
-    after(() => enhanceUploadedPhoto(productId, ins.id, image.url));
     return { ok: true as const, message: "Photo added.", undoId };
   } catch (error) {
     return { ok: false as const, message: error instanceof Error ? error.message : "The photo could not be saved." };
@@ -366,6 +378,10 @@ export async function savePiece(formData: FormData) {
   const db = getDb();
   const [current] = await db.select().from(products).where(eq(products.id, parsed.data.id)).limit(1);
   if (!current) return go("/pieces", "That piece is not here.");
+  if (parsed.data.status === "published" || parsed.data.status === "scheduled") {
+    const gate = await publishGate({ id: current.id, title: parsed.data.title, deletedAt: current.deletedAt });
+    if (!gate.ok) return go(`/pieces/${id}`, gate.reason);
+  }
   const undoId = await snapshot(current.id, "Edited a piece", session.email);
   const attributes = { ...((current.attributes ?? {}) as Record<string, string>) };
   attributes.size = parsed.data.size;
@@ -383,11 +399,10 @@ export async function savePiece(formData: FormData) {
     if (key) attributes[key] = line.slice(split + 1).trim();
   }
   let slug = current.slug;
-  if (parsed.data.title.trim() && (current.slug.startsWith("piece-") || current.title !== parsed.data.title)) {
+  if (parsed.data.title.trim() && isProvisionalSlug(current.slug)) {
     const nextSlug = await uniqueSlug(parsed.data.title, current.id);
     if (nextSlug !== current.slug) {
-      await db.insert(redirects).values({ fromPath: `/p/${current.slug}`, toPath: `/p/${nextSlug}` }).onConflictDoNothing();
-      await db.insert(redirects).values({ fromPath: `/studio/${current.slug}`, toPath: `/studio/${nextSlug}` }).onConflictDoNothing();
+      await writeSlugRedirect(current.slug, nextSlug);
       slug = nextSlug;
     }
   }
@@ -420,11 +435,18 @@ export async function savePiece(formData: FormData) {
 
 async function setStatus(id: string, status: "published" | "sold" | "hidden" | "draft", label: string, back?: string) {
   const session = await actor();
+  const target = back && back.startsWith("/") ? back : `/pieces/${id}`;
+  if (status === "published" || status === "sold") {
+    const db = getDb();
+    const [product] = await db.select().from(products).where(eq(products.id, id)).limit(1);
+    if (!product) return go("/pieces", "That piece is not here.");
+    const gate = await publishGate(product);
+    if (!gate.ok) return go(target, gate.reason);
+  }
   const undoId = await snapshot(id, label, session.email);
   await getDb().update(products).set({ status, updatedAt: new Date() }).where(eq(products.id, id));
   await audit(session.userId, label, "product", id);
   refresh();
-  const target = back && back.startsWith("/") ? back : `/pieces/${id}`;
   return go(target, label, undoId);
 }
 
@@ -463,10 +485,10 @@ export async function restorePiece(formData: FormData) {
   const session = await actor();
   const id = String(formData.get("id"));
   const undoId = await snapshot(id, "Restored from trash", session.email);
-  await getDb().update(products).set({ deletedAt: null, updatedAt: new Date() }).where(eq(products.id, id));
+  await getDb().update(products).set({ deletedAt: null, status: "draft", updatedAt: new Date() }).where(eq(products.id, id));
   await audit(session.userId, "Restored from trash", "product", id);
   refresh();
-  return go(`/pieces/${id}`, "Restored.", undoId);
+  return go(`/pieces/${id}`, "Restored as a private draft.", undoId);
 }
 
 export async function duplicatePiece(formData: FormData) {
@@ -558,10 +580,10 @@ export async function saveInlineField(input: { id: string; intent: string; value
   const undoId = await snapshot(id, "Quick edit", session.email);
   if (intent === "title") {
     let slug = current.slug;
-    if (value && (current.slug.startsWith("piece-") || current.title !== value)) {
+    if (value && isProvisionalSlug(current.slug)) {
       const nextSlug = await uniqueSlug(value, current.id);
       if (nextSlug !== current.slug) {
-        await db.insert(redirects).values({ fromPath: `/p/${current.slug}`, toPath: `/p/${nextSlug}` }).onConflictDoNothing();
+        await writeSlugRedirect(current.slug, nextSlug);
         slug = nextSlug;
       }
     }
@@ -573,6 +595,10 @@ export async function saveInlineField(input: { id: string; intent: string; value
   } else if (intent === "status") {
     if (!["draft", "scheduled", "published", "sold", "hidden"].includes(value)) {
       return { ok: false as const, message: "Choose a status.", undoId: "" };
+    }
+    if (value === "published" || value === "scheduled" || value === "sold") {
+      const gate = await publishGate(current);
+      if (!gate.ok) return { ok: false as const, message: gate.reason, undoId: "" };
     }
     await db.update(products).set({ status: value, updatedAt: new Date() }).where(eq(products.id, id));
   } else if (intent === "category") {
@@ -615,7 +641,7 @@ export async function saveAboutPiece(input: { id: string; title: string; categor
   if (title && isProvisionalSlug(current.slug)) {
     const nextSlug = await uniqueSlug(title, current.id);
     if (nextSlug !== current.slug) {
-      await db.insert(redirects).values({ fromPath: `/p/${current.slug}`, toPath: `/p/${nextSlug}` }).onConflictDoNothing();
+      await writeSlugRedirect(current.slug, nextSlug);
       slug = nextSlug;
     }
   }
@@ -638,7 +664,8 @@ export async function saveAboutPiece(input: { id: string; title: string; categor
 async function restoreVersion(versionId: string) {
   const db = getDb();
   const [version] = await db.select().from(productVersions).where(eq(productVersions.id, versionId)).limit(1);
-  if (!version?.productId) return "";
+  // An already-used undo token can never replay to clobber newer edits.
+  if (!version?.productId || version.undoneAt) return "";
   const snap = version.snapshot as Snapshot;
   await db
     .update(products)
@@ -725,10 +752,10 @@ export async function sprintSave(formData: FormData) {
   if (!current) return go("/review", "That piece is not here.");
   const undoId = await snapshot(id, "Sprint edit", session.email);
   let slug = current.slug;
-  if (title && (current.slug.startsWith("piece-") || current.title !== title)) {
+  if (title && isProvisionalSlug(current.slug)) {
     const nextSlug = await uniqueSlug(title, current.id);
     if (nextSlug !== current.slug) {
-      await db.insert(redirects).values({ fromPath: `/p/${current.slug}`, toPath: `/p/${nextSlug}` }).onConflictDoNothing();
+      await writeSlugRedirect(current.slug, nextSlug);
       slug = nextSlug;
     }
   }
@@ -799,6 +826,14 @@ export async function bulkApply(formData: FormData) {
   let skipped = 0;
   const undoIds: string[] = [];
   for (const id of ids) {
+    if (action === "publish" || action === "sold") {
+      const [product] = await db.select().from(products).where(eq(products.id, id)).limit(1);
+      const gate = product ? await publishGate(product) : { ok: false as const, reason: "not found" };
+      if (!gate.ok) {
+        skipped += 1;
+        continue;
+      }
+    }
     const undoId = await snapshot(id, "Bulk change", session.email);
     if (undoId) undoIds.push(undoId);
     if (action === "hide" || action === "publish" || action === "sold" || action === "draft") {
@@ -839,7 +874,11 @@ export async function bulkApply(formData: FormData) {
   }
   await audit(session.userId, "Bulk change", "product", ids[0] ?? null, { action, count: String(changed) });
   refresh();
-  const skippedNote = skipped ? ` ${skipped} had no price, so they were left alone.` : "";
+  const skippedNote = skipped
+    ? action === "publish" || action === "sold"
+      ? ` ${skipped} needed a photo or name first.`
+      : ` ${skipped} had no price, so they were left alone.`
+    : "";
   return go("/pieces", `${changed} updated.${skippedNote}`, undoIds.length ? undoIds.join(",") : undefined);
 }
 
@@ -995,6 +1034,12 @@ export async function setAsHeroImage(formData: FormData) {
     return go(target, "Add a photo first before choosing it as the homepage hero.");
   }
 
+  const [owner] = await db.select().from(products).where(eq(products.id, image.productId)).limit(1);
+  if (!owner || owner.deletedAt || owner.status !== "published") {
+    const target = productId ? `/pieces/${productId}` : `/pieces/${image.productId}`;
+    return go(target, "Put this piece on the site first before making it the homepage photo.");
+  }
+
   const current = await readSettings();
   const next: ShopSettings = {
     ...current,
@@ -1043,7 +1088,10 @@ async function replaceImage(imageId: string, bytes: Buffer, label: string) {
 }
 
 export async function rotateImage(formData: FormData) {
-  const imageId = String(formData.get("imageId"));
+  await actor();
+  const parsed = z.object({ imageId: z.string().uuid() }).safeParse({ imageId: String(formData.get("imageId") ?? "") });
+  if (!parsed.success) return go("/pieces", "That photo is not here.");
+  const imageId = parsed.data.imageId;
   const [image] = await getDb().select().from(productImages).where(eq(productImages.id, imageId)).limit(1);
   if (!image) return go("/pieces", "That photo is not here.");
   const response = await fetch(image.url);
@@ -1053,7 +1101,10 @@ export async function rotateImage(formData: FormData) {
 }
 
 export async function cropImage(formData: FormData) {
-  const imageId = String(formData.get("imageId"));
+  await actor();
+  const parsed = z.object({ imageId: z.string().uuid() }).safeParse({ imageId: String(formData.get("imageId") ?? "") });
+  if (!parsed.success) return go("/pieces", "That photo is not here.");
+  const imageId = parsed.data.imageId;
   const [image] = await getDb().select().from(productImages).where(eq(productImages.id, imageId)).limit(1);
   if (!image) return go("/pieces", "That photo is not here.");
   const response = await fetch(image.url);
@@ -1398,6 +1449,13 @@ export async function confirmImport(formData: FormData) {
         continue;
       }
       patch.status = status === "on the site" ? "published" : status;
+    }
+    if (patch.status === "published" || patch.status === "scheduled" || patch.status === "sold") {
+      const gate = await publishGate({ id: match.id, title: patch.title ?? match.title, deletedAt: match.deletedAt });
+      if (!gate.ok) {
+        errors.push(`Row ${rowIndex + 2}: ${gate.reason}`);
+        continue;
+      }
     }
     const attributes = { ...((match.attributes ?? {}) as Record<string, string>) };
     if (cell("size")) attributes.size = cell("size");

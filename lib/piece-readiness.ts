@@ -1,3 +1,27 @@
+import { hasRealTitle } from "./piece-title";
+
+export type PublishGate = { ok: true } | { ok: false; reason: string };
+
+/**
+ * The single publish/schedule gate — a piece may only go on the site (or be
+ * scheduled to) when it is restored, has a photo, and has a real name.
+ * "Untitled" is allowed on purpose; a blank price is too.
+ */
+export function canPublishPiece(
+  product: { title?: string | null; deletedAt?: Date | null },
+  imageCount: number,
+): PublishGate {
+  if (product.deletedAt != null) return { ok: false, reason: "Restore this piece from the trash first." };
+  if (imageCount < 1) return { ok: false, reason: "Add a photo before showing this piece on the site." };
+  if (!hasRealTitle(product.title)) {
+    return {
+      ok: false,
+      reason: "Give this piece a name before showing it on the site. You can write Untitled if it has no title.",
+    };
+  }
+  return { ok: true };
+}
+
 export type PieceReadiness = {
   isReady: boolean;
   score: number; // 0 to 100

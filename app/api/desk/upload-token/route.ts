@@ -16,5 +16,5 @@ export async function POST(request: Request) {
     maximumSizeInBytes: 15 * 1024 * 1024,
     addRandomSuffix: true,
   });
-  return Response.json({ token, pathname, type });
+  return Response.json({ token, pathname, type }, { headers: { "Cache-Control": "private, no-store" } });
 }

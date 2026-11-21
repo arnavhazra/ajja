@@ -79,6 +79,7 @@ async function hydrate(rows: (typeof products.$inferSelect)[]) {
 function listed() {
   return sql`(
     ${products.deletedAt} is null
+    and exists (select 1 from product_images pi where pi.product_id = ${products.id})
     and (
       ${products.status} in ('published', 'sold')
       or (${products.status} = 'scheduled' and ${products.publishAt} is not null and ${products.publishAt} <= now())
