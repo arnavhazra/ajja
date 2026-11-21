@@ -118,14 +118,18 @@ async function Pieces({ searchParams }: { searchParams: Promise<Record<string, s
         <Link className="btn btn-quiet self-end" href={trash ? `${prefix}/pieces` : `${prefix}/pieces?trash=1`}>
           {trash ? "Back to pieces" : "Trash"}
         </Link>
-        {trash ? (
+        {trash ? <input type="hidden" name="trash" value="1" /> : null}
+      </form>
+      {trash ? (
+        <>
+          <p className="desk-note">Anything in the trash can be restored for 30 days.</p>
           <form action={emptyTrash} className="self-end">
             <button className="btn btn-secondary" type="submit">
               Empty trash older than 30 days
             </button>
           </form>
-        ) : null}
-      </form>
+        </>
+      ) : null}
       {!trash ? (
         <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Show pieces that need something">
           <span className="text-sm text-tar-soft">Needs:</span>

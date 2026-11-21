@@ -4,7 +4,7 @@ import { hashPassword } from "../lib/password";
 import { totpCode } from "../lib/totp";
 import { e2eDbIsolated } from "./isolated-db";
 
-test.skip(!e2eDbIsolated(), "DATABASE_URL is not confirmed isolated — set E2E_ISOLATED_DB=1 or use a local database");
+test.skip(!e2eDbIsolated(), "DATABASE_URL is not confirmed isolated — set E2E_ISOLATED=1 and E2E_DATABASE_URL to a test branch");
 
 const adminEmail = "e2e-security@example.test";
 const adminPassword = "e2e-security-password-123";

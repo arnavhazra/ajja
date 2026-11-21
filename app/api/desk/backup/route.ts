@@ -1,5 +1,5 @@
 import { zipSync, strToU8 } from "fflate";
-import { updateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { getSession } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import {
@@ -42,15 +42,20 @@ export async function GET() {
       }),
     ),
   };
+  // Fail fast before stamping lastBackupAt — a partial image set is no backup.
   for (const image of imageRows) {
+    let response: Response;
     try {
-      const response = await fetch(image.url);
-      if (!response.ok) continue;
-      files[`images/${image.id}.webp`] = new Uint8Array(await response.arrayBuffer());
+      response = await fetch(image.url);
     } catch {
-      continue;
+      return new Response("A photo could not be downloaded — backup stopped.", { status: 502 });
     }
+    if (!response.ok) {
+      return new Response("A photo could not be downloaded — backup stopped.", { status: 502 });
+    }
+    files[`images/${image.id}.webp`] = new Uint8Array(await response.arrayBuffer());
   }
+  const zipped = zipSync(files);
   const current = withDefaults(settingRows.find((row) => row.key === "shop")?.value);
   await db
     .insert(siteSettings)
@@ -59,12 +64,12 @@ export async function GET() {
       target: siteSettings.key,
       set: { value: { ...current, lastBackupAt: new Date().toISOString() }, updatedAt: new Date() },
     });
-  updateTag("settings");
-  const zipped = zipSync(files);
+  revalidateTag("settings", { expire: 0 });
   return new Response(Buffer.from(zipped), {
     headers: {
       "Content-Type": "application/zip",
       "Content-Disposition": "attachment; filename=ajja-backup.zip",
+      "Cache-Control": "private, no-store",
     },
   });
 }

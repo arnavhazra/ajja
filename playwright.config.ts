@@ -1,16 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
-import { readFileSync } from "node:fs";
+import { applyFixtureEnv } from "./e2e/fixture-env";
 
-const text = readFileSync(".env.local", "utf8");
-for (const line of text.split("\n")) {
-  if (!line || line.startsWith("#")) continue;
-  const split = line.indexOf("=");
-  if (split < 1) continue;
-  const key = line.slice(0, split).trim();
-  let value = line.slice(split + 1).trim();
-  if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
-  if (!process.env[key]) process.env[key] = value;
-}
+// Never read .env.local here — it points at production. The fixture supplies
+// an isolated database and @example.test accounts; it throws before the suite
+// starts if the database host is unsafe.
+applyFixtureEnv();
 
 export default defineConfig({
   testDir: "e2e",
@@ -18,11 +12,11 @@ export default defineConfig({
   expect: { timeout: 15_000 },
   fullyParallel: false,
   workers: 1,
-  use: { ...devices["Desktop Chrome"], baseURL: "http://127.0.0.1:3000" },
+  use: { ...devices["Desktop Chrome"], baseURL: "http://127.0.0.1:3210" },
   webServer: {
-    command: "E2E_DESK_EMAIL=e2e-desk@example.test,e2e-security@example.test node node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port 3000",
-    url: "http://127.0.0.1:3000",
-    reuseExistingServer: true,
+    command: "node node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port 3210",
+    url: "http://127.0.0.1:3210",
+    reuseExistingServer: false,
     timeout: 120_000,
   },
 });

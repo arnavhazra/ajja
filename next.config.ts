@@ -23,6 +23,7 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   devIndicators: false,
+  experimental: { agentUpgrade: "security" },
   images: {
     dangerouslyAllowLocalIP: process.env.NODE_ENV !== "production",
     qualities: [72, 74, 75],

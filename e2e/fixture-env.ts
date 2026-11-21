@@ -1,0 +1,125 @@
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
+
+/**
+ * E2E fixture environment.
+ *
+ * .env.local points at the LIVE production Neon branch — its values are never
+ * copied into process.env and never logged. It is parsed for hostnames ONLY,
+ * so the fixture can refuse any E2E_DATABASE_URL that would touch production.
+ *
+ * The browser suite runs against an isolated Neon branch (or localhost) given
+ * in E2E_DATABASE_URL — a gitignored .env.e2e file may hold it for local runs.
+ * Everything the app needs comes from E2E_* inputs or @example.test fixture
+ * accounts; production companions are scrubbed so nothing falls back.
+ */
+
+const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
+
+function readEnvFile(file: string): Map<string, string> {
+  const map = new Map<string, string>();
+  const full = path.resolve(process.cwd(), file);
+  if (!existsSync(full)) return map;
+  for (const line of readFileSync(full, "utf8").split("\n")) {
+    if (!line || line.startsWith("#")) continue;
+    const split = line.indexOf("=");
+    if (split < 1) continue;
+    const key = line.slice(0, split).trim();
+    let value = line.slice(split + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    map.set(key, value);
+  }
+  return map;
+}
+
+function hostOf(raw: string | undefined): string | null {
+  const value = raw?.trim();
+  if (!value) return null;
+  try {
+    return new URL(value).hostname || null;
+  } catch {
+    // PGHOST-style bare hostnames are not URLs.
+    return value;
+  }
+}
+
+/** Hosts that may never receive fixture writes — names only, never values. */
+export function forbiddenHosts(file = ".env.local"): Set<string> {
+  const hosts = new Set<string>();
+  for (const key of ["DATABASE_URL", "DATABASE_URL_UNPOOLED", "PGHOST", "PGHOST_UNPOOLED", "POSTGRES_HOST"]) {
+    const host = hostOf(readEnvFile(file).get(key));
+    if (host) hosts.add(host);
+  }
+  return hosts;
+}
+
+/**
+ * Fail-closed check for the E2E database: a postgres URL on a host that is
+ * either local, or a Neon branch when E2E_ISOLATED=1 — and never a host found
+ * in .env.local (production). Pure so the unit suite can verify the gate
+ * without ever touching a real .env.local.
+ */
+export function assertSafeE2eDatabaseUrl(databaseUrl: string, forbidden: ReadonlySet<string>, isolated: boolean) {
+  let hostname = "";
+  try {
+    const parsed = new URL(databaseUrl);
+    if (parsed.protocol !== "postgres:" && parsed.protocol !== "postgresql:") {
+      throw new Error("E2E_DATABASE_URL must be a postgres:// or postgresql:// URL.");
+    }
+    hostname = parsed.hostname;
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("E2E_DATABASE_URL")) throw error;
+    throw new Error("E2E_DATABASE_URL is not a valid URL.");
+  }
+  if (forbidden.has(hostname)) {
+    throw new Error(
+      "Refusing to run E2E against the .env.local database host. Supply a separate Neon test branch URL in E2E_DATABASE_URL.",
+    );
+  }
+  const isNeonBranch = hostname === "neon.tech" || hostname.endsWith(".neon.tech");
+  if (!LOCAL_HOSTS.has(hostname) && !(isolated && isNeonBranch)) {
+    throw new Error(
+      `Refusing E2E database host "${hostname}". Use a localhost database, or a *.neon.tech test branch with E2E_ISOLATED=1.`,
+    );
+  }
+  return hostname;
+}
+
+export function applyFixtureEnv() {
+  const forbidden = forbiddenHosts();
+
+  // Optional fixture file (gitignored) — only E2E_* keys, never logged.
+  for (const [key, value] of readEnvFile(".env.e2e")) {
+    if (key.startsWith("E2E_") && !process.env[key]) process.env[key] = value;
+  }
+
+  const databaseUrl = (process.env.E2E_DATABASE_URL ?? "").trim();
+  if (databaseUrl) {
+    assertSafeE2eDatabaseUrl(databaseUrl, forbidden, process.env.E2E_ISOLATED === "1");
+    process.env.DATABASE_URL = databaseUrl;
+  }
+
+  process.env.ADMIN_PATH = (process.env.E2E_ADMIN_PATH ?? "").trim();
+  process.env.SESSION_SECRET = (process.env.E2E_SESSION_SECRET ?? "").trim();
+
+  // Scrub every Postgres/Neon companion so nothing falls back to .env.local.
+  for (const key of Object.keys(process.env)) {
+    if (/^(PG|POSTGRES_|NEON_)/.test(key)) delete process.env[key];
+  }
+
+  // Live integrations stay off; the Blob test store is opt-in only.
+  process.env.BLOB_READ_WRITE_TOKEN = (process.env.E2E_BLOB_READ_WRITE_TOKEN ?? "").trim();
+  process.env.RESEND_API_KEY = "";
+  process.env.OPENROUTER_API_KEY = "";
+  process.env.GEMINI_API_KEY = "";
+
+  // Fixture accounts — @example.test only, never a real inbox.
+  process.env.OWNER_EMAIL = "e2e-owner@example.test";
+  process.env.DEV_ADMIN_EMAIL = "e2e-dev@example.test";
+  process.env.DEV_ADMIN_PASSWORD = "e2e-dev-password-long-123";
+  process.env.DEV_ADMIN_TOTP_SECRET = "JBSWY3DPEHPK3PXP";
+  process.env.E2E_DESK_EMAIL = "e2e-desk@example.test,e2e-security@example.test,e2e-taps@example.test";
+  process.env.EMAIL_FROM = "desk@example.test";
+}
