@@ -99,6 +99,11 @@ export function applyFixtureEnv() {
   if (databaseUrl) {
     assertSafeE2eDatabaseUrl(databaseUrl, forbidden, process.env.E2E_ISOLATED === "1");
     process.env.DATABASE_URL = databaseUrl;
+  } else if (process.env.E2E_ISOLATED === "1") {
+    // E2E_ISOLATED only counts when the fixture URL was chosen explicitly.
+    // Without it an inherited (possibly production) DATABASE_URL would pass
+    // e2eDbIsolated and let destructive fixtures run against it.
+    delete process.env.DATABASE_URL;
   }
 
   process.env.ADMIN_PATH = (process.env.E2E_ADMIN_PATH ?? "").trim();
