@@ -1129,8 +1129,22 @@ export async function cropImage(formData: FormData) {
 export async function reorderImages(productId: string, orderedIds: string[]) {
   const session = await actor();
   const db = getDb();
+  // Reorder only inside the sortOrder slots the submitted images already hold.
+  // Images outside the submitted set (e.g. an enhanced cover at sortOrder 0)
+  // keep their position instead of colliding with a freshly numbered 0..n.
+  const rows = await db
+    .select({ id: productImages.id, sortOrder: productImages.sortOrder })
+    .from(productImages)
+    .where(eq(productImages.productId, productId));
+  const submitted = new Set(orderedIds);
+  const slots = rows
+    .filter((row) => submitted.has(row.id))
+    .map((row) => row.sortOrder)
+    .sort((a, b) => a - b);
+  const fallback = Math.max(-1, ...rows.map((row) => row.sortOrder)) + 1;
   for (const [index, id] of orderedIds.entries()) {
-    await db.update(productImages).set({ sortOrder: index }).where(and(eq(productImages.id, id), eq(productImages.productId, productId)));
+    const sortOrder = slots[index] ?? fallback + index;
+    await db.update(productImages).set({ sortOrder }).where(and(eq(productImages.id, id), eq(productImages.productId, productId)));
   }
   await audit(session.userId, "Reordered photos", "product", productId);
   refresh();
