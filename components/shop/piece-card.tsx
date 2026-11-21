@@ -28,7 +28,7 @@ export function PieceCard({
 
   const cover = product.images[0];
   const named = hasRealTitle(product.title);
-  const title = named ? product.title.trim() : `no. ${pieceRef(product.id)}`;
+  const title = named ? product.title.trim() : `Untitled · No. ${pieceRef(product.id)}`;
   const fullTitle = pieceTitle(product.title, product.categorySlug, product.attributes, product.id);
   const kind = pieceKind(product.categoryName, product.attributes);
   const sold = product.status === "sold";
@@ -79,8 +79,7 @@ export function PieceCard({
               priority={priority}
               placeholder={cover.blurData ? "blur" : "empty"}
               blurDataURL={cover.blurData ?? undefined}
-              className="object-cover"
-              style={{ objectPosition: `${(cover.focalX ?? 0.5) * 100}% ${(cover.focalY ?? 0.5) * 100}%` }}
+              className="object-contain"
             />
           ) : null}
         </Link>

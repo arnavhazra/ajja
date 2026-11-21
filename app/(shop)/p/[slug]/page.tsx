@@ -6,7 +6,6 @@ import { Suspense } from "react";
 import { EnquiryForm } from "@/components/enquiry-form";
 import { EventBeacon } from "@/components/event-beacon";
 import { JsonLd } from "@/components/json-ld";
-import { MotionScan } from "@/components/motion-scan";
 import { ShareButton } from "@/components/share-button";
 import { PieceCard } from "@/components/shop/piece-card";
 import { PieceViewer } from "@/components/shop/piece-viewer";
@@ -205,7 +204,6 @@ async function ProductBody({
           </a>
         </div>
       ) : null}
-      <MotionScan />
     </main>
   );
 }

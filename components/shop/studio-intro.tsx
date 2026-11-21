@@ -57,7 +57,7 @@ export function StudioIntro({ settings, detail }: { settings: ShopSettings; deta
               style={{ objectPosition: `${(photo?.focalX ?? 0.5) * 100}% ${(photo?.focalY ?? 0.5) * 100}%` }}
             />
           </div>
-          {detail ? (
+          {!settings.ownerPhoto && detail ? (
             <figcaption className="cap">
               <span className="tick" aria-hidden="true" style={{ background: detail.pigment }} />
               No. {pieceRef(detail.id)}
