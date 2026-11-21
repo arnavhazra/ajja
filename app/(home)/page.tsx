@@ -176,7 +176,19 @@ async function Home({
 
       <AcquisitionFaq settings={settings} />
 
-      <CommissionForm responseNote={settings.responseNote} initialMessage={initialMessage} />
+      <section id="inquire" className="note-sec scroll-mt-[60px]" aria-labelledby="inquire-title">
+        <div className="note-grid shell">
+          <div className="note-side">
+            <p className="kicker">Send a note</p>
+            <h2 id="inquire-title" className="display mt-[10px]" data-reveal="">
+              Ask the studio
+            </h2>
+            <p className="type">A question about a piece, a visit, or something you would like made.</p>
+            <p className="comm type">{settings.responseNote || "We write back ourselves — no forms lost to a machine."}</p>
+          </div>
+          <CommissionForm responseNote={settings.responseNote} initialMessage={initialMessage} />
+        </div>
+      </section>
 
       <a className="ask-chip no-print" href="#inquire">
         ask →

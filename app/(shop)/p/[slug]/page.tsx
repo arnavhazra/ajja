@@ -187,7 +187,7 @@ async function ProductBody({
         <section id="enquire" aria-label={`Ask about ${title}`} className="scroll-mt-20 bg-wall-deep py-20 md:py-28">
           <div className="shell grid gap-10 md:grid-cols-12 md:gap-6">
             <div className="md:col-span-4">
-              <h2 className="display text-[clamp(2.5rem,5vw,4.5rem)]">Ask about it</h2>
+              <h2 className="display text-[clamp(2.5rem,5vw,4.5rem)]">Ask the studio</h2>
               <p className="caption mt-4 max-w-xs">{settings.paymentNote}</p>
             </div>
             <div className="md:col-span-7 md:col-start-6">

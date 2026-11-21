@@ -1,6 +1,6 @@
 import type { ShopSettings } from "@/lib/settings";
 
-/** The terms: how buying works, in three steps, then the questions owners actually answered. */
+/** The terms: how buying works, in steps, then the questions owners actually answered. */
 export function AcquisitionFaq({ settings }: { settings: ShopSettings }) {
   const items: { title: string; content: string }[] = [];
   if (settings.leadTime.trim()) items.push({ title: "Timing", content: settings.leadTime });
@@ -23,22 +23,22 @@ export function AcquisitionFaq({ settings }: { settings: ShopSettings }) {
   if (!steps.length && !items.length) return null;
 
   return (
-    <section id="buying" className="pr-section shell scroll-mt-[60px]" aria-labelledby="buying-title">
-      <header className="pr-head">
+    <section id="buying" className="shell terms-wrap scroll-mt-[60px]" aria-labelledby="buying-title">
+      <header className="sec-head">
         <div>
-          <p className="pr-label">How buying works</p>
-          <h2 id="buying-title" className="pr-h2" data-reveal="">
+          <p className="kicker">How buying works</p>
+          <h2 id="buying-title" className="display mt-[10px] text-[clamp(2.6rem,5.6vw,5rem)]" data-reveal="">
             Ask, arrange, collect
           </h2>
         </div>
-        <p className="pr-head-note">Nothing is paid online. Every piece is a conversation with the studio first.</p>
+        <p className="sub type">Nothing is paid online. Every piece is a conversation with the studio first.</p>
       </header>
 
       {steps.length ? (
-        <ol className="pr-steps">
+        <ol className="steps">
           {steps.map((step, index) => (
-            <li key={step.title} className="pr-step" data-reveal="">
-              <span className="pr-step-num" aria-hidden="true">
+            <li key={step.title} className="step" data-reveal="">
+              <span className="step-num" aria-hidden="true">
                 {String(index + 1).padStart(2, "0")}
               </span>
               <h3>{step.title}</h3>
@@ -49,14 +49,14 @@ export function AcquisitionFaq({ settings }: { settings: ShopSettings }) {
       ) : null}
 
       {items.length ? (
-        <div className="pr-faq">
+        <div className="terms">
           {items.map((item, index) => (
-            <details key={`${item.title}-${index}`} className="pr-faq-item" data-reveal="">
-              <summary>
+            <details key={`${item.title}-${index}`} className="term" data-reveal="">
+              <summary className="q">
                 <span>{item.title}</span>
-                <span className="pr-faq-mark" aria-hidden="true" />
+                <span className="term-mark" aria-hidden="true" />
               </summary>
-              <p>{item.content}</p>
+              <p className="a">{item.content}</p>
             </details>
           ))}
         </div>

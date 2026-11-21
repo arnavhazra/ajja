@@ -61,11 +61,11 @@ function CommissionFormInner({
 
   if (state.ok) {
     return (
-      <div role="status" className="pr-form pr-form-done">
-        <span className="pr-dot pr-dot-lg" aria-hidden="true" />
-        <p className="pr-form-done-title">Thank you — your note is with the studio.</p>
-        <p className="pr-form-fine">{state.message || responseNote || "We will write back as soon as we can."}</p>
-        <button type="button" onClick={onSendAnother} className="pr-btn pr-btn-quiet">
+      <div role="status" className="note-card note-done">
+        <span className="note-done-dot" aria-hidden="true" />
+        <p className="display-wide text-3xl">Thank you — your note is with the studio.</p>
+        <p className="type text-tar-soft">{state.message || responseNote || "We will write back as soon as we can."}</p>
+        <button type="button" onClick={onSendAnother} className="btn btn-secondary w-fit">
           Send another note
         </button>
         <Honeypot />
@@ -75,24 +75,23 @@ function CommissionFormInner({
   }
 
   return (
-    <form action={action} className="pr-form" onSubmit={notePieces}>
+    <form action={action} className="note-card" onSubmit={notePieces}>
       {productId ? <input type="hidden" name="productId" value={productId} /> : null}
       {productName ? (
-        <p className="pr-form-about">
-          <span>About</span>
-          <strong>{productName}</strong>
+        <p className="f-about">
+          About <strong>{productName}</strong>
         </p>
       ) : null}
 
-      <div className="pr-field">
+      <div className="f-row">
         <label htmlFor="note-name">Your name *</label>
         <input id="note-name" name="name" type="text" required maxLength={120} autoComplete="name" />
       </div>
-      <div className="pr-field">
+      <div className="f-row">
         <label htmlFor="note-contact">Phone or email *</label>
         <input id="note-contact" name="contact" type="text" required maxLength={160} autoComplete="email" />
       </div>
-      <div className="pr-field">
+      <div className="f-row">
         <label htmlFor="note-subject">Subject</label>
         <input
           id="note-subject"
@@ -101,7 +100,7 @@ function CommissionFormInner({
           defaultValue={productName ? `Asking about ${productName}` : "A question for the studio"}
         />
       </div>
-      <div className="pr-field">
+      <div className="f-row">
         <label htmlFor="note-message">Message *</label>
         <textarea
           id="note-message"
@@ -115,28 +114,28 @@ function CommissionFormInner({
       </div>
 
       {chips.length ? (
-        <div className="pr-chips" aria-label="Pieces included in this note">
+        <div className="f-chips" aria-label="Pieces included in this note">
           {chips.slice(0, 4).map((item) => (
-            <span key={item.id} className="pr-chip" title={item.title}>
+            <span key={item.id} className="f-chip" title={item.title}>
               {item.imageUrl ? <Image src={item.imageUrl} alt="" width={28} height={28} className="object-cover" /> : null}
-              <span className="pr-chip-title">{item.title}</span>
+              <span className="f-chip-title">{item.title}</span>
             </span>
           ))}
-          {chips.length > 4 ? <span className="pr-chip pr-chip-more">+{chips.length - 4} more</span> : null}
+          {chips.length > 4 ? <span className="f-chip f-chip-more">+{chips.length - 4} more</span> : null}
         </div>
       ) : null}
 
       <Honeypot />
       {state.message ? (
-        <p role="alert" className="pr-form-error">
+        <p role="alert" className="f-error">
           {state.message}
         </p>
       ) : null}
 
-      <button className="pr-btn pr-btn-wide" type="submit" disabled={pending}>
+      <button className="send" type="submit" disabled={pending}>
         {pending ? "Sending…" : "Send to the studio"}
       </button>
-      <p className="pr-form-fine">Nothing is paid on this site — your note goes straight to the studio.</p>
+      <p className="fine">Nothing is paid on this site — your note goes straight to the studio.</p>
     </form>
   );
 }
