@@ -186,7 +186,7 @@ export function PiecesTable({
             <div className="min-w-0" role="cell">
               <div className="flex flex-wrap items-center gap-2">
                 <input
-                  className="field h-9 min-w-40 flex-1 text-base font-semibold"
+                  className="field min-h-12 min-w-40 flex-1 text-base font-semibold"
                   value={valueOf(row, "title")}
                   placeholder="Name this piece"
                   aria-label={`Name of ${row.displayTitle}`}
@@ -225,7 +225,7 @@ export function PiecesTable({
               </label>
               <input
                 id={`price-${row.id}`}
-                className="field h-9 w-full nums"
+                className="field min-h-12 w-full nums"
                 inputMode="decimal"
                 placeholder="Ask"
                 value={valueOf(row, "price")}
@@ -242,7 +242,7 @@ export function PiecesTable({
               </label>
               <select
                 id={`status-${row.id}`}
-                className="field h-9 w-full"
+                className="field min-h-12 w-full"
                 value={valueOf(row, "status")}
                 onChange={(e) => {
                   edit(row, "status", e.target.value);
@@ -262,7 +262,7 @@ export function PiecesTable({
               </label>
               <select
                 id={`group-${row.id}`}
-                className="field h-9"
+                className="field min-h-12"
                 value={valueOf(row, "category")}
                 onChange={(e) => {
                   edit(row, "category", e.target.value);
@@ -391,7 +391,7 @@ export function PiecesTable({
           <span className="text-sm font-semibold">{selected.size} selected</span>
           <label className="grid gap-1 text-sm">
             With them
-            <select className="field h-9" name="action" value={bulkAction} onChange={(e) => setBulkAction(e.target.value)}>
+            <select className="field min-h-12" name="action" value={bulkAction} onChange={(e) => setBulkAction(e.target.value)}>
               <option value="publish">Put on the site</option>
               <option value="hide">Hide</option>
               <option value="sold">Mark sold</option>
@@ -405,13 +405,13 @@ export function PiecesTable({
           {bulkAction === "percent" || bulkAction === "amount" ? (
             <label className="grid gap-1 text-sm">
               {bulkAction === "percent" ? "Percent, like 10 or -15" : "Dollars, like 25 or -10"}
-              <input className="field h-9 w-32" name="value" inputMode="decimal" />
+              <input className="field min-h-12 w-32" name="value" inputMode="decimal" />
             </label>
           ) : null}
           {bulkAction === "category" ? (
             <label className="grid gap-1 text-sm">
               Group
-              <select className="field h-9" name="categoryId" defaultValue="">
+              <select className="field min-h-12" name="categoryId" defaultValue="">
                 <option value="">No group</option>
                 {groups.map((group) => (
                   <option key={group.id} value={group.id}>

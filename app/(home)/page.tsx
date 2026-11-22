@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { JsonLd } from "@/components/json-ld";
-import { MotionScan } from "@/components/motion-scan";
 import { StudioIntro } from "@/components/shop/studio-intro";
 import { AcquisitionFaq } from "@/components/shop/acquisition-faq";
 import { CommissionForm } from "@/components/shop/commission-form";
@@ -77,9 +76,7 @@ function IndexRow({ entry, index }: { entry: IndexEntry; index: number }) {
               blurDataURL={entry.cover.blurData ?? undefined}
               style={{ objectPosition: `${entry.cover.focalX * 100}% ${entry.cover.focalY * 100}%` }}
             />
-          ) : (
-            <span className="idx-cover-note">no photograph yet</span>
-          )}
+          ) : null}
         </span>
       </Link>
     </li>
@@ -122,7 +119,11 @@ async function Home({
       }
     : null;
 
-  const detail = products.find((product) => product.status !== "sold" && product.images.length > 0) ?? products.find((product) => product.images.length > 0) ?? null;
+  const photographed = products.filter((product) => product.images.length > 0);
+  const detail = (settings.heroImage ? photographed.find((product) => product.images.some((image) => image.url === settings.heroImage)) : undefined)
+    ?? photographed.find((product) => product.status !== "sold")
+    ?? photographed[0]
+    ?? null;
 
   return (
     <main>
@@ -151,16 +152,44 @@ async function Home({
                 {brand.name} — a family studio in {settings.town}, {settings.region}
               </p>
               <h1 id="index-title" className="disp mt-[10px] text-[clamp(2.6rem,6vw,5.5rem)]">
-                The material index<span className="text-sap">.</span>
+                {settings.heroHeadline?.trim() || "Handmade paintings, woodwork, and studio pieces."}
               </h1>
+              <p className="sub type">
+                Pieces grouped by what they are made of and how they are made. Every photograph is the piece itself —
+                every piece is one of a kind, asked about directly, and nothing is paid on this site.
+              </p>
+              <p className="sub type mt-3">
+                <a href="#index-list" className="cap-line">Browse the material index</a>
+              </p>
             </div>
-            <p className="sub type">
-              Pieces grouped by what they are made of and how they are made. Every photograph is the piece itself —
-              nothing is paid on this site.
-            </p>
+            {detail?.images[0] ? (
+              (() => {
+                const heroPhoto = detail.images.find((image) => image.url === settings.heroImage) ?? detail.images[0];
+                return (
+              <figure className="index-hero m-0">
+                <Link href={`/p/${detail.slug}`} className="ph plate relative block aspect-[4/3] w-full" aria-label={pieceTitle(detail.title, detail.categorySlug, detail.attributes, detail.id)}>
+                  <Image
+                    src={heroPhoto.url}
+                    alt={heroPhoto.alt || pieceTitle(detail.title, detail.categorySlug, detail.attributes, detail.id)}
+                    fill
+                    priority
+                    sizes="(min-width: 900px) 40vw, 94vw"
+                    placeholder={heroPhoto.blurData ? "blur" : "empty"}
+                    blurDataURL={heroPhoto.blurData ?? undefined}
+                    className="object-contain p-3"
+                  />
+                </Link>
+                <figcaption className="idx-meta mt-2">
+                  <Link href={`/p/${detail.slug}`} className="cap-line">{pieceTitle(detail.title, detail.categorySlug, detail.attributes, detail.id)}</Link>
+                  <span> — in the studio</span>
+                </figcaption>
+              </figure>
+                );
+              })()
+            ) : null}
           </div>
           {entries.length || allEntry ? (
-            <ol className="idx">
+            <ol className="idx" id="index-list">
               {entries.map((entry, index) => (
                 <IndexRow key={entry.id} entry={entry} index={index} />
               ))}
@@ -194,7 +223,6 @@ async function Home({
         ask →
       </a>
 
-      <MotionScan />
     </main>
   );
 }

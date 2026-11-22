@@ -20,7 +20,7 @@ const fixtureFiles = [smallFile, bigFile];
 let smallPhoto: Buffer;
 
 test.describe.configure({ mode: "serial" });
-test.skip(!e2eDbIsolated(), "DATABASE_URL is not confirmed isolated — set E2E_ISOLATED_DB=1 or use a local database");
+test.skip(!e2eDbIsolated(), "DATABASE_URL is not confirmed isolated — set E2E_ISOLATED=1 and E2E_DATABASE_URL to a test branch");
 
 test.beforeAll(async () => {
   const sql = neon(process.env.DATABASE_URL ?? "");
@@ -28,7 +28,6 @@ test.beforeAll(async () => {
   await sql`delete from product_versions where product_id in (select id from products where title = any(${fixtureTitles}) or attributes->>'originalFile' = any(${fixtureFiles}))`;
   await sql`delete from products where title = any(${fixtureTitles}) or attributes->>'originalFile' = any(${fixtureFiles})`;
   await sql`delete from enquiries where name = 'Test buyer'`;
-  await sql`delete from rate_limits where bucket like 'enquiry:%'`;
   await sql`delete from sessions where email = ${adminEmail}`;
   await sql`insert into admin_users (email, role, password_hash) values (${adminEmail}, 'owner', ${await hashPassword(adminPassword)})
     on conflict (email) do update set password_hash = excluded.password_hash, failed_attempts = 0, locked_until = null`;
@@ -63,19 +62,18 @@ test.afterAll(async () => {
   await sql`delete from enquiries where name = 'Test buyer'`;
   await sql`delete from sessions where email = ${adminEmail}`;
   await sql`delete from admin_users where email = ${adminEmail}`;
-  await sql`update site_settings set value = jsonb_set(value, '{whatsapp}', '""'::jsonb, true) where key = 'shop'`;
 });
 
 test("home, redirects, category routes, and a missing page", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1, name: /material index/i })).toBeVisible();
+  await expect(page.locator("#index-title").first()).toBeVisible();
   // The index opens on category links — no hero scroll — and All pieces is one of them.
   await expect(page.locator('.idx a[href="/category/all"]')).toBeVisible();
   for (const old of ["/shop", "/studio", "/about", "/visit", "/sold", "/saved", "/search"]) {
     await page.goto(old);
     await expect(page).toHaveURL(/\/$/);
-    await expect(page.getByRole("heading", { name: /material index/i })).toBeVisible();
+    await expect(page.locator("#index-title").first()).toBeVisible();
   }
   // /category/all lists only public pieces; unknown slugs are 404.
   await page.goto("/category/all");
@@ -108,7 +106,7 @@ test("owner signs in with a password, prices, publishes, hides, undoes, and shar
   await page.getByRole("link", { name: "My pieces", exact: true }).click();
   await page.getByRole("link", { name: title }).click();
   await expect(page.getByRole("heading", { name: "Edit this piece" })).toBeVisible();
-  await page.getByLabel("Price in dollars").fill("40");
+  await page.getByLabel("Price in US dollars").fill("40");
   await page.getByRole("button", { name: "Save piece" }).click();
   await expect(page.getByRole("status")).toContainText("Saved");
   await page.getByRole("button", { name: "Put on the site" }).click();
@@ -150,7 +148,7 @@ test("owner signs in with a password, prices, publishes, hides, undoes, and shar
 });
 
 test("photo upload makes a private draft that publishes through review", async ({ page }) => {
-  test.skip(!process.env.BLOB_READ_WRITE_TOKEN, "Needs a Blob token");
+  test.skip(!process.env.E2E_BLOB_READ_WRITE_TOKEN, "Needs E2E_BLOB_READ_WRITE_TOKEN for a separate test Blob store");
   await page.goto(`/${process.env.ADMIN_PATH}`);
   await page.getByLabel("Email").fill(adminEmail);
   await page.getByLabel("Password").fill(adminPassword);

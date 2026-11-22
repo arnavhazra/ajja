@@ -11,7 +11,7 @@ export function PhotoManager({
   images,
   heroImage,
 }: {
-  product: { id: string; title: string; attributes?: Record<string, unknown> };
+  product: { id: string; title: string; status: string; attributes?: Record<string, unknown> };
   images: Image[];
   heroImage: string;
 }) {
@@ -44,11 +44,11 @@ export function PhotoManager({
               <form action={moveImage}>
                 <input type="hidden" name="imageId" value={image.id} />
                 <input type="hidden" name="direction" value="down" />
-                <button className="btn btn-quiet min-h-11 px-3 text-xs" type="submit" disabled={index === images.length - 1}>
+                <button className="btn btn-quiet min-h-11 px-3 text-xs" type="submit" disabled={index === originals.length - 1}>
                   Move down
                 </button>
               </form>
-              <DragPhoto id={image.id} productId={product.id} ids={images.map((item) => item.id)} />
+              <DragPhoto id={image.id} productId={product.id} ids={originals.map((item) => item.id)} />
               {index !== 0 ? (
                 <form action={coverImage}>
                   <input type="hidden" name="imageId" value={image.id} />
@@ -63,12 +63,16 @@ export function PhotoManager({
                   Turn 90°
                 </button>
               </form>
-              <form action={setAsHeroImage}>
-                <input type="hidden" name="imageId" value={image.id} />
-                <button className="btn btn-secondary min-h-11 px-3 text-xs" type="submit">
-                  {heroImage === image.url ? "★ Refresh hero" : "Set as homepage hero"}
-                </button>
-              </form>
+              {product.status === "published" ? (
+                <form action={setAsHeroImage}>
+                  <input type="hidden" name="imageId" value={image.id} />
+                  <button className="btn btn-secondary min-h-11 px-3 text-xs" type="submit">
+                    {heroImage === image.url ? "★ Refresh hero" : "Set as homepage hero"}
+                  </button>
+                </form>
+              ) : (
+                <span className="desk-note inline-flex min-h-11 items-center text-xs">Put this piece on the site first to use it on the home page.</span>
+              )}
             </div>
           </div>
 
@@ -91,32 +95,36 @@ export function PhotoManager({
             </form>
 
             <div className="flex flex-col justify-between rounded-sm border border-line bg-wall-deep/40 p-4">
-              <form action={cropImage} className="grid gap-3">
-                <input type="hidden" name="imageId" value={image.id} />
-                <p className="text-sm font-semibold">Fine crop margins</p>
-                <p className="caption text-xs">Trim edges in percent (0–100).</p>
+              <details>
+                <summary className="inline-flex min-h-12 cursor-pointer items-center text-sm font-semibold">
+                  Trim photo edges (optional)
+                </summary>
+                <form action={cropImage} className="mt-2 grid gap-3">
+                  <input type="hidden" name="imageId" value={image.id} />
+                  <p className="caption text-xs">Trim edges in percent (0–100).</p>
                 <div className="grid grid-cols-2 gap-2">
                   <label className="grid gap-1 text-xs">
                     Left %
-                    <input className="field h-9 text-xs" name="left" inputMode="numeric" defaultValue="0" />
+                    <input className="field min-h-12 text-xs" name="left" inputMode="numeric" defaultValue="0" />
                   </label>
                   <label className="grid gap-1 text-xs">
                     Top %
-                    <input className="field h-9 text-xs" name="top" inputMode="numeric" defaultValue="0" />
+                    <input className="field min-h-12 text-xs" name="top" inputMode="numeric" defaultValue="0" />
                   </label>
                   <label className="grid gap-1 text-xs">
                     Width %
-                    <input className="field h-9 text-xs" name="width" inputMode="numeric" defaultValue="100" />
+                    <input className="field min-h-12 text-xs" name="width" inputMode="numeric" defaultValue="100" />
                   </label>
                   <label className="grid gap-1 text-xs">
                     Height %
-                    <input className="field h-9 text-xs" name="height" inputMode="numeric" defaultValue="100" />
+                    <input className="field min-h-12 text-xs" name="height" inputMode="numeric" defaultValue="100" />
                   </label>
                 </div>
-                <button className="btn btn-quiet mt-2" type="submit">
-                  Apply crop
-                </button>
-              </form>
+                  <button className="btn btn-quiet mt-2" type="submit">
+                    Apply crop
+                  </button>
+                </form>
+              </details>
             </div>
           </div>
 

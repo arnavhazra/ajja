@@ -15,14 +15,17 @@ export async function DeskNav({ email }: { email: string }) {
         ["/add", "Add a piece"],
         ["/pieces", "My pieces"],
         ["/messages", "Messages", counts.waiting],
+        ["/help", "Help"],
       ],
     },
     {
       title: "More",
       links: [
+        ["/review", "Review drafts"],
         ["/groups", "Groups"],
         ["/insights", "Numbers"],
         ["/files", "Files"],
+        ["/history", "History"],
         ["/settings", "Settings"],
       ],
     },
@@ -33,16 +36,9 @@ export async function DeskNav({ email }: { email: string }) {
         <p className="display text-3xl">
           {brand.name} <span className="desk-tag">Desk</span>
         </p>
-        <Link className="desk-link desk-view" href="/" target="_blank" rel="noreferrer">
-          View the shop
-        </Link>
-      </div>
-      <DeskNavLinks prefix={prefix} sections={sections} />
-      <div className="desk-foot">
-        <p className="desk-signed-in truncate text-sm text-tar-soft">{email}</p>
-        <div className="flex flex-wrap gap-2">
-          <Link className="btn btn-secondary min-h-11 px-4 text-sm" href={`${prefix}/help`}>
-            Help
+        <div className="flex flex-wrap items-center gap-2">
+          <Link className="desk-link desk-view" href="/" target="_blank" rel="noreferrer">
+            View the shop
           </Link>
           <form action={leaveDesk}>
             <button className="btn btn-quiet min-h-11 px-4 text-sm" type="submit">
@@ -50,6 +46,10 @@ export async function DeskNav({ email }: { email: string }) {
             </button>
           </form>
         </div>
+      </div>
+      <DeskNavLinks prefix={prefix} sections={sections} />
+      <div className="desk-foot">
+        <p className="desk-signed-in truncate text-sm text-tar-soft">{email}</p>
       </div>
     </header>
   );

@@ -23,7 +23,7 @@ async function uploadOne(file: File, signal: AbortSignal, onProgress: (pct: numb
   });
 }
 
-export function PhotoUpload({ productId }: { productId?: string }) {
+export function PhotoUpload({ productId, prefix = "" }: { productId?: string; prefix?: string }) {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [grouped, setGrouped] = useState(false);
@@ -80,9 +80,9 @@ export function PhotoUpload({ productId }: { productId?: string }) {
       }
       setStatus("Done.");
       if (ids.length === 1) {
-        window.location.assign(new URL(`add?piece=${ids[0]}`, window.location.href).toString());
+        window.location.assign(new URL(`${prefix}/add?piece=${ids[0]}`, window.location.origin).toString());
       } else {
-        window.location.assign(new URL("pieces?status=draft", window.location.href).toString());
+        window.location.assign(new URL(`${prefix}/pieces?status=draft`, window.location.origin).toString());
       }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "The photo did not upload.");
@@ -92,24 +92,27 @@ export function PhotoUpload({ productId }: { productId?: string }) {
   }
 
   return (
-    <div className="grid max-w-xl gap-2">
-      <label className="grid gap-2">
-        Choose photos
+    <div className="grid max-w-xl gap-3">
+      <label className="upload-card">
         <input
-          className="field"
+          className="upload-input"
           type="file"
           multiple
           accept="image/jpeg,image/png,image/webp,image/heic,.heic"
           onChange={(event) => void onChange(event)}
         />
+        <span>Choose photo from this device</span>
       </label>
       {!productId ? (
-        <label className="flex min-h-11 items-center gap-2 text-sm text-tar-soft">
-          <input type="checkbox" checked={grouped} onChange={(e) => setGrouped(e.target.checked)} />
-          Put all of these photos on one piece
-        </label>
+        <details className="desk-note">
+          <summary className="inline-flex min-h-11 cursor-pointer items-center">Adding several photos at once?</summary>
+          <label className="flex min-h-11 items-center gap-2 text-sm text-tar-soft">
+            <input type="checkbox" checked={grouped} onChange={(e) => setGrouped(e.target.checked)} />
+            Put all of these photos on one piece
+          </label>
+          <p>{grouped ? "One piece, several photos." : "One piece per photo."}</p>
+        </details>
       ) : null}
-      {!productId ? <p className="desk-note">{grouped ? "One piece, several photos." : "One piece per photo."}</p> : null}
       {status ? <p role="status">{status}</p> : null}
       {error ? <p role="alert">{error}</p> : null}
     </div>

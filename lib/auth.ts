@@ -39,6 +39,7 @@ async function writeCookie(id: string, expires: Date) {
   });
 }
 
+// Strictly read-only — a Server Component render may not write cookies.
 export async function getSession() {
   const jar = await cookies();
   const id = jar.get(SESSION_COOKIE)?.value;
@@ -46,12 +47,6 @@ export async function getSession() {
   const db = getDb();
   const [session] = await db.select().from(sessions).where(eq(sessions.id, id)).limit(1);
   if (!session || session.expiresAt.getTime() < Date.now()) return null;
-  if (session.expiresAt.getTime() - Date.now() < 25 * 24 * 60 * 60 * 1000) {
-    const expiresAt = new Date(Date.now() + MONTH * 1000);
-    await db.update(sessions).set({ expiresAt }).where(eq(sessions.id, session.id));
-    await writeCookie(session.id, expiresAt);
-    return { ...session, expiresAt };
-  }
   return session;
 }
 

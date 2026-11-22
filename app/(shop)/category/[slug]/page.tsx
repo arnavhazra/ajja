@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { JsonLd } from "@/components/json-ld";
-import { MotionScan } from "@/components/motion-scan";
 import { PieceCard } from "@/components/shop/piece-card";
 import { orderForIndex } from "@/lib/category-index";
 import { loadCategory, loadCategoryPieces, loadManifest } from "@/lib/public-data";
@@ -114,7 +113,6 @@ async function CategoryBody({ params }: { params: Promise<Params> }) {
           <p className="type py-10 text-tar-soft">Nothing public in this art form yet — ask the studio what is in progress.</p>
         )}
       </div>
-      <MotionScan />
     </main>
   );
 }

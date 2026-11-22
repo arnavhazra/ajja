@@ -95,37 +95,42 @@ async function Pieces({ searchParams }: { searchParams: Promise<Record<string, s
         <h1 className="text-4xl">Pieces</h1>
         <p className="desk-note">Search, change a name, price, group, or status right here — changes save when you leave the field.</p>
       </div>
+      <nav className="flex flex-wrap gap-2" aria-label="Which pieces to show">
+        {[
+          { label: "All", extra: { status: "", trash: "" }, active: !trash && !one(params.status) },
+          { label: "Drafts", extra: { status: "draft", trash: "" }, active: !trash && one(params.status) === "draft" },
+          { label: "On the site", extra: { status: "published", trash: "" }, active: !trash && one(params.status) === "published" },
+          { label: "Sold", extra: { status: "sold", trash: "" }, active: !trash && one(params.status) === "sold" },
+          { label: "Hidden", extra: { status: "hidden", trash: "" }, active: !trash && one(params.status) === "hidden" },
+          { label: "Trash", extra: { status: "", trash: "1" }, active: trash },
+        ].map((tab) => (
+          <Link key={tab.label} className="desk-link desk-view min-h-12" aria-current={tab.active ? "page" : undefined} href={href(tab.extra)}>
+            {tab.label}
+          </Link>
+        ))}
+      </nav>
       <form className="flex flex-wrap items-end gap-2" method="get">
         <label className="grid gap-1">
           Search
           <input className="field" name="q" defaultValue={one(params.q)} />
         </label>
-        <label className="grid gap-1">
-          Status
-          <select className="field" name="status" defaultValue={one(params.status)}>
-            <option value="">Any</option>
-            <option value="draft">Draft</option>
-            <option value="scheduled">Scheduled</option>
-            <option value="published">On the site</option>
-            <option value="sold">Sold</option>
-            <option value="hidden">Hidden</option>
-          </select>
-        </label>
+        {one(params.status) ? <input type="hidden" name="status" value={one(params.status)} /> : null}
         {need ? <input type="hidden" name="need" value={need} /> : null}
+        {trash ? <input type="hidden" name="trash" value="1" /> : null}
         <button className="btn btn-primary self-end" type="submit">
-          Show
+          Search
         </button>
-        <Link className="btn btn-quiet self-end" href={trash ? `${prefix}/pieces` : `${prefix}/pieces?trash=1`}>
-          {trash ? "Back to pieces" : "Trash"}
-        </Link>
-        {trash ? (
+      </form>
+      {trash ? (
+        <>
+          <p className="desk-note">Anything in the trash can be restored for 30 days.</p>
           <form action={emptyTrash} className="self-end">
             <button className="btn btn-secondary" type="submit">
               Empty trash older than 30 days
             </button>
           </form>
-        ) : null}
-      </form>
+        </>
+      ) : null}
       {!trash ? (
         <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Show pieces that need something">
           <span className="text-sm text-tar-soft">Needs:</span>

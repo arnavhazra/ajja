@@ -33,8 +33,8 @@ export const viewport: Viewport = {
   viewportFit: "cover",
   interactiveWidget: "resizes-content",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F6F0E5" },
-    { media: "(prefers-color-scheme: dark)", color: "#241C15" },
+    { media: "(prefers-color-scheme: light)", color: "#f3ede2" },
+    { media: "(prefers-color-scheme: dark)", color: "#221b15" },
   ],
 };
 
@@ -52,7 +52,7 @@ export function generateMetadata(): Metadata {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-scroll-behavior="smooth" className={`${display.variable} ${reader.variable} ${ledger.variable} scroll-smooth h-full`}>
+    <html lang="en" className={`${display.variable} ${reader.variable} ${ledger.variable} h-full`}>
       <body className="flex min-h-dvh flex-col bg-wall font-sans text-tar antialiased">
         <nav aria-label="Skip links">
           <a className="skip-link" href="#content">

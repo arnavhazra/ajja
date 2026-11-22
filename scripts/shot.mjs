@@ -28,6 +28,8 @@ for (const [label, viewport] of [
     window.scrollTo(0, 0);
   }).catch(() => {});
   await page.waitForLoadState("networkidle").catch(() => {});
+  // Give the real piece photograph a beat to paint before the shot.
+  await page.waitForSelector("main img, article img", { timeout: 15_000 }).catch(() => {});
   await page.waitForTimeout(1200);
   await page.screenshot({ path: `${dir}/${name}-${label}.png`, fullPage: full });
   await page.close();

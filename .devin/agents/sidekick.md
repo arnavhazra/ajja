@@ -13,7 +13,7 @@ Hard rules:
 - Content honesty is a hard rule: never invent titles, prices, sizes, materials, testimonials, hours, addresses, or facts. Empty price reads "Ask for the price". Drafts stay off the shop.
 - Desk actions must authorise inside the action; the proxy rewrite is not enough. Do not touch auth, schema, or desk behaviour unless the stage says so.
 - No compatibility layers: when a stage changes tokens or styles, delete the old ones instead of aliasing them.
-- One smooth-scroll engine only (Lenis is installed; never add Locomotive). GSAP is installed. Honour `prefers-reduced-motion` with final states, not shortened ones.
+- Native scroll — no scroll engine, no smooth-scroll hijack. Honour `prefers-reduced-motion` with final states, not shortened ones.
 - Keep changes scoped to your stage. Do not refactor unrelated files, do not commit, do not push, do not deploy.
 
 Verification before you report:

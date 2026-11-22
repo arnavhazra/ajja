@@ -29,8 +29,11 @@ desk and older components keep working.
 
 ## Typography
 
-- Display and UI: Bricolage Grotesque (`--font-display`), heavy and tightly
-  tracked for headlines (`.disp`, `.display`, `.word`).
+- Editorial headings: Newsreader (`--font-reader`), weight 500, mixed case,
+  tight tracking (`.disp`, `.display`, `.display-wide`) — the Verandah Index
+  catalogue voice.
+- UI, navigation, buttons, numerals: Bricolage Grotesque (`--font-display`),
+  weight 600, sentence case.
 - Prose and captions: Newsreader (`--font-reader`), italic for captions
   (`.caption`, `.tag`, `.kicker`, `.type`, `.prose`).
 - Prices and counts use tabular numbers (`.nums`).

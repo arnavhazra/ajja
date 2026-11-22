@@ -69,11 +69,12 @@ export function DraftAboutForm({
       <label className="grid gap-1">
         Name
         <input className="field" name="title" defaultValue={piece.title} required maxLength={160} />
+        <span className="desk-note text-sm">Write a name, or write Untitled.</span>
       </label>
       <label className="grid gap-1">
-        One art form
+        Kind of work
         <select className="field" name="categoryId" defaultValue={piece.categoryId}>
-          <option value="">No art form yet</option>
+          <option value="">Choose later</option>
           {groups.map((group) => (
             <option key={group.id} value={group.id}>
               {group.name}
@@ -82,12 +83,13 @@ export function DraftAboutForm({
         </select>
       </label>
       <label className="grid gap-1">
-        Description, optional
+        Words about this piece (optional)
         <textarea className="field" name="description" defaultValue={piece.description} maxLength={5000} />
       </label>
       <label className="grid gap-1">
-        Price in dollars, optional
+        Price in US dollars (optional)
         <input className="field" name="price" inputMode="decimal" defaultValue={piece.price} />
+        <span className="desk-note text-sm">Leave blank if people should ask.</span>
       </label>
       {error ? (
         <p role="alert" ref={alertRef} tabIndex={-1} className="desk-note border-l-4 border-sold text-sold">
@@ -99,7 +101,7 @@ export function DraftAboutForm({
           {pending ? "Saving…" : error ? "Retry — save and continue" : "Save and continue"}
         </button>
         <button className="btn btn-secondary" type="button" disabled={pending} onClick={() => submit("leave")}>
-          Save and leave
+          Keep as private draft
         </button>
       </div>
     </form>

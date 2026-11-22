@@ -9,6 +9,7 @@ import { publishPiece } from "@/lib/desk-actions";
 import { loadDeskPiece, loadDeskPieces, requireDesk } from "@/lib/desk-data";
 import { deskPrefix } from "@/lib/desk-path";
 import { formatMoney } from "@/lib/money";
+import { canPublishPiece } from "@/lib/piece-readiness";
 import { pieceKind, pieceTitle } from "@/lib/piece-title";
 
 // after()-scheduled photo tidy can outlive the response; give it room.
@@ -71,7 +72,7 @@ async function Photo({ prefix, note }: { prefix: string; note: string }) {
           JPEG, PNG, WebP, or HEIC, up to 15 MB.
         </p>
       </div>
-      <PhotoUpload />
+      <PhotoUpload prefix={prefix} />
       {drafts.length ? (
         <section className="grid gap-3">
           <h2 className="text-2xl">Continue a draft</h2>
@@ -154,6 +155,7 @@ async function Review({
   const kind = pieceKind(groupName, attributes);
   const price = formatMoney(product.priceMinor, product.currency);
   const cover = images[0];
+  const gate = canPublishPiece(product, images.length);
 
   return (
     <main className="desk-page max-w-3xl">
@@ -191,11 +193,19 @@ async function Review({
           ) : null}
         </div>
       </section>
+      {!gate.ok ? (
+        <p className="desk-note border-l-4 border-sap bg-wall-deep px-4 py-3">
+          {gate.reason}{" "}
+          <Link className="ink-link" href={`${prefix}/add?piece=${product.id}`}>
+            Back to About this piece
+          </Link>
+        </p>
+      ) : null}
       <div className="flex flex-wrap items-center gap-3">
         <form action={publishPiece}>
           <input type="hidden" name="id" value={product.id} />
           <input type="hidden" name="back" value="/pieces" />
-          <button className="btn btn-primary" type="submit">
+          <button className="btn btn-primary" type="submit" disabled={!gate.ok}>
             Show on site
           </button>
         </form>
@@ -203,7 +213,7 @@ async function Review({
           Back to about
         </Link>
         <Link className="btn btn-quiet" href={`${prefix}/pieces`}>
-          Save and leave
+          Keep as private draft
         </Link>
       </div>
     </main>

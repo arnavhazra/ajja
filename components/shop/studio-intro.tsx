@@ -27,18 +27,18 @@ export function StudioIntro({ settings, detail }: { settings: ShopSettings; deta
         </div>
         <dl className="honesty">
           <div>
-            <b>Where</b>
-            <span>
+            <dt>Where</dt>
+            <dd>
               {settings.town}, {settings.region}
-            </span>
+            </dd>
           </div>
           <div>
-            <b>Visiting</b>
-            <span>By appointment</span>
+            <dt>Visiting</dt>
+            <dd>By appointment</dd>
           </div>
           <div>
-            <b>Payment</b>
-            <span>{settings.paymentNote}</span>
+            <dt>Payment</dt>
+            <dd>{settings.paymentNote}</dd>
           </div>
         </dl>
       </div>
@@ -57,7 +57,7 @@ export function StudioIntro({ settings, detail }: { settings: ShopSettings; deta
               style={{ objectPosition: `${(photo?.focalX ?? 0.5) * 100}% ${(photo?.focalY ?? 0.5) * 100}%` }}
             />
           </div>
-          {detail ? (
+          {!settings.ownerPhoto && detail ? (
             <figcaption className="cap">
               <span className="tick" aria-hidden="true" style={{ background: detail.pigment }} />
               No. {pieceRef(detail.id)}

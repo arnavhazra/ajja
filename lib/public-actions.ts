@@ -1,9 +1,10 @@
 "use server";
 
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import { headers } from "next/headers";
 import { enquirySchema } from "./schemas";
 import { getDb } from "./db";
-import { auditLog, enquiries } from "./db/schema";
+import { auditLog, enquiries, products } from "./db/schema";
 import { allowRate } from "./rate-limit";
 import { dayHash } from "./day-hash";
 import { getSettings } from "./public-data";
@@ -30,9 +31,19 @@ export async function sendEnquiry(_state: { ok: boolean; message: string }, form
   const hash = dayHash(ip, headerList.get("user-agent") ?? "", process.env.SESSION_SECRET ?? "ajja");
   const allowed = await allowRate(`enquiry:${hash}`, 5, 60 * 60);
   if (!allowed) return { ok: false, message: "Too many messages from this device. Try again later." };
-  const productId = parsed.data.productId && parsed.data.productId.length > 10 ? parsed.data.productId : null;
+  // Keep the product link only when the piece is publicly listed — a hidden,
+  // trashed, or made-up id must not attach a private piece to an enquiry.
+  let productId = parsed.data.productId && parsed.data.productId.length > 10 ? parsed.data.productId : null;
   const message = parsed.data.subject ? `${parsed.data.subject}\n\n${parsed.data.message}` : parsed.data.message;
   const db = getDb();
+  if (productId) {
+    const [row] = await db
+      .select({ id: products.id })
+      .from(products)
+      .where(and(eq(products.id, productId), isNull(products.deletedAt), inArray(products.status, ["published", "sold"])))
+      .limit(1);
+    if (!row) productId = null;
+  }
   await db.insert(enquiries).values({
     productId,
     name: parsed.data.name,
@@ -43,7 +54,11 @@ export async function sendEnquiry(_state: { ok: boolean; message: string }, form
     bulk: parsed.data.bulk,
   });
   await db.insert(auditLog).values({ action: "New message", entity: "enquiry", entityId: productId, meta: {} });
-  await notifyOwner(parsed.data.name, parsed.data.contact, parsed.data.message);
+  try {
+    await notifyOwner(parsed.data.name, parsed.data.contact, parsed.data.message);
+  } catch (error) {
+    console.error("Owner email notification failed", error instanceof Error ? error.message : "unknown");
+  }
   return { ok: true, message: "Message saved. The studio will read it." };
 }
 
@@ -56,6 +71,7 @@ async function notifyOwner(name: string, contact: string, message: string) {
   if (!to) return;
   await fetch("https://api.resend.com/emails", {
     method: "POST",
+    signal: AbortSignal.timeout(5000),
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       from,

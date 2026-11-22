@@ -1,43 +1,46 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 import type { PublicImage } from "@/lib/types";
-import { MacroLoupeImage } from "./macro-loupe";
 
 /**
- * Large photograph with 2.6x Optical Macro Loupe, thumbnails,
- * and a full-screen view where pointer/drag navigates fine pigment detail.
+ * The whole photograph, fit-contained on its plate, with thumbnails and a
+ * native <dialog> full-screen view. No hover gimmicks — the work stands.
  */
 export function PieceViewer({ images, title }: { images: PublicImage[]; title: string }) {
   const [index, setIndex] = useState(0);
-  const [origin, setOrigin] = useState({ x: 50, y: 50 });
   const dialogRef = useRef<HTMLDialogElement>(null);
   const image = images[index];
-
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (!dialogRef.current?.open || images.length < 2) return;
-      if (event.key === "ArrowRight") setIndex((i) => (i + 1) % images.length);
-      if (event.key === "ArrowLeft") setIndex((i) => (i - 1 + images.length) % images.length);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [images.length]);
 
   if (!image) return <div className="plate aspect-[4/5] w-full" />;
   const ratio = image.width && image.height ? `${image.width} / ${image.height}` : "4 / 5";
 
   return (
     <div className="grid gap-3">
-      <MacroLoupeImage
-        image={image}
-        title={title}
-        ratio={ratio}
-        priority={index === 0}
-        onOpenDialog={() => dialogRef.current?.showModal()}
-      />
+      <figure className="plate relative m-0" style={{ aspectRatio: ratio }}>
+        <Image
+          key={image.id}
+          src={image.url}
+          alt={image.alt || title}
+          fill
+          sizes="(min-width: 768px) 58vw, 100vw"
+          priority={index === 0}
+          placeholder={image.blurData ? "blur" : "empty"}
+          blurDataURL={image.blurData ?? undefined}
+          className="photo-dissolve object-contain p-3"
+        />
+      </figure>
+
+      <button
+        type="button"
+        className="btn btn-quiet w-fit min-h-11 cursor-pointer"
+        aria-label="View full screen"
+        onClick={() => dialogRef.current?.showModal()}
+      >
+        View full screen
+      </button>
 
       {images.length > 1 ? (
         <ul className="no-scrollbar flex gap-2 overflow-x-auto pt-1" aria-label="Photographs">
@@ -69,26 +72,7 @@ export function PieceViewer({ images, title }: { images: PublicImage[]; title: s
         }}
       >
         <div className="relative size-full">
-          <div
-            className="absolute inset-0 cursor-zoom-out overflow-hidden"
-            onPointerMove={(event) => {
-              const rect = event.currentTarget.getBoundingClientRect();
-              setOrigin({
-                x: ((event.clientX - rect.left) / rect.width) * 100,
-                y: ((event.clientY - rect.top) / rect.height) * 100,
-              });
-            }}
-            onClick={() => dialogRef.current?.close()}
-          >
-            <Image
-              src={image.url}
-              alt={image.alt || title}
-              fill
-              sizes="100vw"
-              className="object-contain transition-transform duration-300 ease-out md:scale-[1.6]"
-              style={{ transformOrigin: `${origin.x}% ${origin.y}%` }}
-            />
-          </div>
+          <Image src={image.url} alt={image.alt || title} fill sizes="100vw" className="object-contain" />
           <div className="safe-bottom pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 p-4">
             <p className="pointer-events-auto rounded-full bg-vat/70 px-4 py-2 text-sm backdrop-blur">
               {title}

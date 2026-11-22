@@ -9,19 +9,19 @@
   Build stamp: material-index-1 (change this line to force a stylesheet rebuild).
 */
 :root {
-  --gesso: #f6f0e5;
-  --plate: #e6dac7;
-  --plate-deep: #d5c6ac;
-  --jackwood: #30261e;
-  --jackwood-soft: #66594a;
+  --gesso: #f3ede2;
+  --plate: #e6dccb;
+  --plate-deep: #d8cbb6;
+  --jackwood: #2c221b;
+  --jackwood-soft: #635548;
   --laterite: #894636;
-  --laterite-deep: #6f3628;
+  --laterite-deep: #6e3527;
   --cobalt: #28489c;
   --pigment: var(--laterite); /* default accent; each piece/section overrides inline */
   --pigment-ink: #f6f0e5;
   --line: rgba(48, 38, 30, 0.18);
   --line-strong: rgba(48, 38, 30, 0.45);
-  --vat: #241b13;
+  --vat: #211913;
   --vat-ink: #e9dfcc;
   --vat-soft: #a79a80;
   --ok: #42603f;
@@ -174,28 +174,25 @@ img {
 /* ---------- Type voices ---------- */
 /* Bricolage Grotesque — the display voice, headings and UI. */
 .disp {
-  font-family: var(--font-display), "Bricolage Grotesque", sans-serif;
+  font-family: var(--font-reader), "Newsreader", Georgia, serif;
   font-optical-sizing: auto;
-  font-weight: 800;
-  text-transform: uppercase;
-  line-height: 0.92;
-  letter-spacing: -0.015em;
+  font-weight: 500;
+  line-height: 1.06;
+  letter-spacing: -0.02em;
 }
 .display {
-  font-family: var(--font-display), "Bricolage Grotesque", sans-serif;
+  font-family: var(--font-reader), "Newsreader", Georgia, serif;
   font-optical-sizing: auto;
-  font-weight: 800;
-  text-transform: uppercase;
-  line-height: 0.95;
-  letter-spacing: -0.01em;
+  font-weight: 500;
+  line-height: 1.06;
+  letter-spacing: -0.02em;
 }
 .display-wide {
-  font-family: var(--font-display), "Bricolage Grotesque", sans-serif;
+  font-family: var(--font-reader), "Newsreader", Georgia, serif;
   font-optical-sizing: auto;
-  font-weight: 700;
-  text-transform: uppercase;
-  line-height: 1;
-  letter-spacing: 0;
+  font-weight: 500;
+  line-height: 1.06;
+  letter-spacing: -0.02em;
 }
 /* Newsreader — captions, notes, and prose. */
 .type {
@@ -372,18 +369,23 @@ section[id] { scroll-margin-top: 78px; }
 
 /* ---------- The material index ---------- */
 .index-head {
-  padding: clamp(22px, 4vh, 44px) 0 clamp(16px, 3vh, 28px);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: clamp(18px, 3vw, 40px);
+  row-gap: 28px;
+  align-items: end;
 }
+.index-head > div { grid-column: 1 / 8; }
+.index-hero { grid-column: 8 / 13; }
+@media (max-width: 899px) {
+  .index-head > div, .index-hero { grid-column: 1 / -1; }
+}
+.index-head { padding: clamp(22px, 4vh, 44px) 0 clamp(16px, 3vh, 28px); }
 .index-head .sub { max-width: 44ch; color: var(--tar-soft); }
-.idx { border-top: 1px solid var(--line-strong); }
+.idx { border-top: 2px solid var(--laterite); box-shadow: 0 -1px 0 var(--line-strong) inset; }
 .idx-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(120px, 18vw);
+  grid-template-columns: minmax(0, 1fr) minmax(160px, min(220px, 22vw));
   gap: clamp(14px, 3vw, 40px);
   align-items: center;
   padding: clamp(18px, 3.4vh, 34px) 0;
@@ -394,12 +396,11 @@ section[id] { scroll-margin-top: 78px; }
 .idx-lead { display: flex; align-items: baseline; gap: clamp(12px, 2vw, 26px); min-width: 0; }
 .idx-num { color: var(--tar-soft); font-variant-numeric: tabular-nums; font-size: 0.95rem; flex: none; }
 .idx-name {
-  font-family: var(--font-display), "Bricolage Grotesque", sans-serif;
-  font-weight: 800;
-  text-transform: uppercase;
-  line-height: 0.95;
-  letter-spacing: -0.01em;
-  font-size: clamp(1.7rem, 4.6vw, 3.4rem);
+  font-family: var(--font-reader), "Newsreader", Georgia, serif;
+  font-weight: 500;
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  font-size: clamp(1.75rem, 3.2vw, 2.75rem);
   transition: color 0.2s;
 }
 .idx-row:hover .idx-name { color: var(--sap); }
@@ -420,7 +421,7 @@ section[id] { scroll-margin-top: 78px; }
   background: var(--wall-deep);
   border: 1px solid var(--line);
 }
-.idx-cover img { object-fit: cover; }
+.idx-cover img { object-fit: contain; }
 .idx-cover-note {
   display: grid;
   place-items: center;
@@ -446,9 +447,11 @@ section[id] { scroll-margin-top: 78px; }
 .sec-head h2 { font-size: clamp(40px, 5.6vw, 88px); }
 .sec-head .sub { max-width: 40ch; color: var(--tar-soft); font-size: 15px; }
 
-.wall { columns: 4; column-gap: clamp(18px, 2vw, 30px); padding-bottom: 10px; }
-.piece { break-inside: avoid; margin: 0 0 clamp(34px, 4.5vh, 58px); }
-.piece .ph { position: relative; display: block; width: 100%; overflow: hidden; background: var(--wall-deep); }
+.wall { display: grid; grid-template-columns: 1fr; column-gap: 2rem; row-gap: 3rem; align-items: start; padding-bottom: 10px; }
+@media (min-width: 640px) { .wall { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .wall { grid-template-columns: repeat(3, 1fr); } }
+.piece { margin: 0; }
+.piece .ph { position: relative; display: block; width: 100%; overflow: hidden; background: var(--wall-deep); padding: 0.75rem; }
 .cap {
   display: flex;
   gap: 10px;
@@ -499,8 +502,8 @@ section[id] { scroll-margin-top: 78px; }
   border-bottom: 1px solid var(--line);
   font-size: 0.95rem;
 }
-.honesty b { font-weight: 700; color: var(--tar); }
-.honesty span { color: var(--tar-soft); }
+.honesty dt { font-weight: 700; color: var(--tar); }
+.honesty dd { margin: 0; color: var(--tar-soft); }
 .bench-photo { position: relative; align-self: start; }
 .bench-photo .ph { aspect-ratio: 1 / 1; width: 100%; background: var(--wall-deep); }
 .bench-photo .cap { font-size: 0.95rem; color: var(--tar-soft); padding: 9px 0 0; }
@@ -536,22 +539,10 @@ section[id] { scroll-margin-top: 78px; }
 
 .note-card {
   background: var(--wall);
-  border: 1px solid var(--line-strong);
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--laterite);
   padding: clamp(20px, 2.6vw, 38px);
-  transform: rotate(-0.4deg);
-  box-shadow: 0 18px 40px -26px rgba(36, 27, 19, 0.5);
   position: relative;
-}
-.note-card::before {
-  content: "";
-  position: absolute;
-  top: -9px;
-  left: 50%;
-  width: 64px;
-  height: 18px;
-  background: var(--pigment);
-  opacity: 0.75;
-  transform: translateX(-50%) rotate(-1.5deg);
 }
 .f-row {
   display: grid;
@@ -759,22 +750,6 @@ details.term > .a { grid-column: 2; }
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
-/* ---------- Scroll reveal: 12px rise + unclip ---------- */
-[data-reveal] {
-  opacity: 0;
-  transform: translateY(12px);
-  clip-path: inset(0 0 8% 0);
-}
-[data-reveal].revealed {
-  opacity: 1;
-  transform: none;
-  clip-path: inset(0 0 0 0);
-  transition:
-    opacity 0.4s var(--ease-out),
-    transform 0.4s var(--ease-out),
-    clip-path 0.4s var(--ease-out);
-  transition-delay: var(--reveal-delay, 0ms);
-}
 
 /* The one sanctioned motion: a 180ms opacity dissolve when the selected
    photograph changes. Reduced motion collapses it to instant below. */
@@ -786,25 +761,20 @@ details.term > .a { grid-column: 2; }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 1180px) {
-  .wall { columns: 3; }
 }
 @media (max-width: 900px) {
-  .wall { columns: 2; }
   .bench, .note-grid { grid-template-columns: 1fr; }
-  .mast-nav { display: none; }
   .foot-top { grid-template-columns: 1fr 1fr; }
   .term { grid-template-columns: 1fr; gap: 6px; }
   .steps { grid-template-columns: 1fr; }
   .step p { max-width: 56ch; }
 }
 @media (max-width: 640px) {
-  .wall { columns: 1; }
   .f-row { grid-template-columns: 1fr; gap: 4px; }
   .foot-top { grid-template-columns: 1fr; }
-  .note-card { transform: none; }
   /* Photograph stacked above the index entry. */
   .idx-row { grid-template-columns: 1fr; gap: 12px; }
-  .idx-cover { order: -1; max-width: 420px; }
+  .idx-cover { order: -1; max-width: 420px; aspect-ratio: 16 / 10; }
 }
 
 /* ---------- View transitions ---------- */

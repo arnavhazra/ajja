@@ -4,7 +4,7 @@ import { Flash, one } from "@/components/desk/flash";
 import { removeTestimonial, saveHome, saveTestimonial } from "@/lib/desk-actions";
 import { loadQuotes, requireDesk } from "@/lib/desk-data";
 import { WEEKDAY_NAMES } from "@/lib/open-now";
-import { getSettings, loadStudio } from "@/lib/public-data";
+import { getSettings, loadManifest } from "@/lib/public-data";
 
 export default function HomeEditorPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   return (
@@ -17,12 +17,18 @@ export default function HomeEditorPage({ searchParams }: { searchParams: Promise
 async function HomeEditor({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   await requireDesk();
   const params = await searchParams;
-  const [settings, quotes, studio] = await Promise.all([getSettings(), loadQuotes(), loadStudio()]);
+  const [settings, quotes, manifest] = await Promise.all([getSettings(), loadQuotes(), loadManifest()]);
   const photos = [
     ...new Map(
-      studio.flatMap((piece) => piece.images.map((image) => [image.url, { url: image.url, label: piece.title.trim() || "Untitled photograph" }] as const)),
+      manifest.flatMap((piece) => piece.images.map((image) => [image.url, { url: image.url, label: piece.title.trim() || "Untitled photograph" }] as const)),
     ).values(),
   ];
+  // The manifest only lists pieces on the site. Keep the currently saved
+  // photographs selectable anyway so saving the page can't silently clear a
+  // portrait or hero that belongs to a draft or an unlisted photo.
+  for (const url of [settings.heroImage, settings.ownerPhoto]) {
+    if (url && !photos.some((photo) => photo.url === url)) photos.push({ url, label: "Current photograph — not listed on the site" });
+  }
   return (
     <main className="desk-page max-w-3xl">
       <Flash note={one(params.note)} undo="" back="/home" />
@@ -78,14 +84,8 @@ async function HomeEditor({ searchParams }: { searchParams: Promise<Record<strin
             ))}
           </select>
         </label>
-        <label className="grid gap-1">
-          Hero focus across, 0 to 1
-          <input className="field" name="heroFocalX" defaultValue={String(settings.heroFocalX)} />
-        </label>
-        <label className="grid gap-1">
-          Hero focus down, 0 to 1
-          <input className="field" name="heroFocalY" defaultValue={String(settings.heroFocalY)} />
-        </label>
+        <input type="hidden" name="heroFocalX" value={String(settings.heroFocalX)} />
+        <input type="hidden" name="heroFocalY" value={String(settings.heroFocalY)} />
         <label className="grid gap-1">
           Your photo
           <select className="field" name="ownerPhoto" defaultValue={settings.ownerPhoto}>
@@ -194,21 +194,8 @@ async function HomeEditor({ searchParams }: { searchParams: Promise<Record<strin
           Returns
           <textarea className="field" name="returns" defaultValue={settings.policies.returns} />
         </label>
-        <label className="grid gap-1">
-          Theme
-          <select className="field" name="theme" defaultValue={settings.theme}>
-            <option value="walnut">Walnut</option>
-            <option value="clay">Clay</option>
-            <option value="ink">Ink</option>
-          </select>
-        </label>
-        <label className="grid gap-1">
-          Headings
-          <select className="field" name="fontPair" defaultValue={settings.fontPair}>
-            <option value="fraunces">Spectral</option>
-            <option value="newsreader">Newsreader</option>
-          </select>
-        </label>
+        <input type="hidden" name="theme" value={settings.theme} />
+        <input type="hidden" name="fontPair" value={settings.fontPair} />
         <label className="flex min-h-12 items-center gap-3">
           <input type="checkbox" name="approved" defaultChecked={!settings.copyNeedsApproval} />
           This wording is approved

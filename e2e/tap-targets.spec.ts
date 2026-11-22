@@ -3,9 +3,9 @@ import { neon } from "@neondatabase/serverless";
 import { hashPassword } from "../lib/password";
 import { e2eDbIsolated } from "./isolated-db";
 
-test.skip(!e2eDbIsolated(), "DATABASE_URL is not confirmed isolated — set E2E_ISOLATED_DB=1 or use a local database");
+test.skip(!e2eDbIsolated(), "DATABASE_URL is not confirmed isolated — set E2E_ISOLATED=1 and E2E_DATABASE_URL to a test branch");
 
-const adminEmail = (process.env.DEV_ADMIN_EMAIL || process.env.OWNER_EMAIL || "e2e-taps@example.test").toLowerCase();
+const adminEmail = "e2e-taps@example.test";
 const adminPassword = "e2e-taps-password-long";
 const title = "Tap Target Piece";
 const slug = "tap-target-piece";
@@ -40,7 +40,7 @@ async function expectBigEnough(locator: ReturnType<import("@playwright/test").Pa
   expect(count, `${context}: no targets found`).toBeGreaterThan(0);
   for (let i = 0; i < count; i += 1) {
     const box = await locator.nth(i).boundingBox();
-    if (!box) continue; // not rendered in this viewport
+    if (!box || (box.height === 0 && box.width === 0)) continue; // not rendered in this viewport
     expect(box.height, `${context} #${i} height ${box.height}`).toBeGreaterThanOrEqual(44);
     expect(box.width, `${context} #${i} width ${box.width}`).toBeGreaterThanOrEqual(44);
   }

@@ -5,12 +5,12 @@ import { neon } from "@neondatabase/serverless";
 import { hashPassword } from "../lib/password";
 import { e2eDbIsolated } from "./isolated-db";
 
-test.skip(!e2eDbIsolated(), "DATABASE_URL is not confirmed isolated — set E2E_ISOLATED_DB=1 or use a local database");
+test.skip(!e2eDbIsolated(), "DATABASE_URL is not confirmed isolated — set E2E_ISOLATED=1 and E2E_DATABASE_URL to a test branch");
 
 const SCREENSHOT_DIR = path.resolve(process.cwd(), "screenshots");
 mkdirSync(SCREENSHOT_DIR, { recursive: true });
 
-const adminEmail = (process.env.DEV_ADMIN_EMAIL || process.env.OWNER_EMAIL || "e2e-desk@example.test").toLowerCase();
+const adminEmail = "e2e-desk@example.test";
 const adminPassword = "e2e-desk-password-long";
 const title = "Visual Audit Specimen";
 const slug = "visual-audit-specimen";

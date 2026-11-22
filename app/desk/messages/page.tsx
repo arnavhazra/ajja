@@ -28,18 +28,16 @@ async function Messages({ searchParams }: { searchParams: Promise<Record<string,
         <p className="desk-note">New, replied, or closed. Old messages are deleted after the number of days you set.</p>
       </div>
       <nav className="flex flex-wrap gap-2" aria-label="Message status">
-        <a className="btn btn-quiet" href="?">
-          All
-        </a>
-        <a className="btn btn-quiet" href="?status=new">
-          New
-        </a>
-        <a className="btn btn-quiet" href="?status=replied">
-          Replied
-        </a>
-        <a className="btn btn-quiet" href="?status=closed">
-          Closed
-        </a>
+        {([
+          ["", "All"],
+          ["new", "New"],
+          ["replied", "Replied"],
+          ["closed", "Closed"],
+        ] as const).map(([key, label]) => (
+          <a key={key} className="btn btn-quiet" aria-current={(status || "") === key ? "page" : undefined} href={key ? `?status=${key}` : "?"}>
+            {label}
+          </a>
+        ))}
         <a className="btn btn-secondary" href="/api/desk/messages">
           Export
         </a>
@@ -57,7 +55,7 @@ async function Messages({ searchParams }: { searchParams: Promise<Record<string,
       <form id="bulk-mark" action={markEnquiries} className="flex flex-wrap items-center gap-2">
         <label className="grid gap-1">
           <span className="field-label">Mark ticked messages</span>
-          <select className="field h-9" name="status" defaultValue="replied">
+          <select className="field min-h-12" name="status" defaultValue="replied">
             <option value="replied">Replied</option>
             <option value="closed">Closed</option>
             <option value="new">New</option>
@@ -72,6 +70,7 @@ async function Messages({ searchParams }: { searchParams: Promise<Record<string,
         {rows.map((row) => {
           const phone = digits(row.contact);
           const href = phone.length >= 10 ? whatsAppHref(phone, `Hello ${row.name}, this is ${settings.businessName}.`) : "";
+          const email = row.contact.includes("@") ? row.contact.trim() : "";
           return (
             <article key={row.id} className="grid gap-2 border-b border-line pb-4">
               <h2 className="flex items-center gap-2 text-2xl">
@@ -91,6 +90,11 @@ async function Messages({ searchParams }: { searchParams: Promise<Record<string,
                 {href ? (
                   <a className="btn btn-primary" href={href}>
                     Reply on WhatsApp
+                  </a>
+                ) : null}
+                {email ? (
+                  <a className="btn btn-primary" href={`mailto:${email}?subject=${encodeURIComponent(`Re: your message to ${settings.businessName}`)}`}>
+                    Reply by email
                   </a>
                 ) : null}
                 <form action={setEnquiryStatus}>
@@ -119,15 +123,18 @@ async function Messages({ searchParams }: { searchParams: Promise<Record<string,
           );
         })}
       </div>
-      <form action={saveRetention} className="grid max-w-sm gap-2">
-        <label className="grid gap-1">
-          Keep messages for this many days
-          <input className="field" name="days" inputMode="numeric" defaultValue={String(settings.enquiryRetentionDays)} />
-        </label>
-        <button className="btn btn-secondary w-fit" type="submit">
-          Save
-        </button>
-      </form>
+      <details className="hairline-box grid max-w-sm gap-2 p-4">
+        <summary className="inline-flex min-h-12 cursor-pointer items-center font-semibold">Message cleanup setting</summary>
+        <form action={saveRetention} className="grid gap-2">
+          <label className="grid gap-1">
+            Keep messages for this many days
+            <input className="field" name="days" inputMode="numeric" defaultValue={String(settings.enquiryRetentionDays)} />
+          </label>
+          <button className="btn btn-secondary w-fit" type="submit">
+            Save
+          </button>
+        </form>
+      </details>
     </main>
   );
 }

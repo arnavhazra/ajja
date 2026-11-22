@@ -6,12 +6,9 @@ import { Suspense } from "react";
 import { EnquiryForm } from "@/components/enquiry-form";
 import { EventBeacon } from "@/components/event-beacon";
 import { JsonLd } from "@/components/json-ld";
-import { MotionScan } from "@/components/motion-scan";
 import { ShareButton } from "@/components/share-button";
 import { PieceCard } from "@/components/shop/piece-card";
 import { PieceViewer } from "@/components/shop/piece-viewer";
-import { DynamicPrice } from "@/components/shop/dynamic-price";
-import { ScaleVisualizer } from "@/components/shop/scale-visualizer";
 import { enquiryPrefillMessage, parsePiecesParam } from "@/lib/folio";
 import { formatMoney } from "@/lib/money";
 import { hasRealTitle, pieceKind, pieceTitle } from "@/lib/piece-title";
@@ -142,9 +139,7 @@ async function ProductBody({
                   {sold ? "Sold" : "In the studio"}
                 </p>
                 <h1 className="display text-[clamp(2.5rem,4.5vw,4.25rem)]">{title}</h1>
-                <p className="nums text-2xl">
-                  <DynamicPrice priceMinor={product.priceMinor} fallback={price ?? "price on asking"} sold={sold} />
-                </p>
+                <p className="nums text-2xl">{sold ? "Sold" : (price ?? "Ask for the price")}</p>
               </div>
             </ViewTransition>
             {product.description || attributes.details ? (
@@ -161,19 +156,9 @@ async function ProductBody({
                 </div>
               ))}
             </dl>
-            {product.images[0] ? (
-              <div data-reveal="">
-                <ScaleVisualizer
-                  image={product.images[0]}
-                  title={title}
-                  sizeText={attributes.size || attributes.dimensions}
-                  kind={kind ?? undefined}
-                />
-              </div>
-            ) : null}
             <div className="flex flex-wrap gap-3" data-reveal="">
               {!sold ? (
-                <a href="#enquire" className="btn btn-pigment">
+                <a href="#enquire" className="btn btn-primary">
                   Ask about this piece
                 </a>
               ) : null}
@@ -213,13 +198,12 @@ async function ProductBody({
       ) : null}
 
       {!sold ? (
-        <div className="safe-bottom fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-line bg-wall/95 p-3 backdrop-blur md:hidden">
-          <a className="btn btn-pigment flex-1 text-center" href="#enquire">
+        <div className="safe-bottom fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-line bg-wall/95 p-3 backdrop-blur md:hidden has-[:target]:hidden">
+          <a className="btn btn-primary flex-1 text-center" href="#enquire">
             Ask about piece
           </a>
         </div>
       ) : null}
-      <MotionScan />
     </main>
   );
 }

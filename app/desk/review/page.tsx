@@ -37,10 +37,7 @@ async function Review({ searchParams }: { searchParams: Promise<Record<string, s
                 fill
                 priority
                 sizes="(max-width: 768px) 100vw, 48rem"
-                className="object-cover"
-                style={{
-                  objectPosition: `${Number(item.images[0].focalX) * 100}% ${Number(item.images[0].focalY) * 100}%`,
-                }}
+                className="object-contain"
               />
             ) : (
               <p>No photo yet</p>
@@ -60,7 +57,7 @@ async function Review({ searchParams }: { searchParams: Promise<Record<string, s
                 className="field text-lg"
                 name="title"
                 defaultValue={item.product.title}
-                placeholder="e.g. Cobalt pour no. 3"
+                placeholder="Write a name, or Untitled"
                 autoFocus
               />
             </label>
@@ -71,7 +68,7 @@ async function Review({ searchParams }: { searchParams: Promise<Record<string, s
                 name="price"
                 defaultValue={minorToDollars(item.product.priceMinor)}
                 inputMode="decimal"
-                placeholder="e.g. 180"
+                placeholder="Leave blank if people should ask"
               />
             </label>
             <div className="flex flex-wrap gap-2">
