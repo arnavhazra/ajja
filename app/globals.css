@@ -597,7 +597,7 @@ section[id] { scroll-margin-top: 78px; }
   font-size: clamp(2rem, 3vw, 3rem);
   line-height: 1;
   color: transparent;
-  -webkit-text-stroke: 1px var(--line-strong);
+  -webkit-text-stroke: 1px var(--jackwood-soft);
 }
 .step:hover .step-num { -webkit-text-stroke-color: var(--sap); }
 .step h3 { font-weight: 700; font-size: 1rem; margin-top: 12px; }
@@ -656,6 +656,7 @@ details.term > .a { grid-column: 2; }
 
 /* Inline piece reference inside a caption. */
 .cap-line { color: var(--tar); font-weight: 600; border-bottom: 1px solid var(--line-strong); padding-bottom: 1px; }
+a.cap-line { display: inline-flex; align-items: center; min-height: 44px; }
 .cap-line:hover { color: var(--sap); border-bottom-color: var(--sap); }
 
 /* Generic field (desk + piece page) */
@@ -701,7 +702,7 @@ details.term > .a { grid-column: 2; }
 .foot-col a { display: flex; align-items: center; min-height: 44px; font-size: 0.95rem; padding: 4px 0; color: var(--vat-ink); }
 .foot-col a:hover { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
 .foot-note p { font-size: 0.95rem; color: var(--vat-ink); max-width: 30ch; }
-.foot-note .map { display: inline-block; margin-top: 12px; border-bottom: 1px solid #6b6756; padding-bottom: 2px; }
+.foot-note .map { display: inline-flex; align-items: center; min-height: 44px; margin-top: 12px; border-bottom: 1px solid #6b6756; padding-bottom: 2px; }
 .foot-bot {
   margin-top: 44px;
   padding-top: 18px;

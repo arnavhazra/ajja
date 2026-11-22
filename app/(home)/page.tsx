@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -12,6 +13,14 @@ import { formatMoney } from "@/lib/money";
 import { pieceTitle } from "@/lib/piece-title";
 import { getSettings, loadCategories, loadManifest, loadSaved } from "@/lib/public-data";
 import { siteUrl } from "@/lib/site-url";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettings();
+  return {
+    title: `${brand.name} — handmade art and woodwork from a family studio in ${settings.town}, ${settings.region}`,
+    alternates: { canonical: "/" },
+  };
+}
 
 function IndexSkeleton() {
   return (
@@ -105,6 +114,9 @@ async function Home({
         })),
         (minor) => formatMoney(minor, saved[0]?.currency ?? "USD"),
       )
+    : undefined;
+  const defaultSubject = saved.length
+    ? `Asking about ${saved.length === 1 ? "a saved piece" : `${saved.length} saved pieces`}`
     : undefined;
 
   const entries = buildIndex(categories, products);
@@ -215,7 +227,7 @@ async function Home({
             <p className="type">A question about a piece, a visit, or something you would like made.</p>
             <p className="comm type">{settings.responseNote || "We write back ourselves — no forms lost to a machine."}</p>
           </div>
-          <CommissionForm responseNote={settings.responseNote} initialMessage={initialMessage} />
+          <CommissionForm responseNote={settings.responseNote} initialMessage={initialMessage} defaultSubject={defaultSubject} />
         </div>
       </section>
 

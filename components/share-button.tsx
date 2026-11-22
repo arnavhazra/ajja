@@ -6,7 +6,7 @@ export function ShareButton({ label }: { label: string }) {
   const [note, setNote] = useState("");
 
   async function share() {
-    const url = window.location.href;
+    const url = `${window.location.origin}${window.location.pathname}`;
     const data = { title: label, text: label, url };
     try {
       if (navigator.share) {

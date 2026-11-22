@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ViewTransition, type CSSProperties, type MouseEvent } from "react";
 import { cn } from "@/lib/cn";
 import { formatMoney } from "@/lib/money";
-import { hasRealTitle, pieceKind, pieceRef, pieceTitle } from "@/lib/piece-title";
+import { pieceKind, pieceTitle } from "@/lib/piece-title";
 import type { PublicProduct } from "@/lib/types";
 import { useFolio } from "./collectors-folio";
 
@@ -27,14 +27,12 @@ export function PieceCard({
   const { hasItem, toggleItem, setIsOpen: setFolioOpen } = useFolio();
 
   const cover = product.images[0];
-  const named = hasRealTitle(product.title);
-  const title = named ? product.title.trim() : `Untitled · No. ${pieceRef(product.id)}`;
   const fullTitle = pieceTitle(product.title, product.categorySlug, product.attributes, product.id);
   const kind = pieceKind(product.categoryName, product.attributes);
   const sold = product.status === "sold";
   const inFolio = hasItem(product.id);
 
-  const price = sold ? "sold" : (formatMoney(product.priceMinor, product.currency) ?? "price on asking");
+  const price = sold ? "sold" : (formatMoney(product.priceMinor, product.currency) ?? "Ask for the price");
   const ratio = cover?.width && cover?.height ? `${cover.width} / ${cover.height}` : "4 / 5";
   const ratioValue = cover?.width && cover?.height ? cover.width / cover.height : 0.8;
 
@@ -90,7 +88,7 @@ export function PieceCard({
             <span className="tick" aria-hidden="true" />
             <Link href={`/p/${product.slug}`} className="cap-line inline-flex min-h-11 min-w-0 flex-1 items-center">
               <span className="truncate">
-                {title}
+                {fullTitle}
                 {kind ? ` — ${kind}` : ""}
               </span>
             </Link>

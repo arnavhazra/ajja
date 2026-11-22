@@ -12,24 +12,44 @@ export default async function ProductImage({ params }: { params: Promise<{ slug:
   const { slug } = await params;
   const { product } = await loadProduct(slug);
   const title = pieceTitle(product?.title ?? "", product?.categorySlug, product?.attributes, product?.id ?? product?.slug);
-  const price = formatMoney(product?.priceMinor ?? null, product?.currency) ?? "price on asking";
+  const price = formatMoney(product?.priceMinor ?? null, product?.currency) ?? "Ask for the price";
+  const cover = product?.images[0];
+  const pigment = product?.pigment ?? "#894636";
+  const pigmentInk = product?.pigmentInk ?? "#f6f0e5";
   return new ImageResponse(
     <div
       style={{
         width: "100%",
         height: "100%",
         display: "flex",
-        flexDirection: "column",
-        justifyContent: "flex-end",
-        background: product?.pigment ?? "#894636",
-        color: product?.pigmentInk ?? "#f6f0e5",
-        padding: 64,
-        fontFamily: "Georgia",
+        background: "#f3ede2",
       }}
     >
-      <div style={{ display: "flex", fontSize: 64 }}>{title}</div>
-      <div style={{ display: "flex", fontSize: 32, marginTop: 16 }}>{product?.status === "sold" ? "Sold" : price}</div>
-      <div style={{ display: "flex", fontSize: 24, marginTop: 24, opacity: 0.75 }}>{brand.name}</div>
+      {cover ? (
+        <div style={{ display: "flex", width: "58%", height: "100%", background: "#e6dccb", padding: 40 }}>
+          <img
+            src={cover.url}
+            alt=""
+            style={{ width: "100%", height: "100%", objectFit: "contain" }}
+          />
+        </div>
+      ) : null}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-end",
+          flex: 1,
+          background: pigment,
+          color: pigmentInk,
+          padding: 64,
+          fontFamily: "Georgia",
+        }}
+      >
+        <div style={{ display: "flex", fontSize: 56, lineHeight: 1.15 }}>{title}</div>
+        <div style={{ display: "flex", fontSize: 30, marginTop: 20 }}>{product?.status === "sold" ? "Sold" : price}</div>
+        <div style={{ display: "flex", fontSize: 24, marginTop: 28, opacity: 0.75 }}>{brand.name}</div>
+      </div>
     </div>,
     { ...size },
   );

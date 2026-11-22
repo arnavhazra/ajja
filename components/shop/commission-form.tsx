@@ -11,6 +11,7 @@ type Props = {
   productName?: string;
   responseNote?: string;
   initialMessage?: string;
+  defaultSubject?: string;
   saved?: FolioItem[];
 };
 
@@ -28,6 +29,7 @@ function CommissionFormInner({
   productName,
   responseNote,
   initialMessage,
+  defaultSubject,
   saved = [],
   onSendAnother,
 }: Props & { onSendAnother: () => void }) {
@@ -64,7 +66,7 @@ function CommissionFormInner({
       <div role="status" className="note-card note-done">
         <span className="note-done-dot" aria-hidden="true" />
         <p className="display-wide text-3xl">Thank you — your note is with the studio.</p>
-        <p className="type text-tar-soft">{state.message || responseNote || "We will write back as soon as we can."}</p>
+        <p className="type text-tar-soft">{state.message || responseNote || "We will reply by phone or email within a few days."}</p>
         <button type="button" onClick={onSendAnother} className="btn btn-secondary w-fit">
           Send another note
         </button>
@@ -89,7 +91,18 @@ function CommissionFormInner({
       </div>
       <div className="f-row">
         <label htmlFor="note-contact">Phone or email *</label>
-        <input id="note-contact" name="contact" type="text" required maxLength={160} autoComplete="email" />
+        <input
+          id="note-contact"
+          name="contact"
+          type="text"
+          required
+          maxLength={160}
+          autoComplete="tel"
+          inputMode="text"
+          pattern=".*@.*|(.*[0-9].*){7,}"
+          title="A phone number or an email address the studio can reply to"
+          placeholder="e.g. 610 555 0123 or you@example.com"
+        />
       </div>
       <div className="f-row">
         <label htmlFor="note-subject">Subject</label>
@@ -97,7 +110,7 @@ function CommissionFormInner({
           id="note-subject"
           name="subject"
           type="text"
-          defaultValue={productName ? `Asking about ${productName}` : "A question for the studio"}
+          defaultValue={productName ? `Asking about ${productName}` : (defaultSubject ?? "A question for the studio")}
         />
       </div>
       <div className="f-row">
