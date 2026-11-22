@@ -163,7 +163,7 @@ export async function verifyStaff(emailRaw: string, password: string, token: str
   const headerList = await headers();
   const forwardedFor = headerList.get("x-forwarded-for");
   const ip = forwardedFor?.split(",").pop()?.trim() || headerList.get("x-real-ip")?.trim() || "127.0.0.1";
-  const rateAllowed = await allowRate(`verify-staff:${email}:${ip.slice(0, 64)}`, 5, 60 * 15);
+  const rateAllowed = await allowRate(`verify-staff:${ip.slice(0, 64)}`, 10, 60 * 15);
   if (!rateAllowed) {
     return { ok: false as const, message: "Too many tries. Wait 15 minutes." };
   }
@@ -175,6 +175,9 @@ export async function verifyStaff(emailRaw: string, password: string, token: str
     const db = getDb();
     const [devUser] = await db.select().from(adminUsers).where(eq(adminUsers.email, email)).limit(1);
     if (devUser) {
+      if (devUser.lockedUntil && devUser.lockedUntil.getTime() > Date.now()) {
+        return { ok: false as const, message: `Too many tries. Wait ${LOCK_MINUTES} minutes.` };
+      }
       const attempts = devUser.failedAttempts + 1;
       const locked = attempts >= LOCK_AFTER;
       await db
@@ -257,7 +260,9 @@ export async function changePassword(userId: string, current: string, next: stri
     if (!expected || !same(current, expected)) {
       return { ok: false as const, message: "Your current password did not match." };
     }
-  } else {
+  } else if (current.trim() !== "") {
+    // First-time setup: an owner with no password yet proves identity by the
+    // current session, so only a blank current password is accepted here.
     return { ok: false as const, message: "Your current password did not match." };
   }
   await db

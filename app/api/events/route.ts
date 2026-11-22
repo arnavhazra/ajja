@@ -24,6 +24,12 @@ export async function POST(request: Request) {
   const ip = forwardedFor?.split(",").pop()?.trim() || headerList.get("x-real-ip")?.trim() || "127.0.0.1";
   const userAgent = headerList.get("user-agent") ?? "";
   const hash = dayHash(ip, userAgent, process.env.SESSION_SECRET ?? "dev-anonymous-events");
+  const rateHash = dayHash(ip, "quota", process.env.SESSION_SECRET ?? "dev-anonymous-events");
+
+  const allowed = await allowRate(`events:${rateHash.slice(0, 20)}`, 60, 60);
+  if (!allowed) {
+    return Response.json({ ok: false }, { status: 429 });
+  }
 
   const db = getDb();
   let validProductId: string | null = null;
@@ -48,11 +54,6 @@ export async function POST(request: Request) {
       return Response.json({ ok: true });
     }
     validProductId = product.id;
-  }
-
-  const allowed = await allowRate(`events:${hash.slice(0, 20)}`, 60, 60);
-  if (!allowed) {
-    return Response.json({ ok: false }, { status: 429 });
   }
 
   await db.insert(events).values({
