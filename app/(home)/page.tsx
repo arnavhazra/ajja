@@ -17,7 +17,7 @@ import { siteUrl } from "@/lib/site-url";
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings();
   return {
-    title: `${brand.name} — handmade art and woodwork from a family studio in ${settings.town}, ${settings.region}`,
+    title: `Handmade art and woodwork from a family studio in ${settings.town}, ${settings.region}`,
     alternates: { canonical: "/" },
   };
 }

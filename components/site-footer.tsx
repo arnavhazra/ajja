@@ -35,12 +35,11 @@ export function SiteFooter({ settings, pigments = [], hasStory = false }: { sett
           <nav className="foot-col" aria-label="Good to know">
             <p className="foot-col-label">good to know</p>
             <Link href="/policies">buying, collection &amp; returns</Link>
-            {hasStory ? <Link href="/#studio">the studio</Link> : null}
             <Link href="/privacy">privacy</Link>
           </nav>
 
           <div className="foot-note">
-            <p className="foot-col-label foot-col">&gt; the studio</p>
+            <p className="foot-col-label foot-col">the studio note</p>
             <p>A family studio in {settings.town}, {settings.region}. Inquiries welcome — nothing is paid online.</p>
             {settings.email ? (
               <a className="map" href={`mailto:${settings.email}`}>
