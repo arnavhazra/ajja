@@ -6,7 +6,7 @@
   laterite house accent, cobalt focus. Bricolage Grotesque for headings and UI,
   Newsreader for captions and prose. Thin ruled labels, uncoated paper margins,
   real photographs beside uncropped whole works.
-  Build stamp: material-index-1 (change this line to force a stylesheet rebuild).
+  Build stamp: material-index-2 (change this line to force a stylesheet rebuild).
 */
 :root {
   --gesso: #f6f0e5;
@@ -817,6 +817,10 @@ details.term > .a { grid-column: 2; }
 ::view-transition-group(*) { animation-duration: 0.5s; animation-timing-function: var(--ease-out-quint); }
 ::view-transition-new(piece-label-*) { animation-name: vt-tag-slide; }
 
+/* data-reveal is an inert marker — nothing reveals it anymore. Keep content
+   visible unconditionally so a stale stylesheet can never hide it again. */
+[data-reveal] { opacity: 1; transform: none; clip-path: none; }
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -827,7 +831,6 @@ details.term > .a { grid-column: 2; }
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  [data-reveal] { opacity: 1; transform: none; clip-path: none; }
   ::view-transition-group(*),
   ::view-transition-old(*),
   ::view-transition-new(*) { animation: none !important; }
