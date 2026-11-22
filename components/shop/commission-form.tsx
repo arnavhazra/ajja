@@ -99,7 +99,7 @@ function CommissionFormInner({
           maxLength={160}
           autoComplete="tel"
           inputMode="text"
-          pattern=".*([0-9]{5,}|@).*"
+          pattern=".*@.*|(.*[0-9].*){7,}"
           title="A phone number or an email address the studio can reply to"
           placeholder="e.g. 610 555 0123 or you@example.com"
         />
