@@ -70,6 +70,11 @@ export function PieceViewer({ images, title }: { images: PublicImage[]; title: s
         onClick={(event) => {
           if (event.target === event.currentTarget) dialogRef.current?.close();
         }}
+        onKeyDown={(event) => {
+          if (images.length < 2) return;
+          if (event.key === "ArrowLeft") setIndex((i) => (i - 1 + images.length) % images.length);
+          if (event.key === "ArrowRight") setIndex((i) => (i + 1) % images.length);
+        }}
       >
         <div className="relative size-full">
           <Image src={image.url} alt={image.alt || title} fill sizes="100vw" className="object-contain" />

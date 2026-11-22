@@ -295,7 +295,7 @@ function FolioDrawer() {
                     </div>
                     <div className="flex items-center justify-between pt-1">
                       <span className="nums text-xs font-semibold text-tar">
-                        {item.status === "sold" ? "sold" : item.priceMinor ? format(item.priceMinor) : "price on asking"}
+                        {item.status === "sold" ? "sold" : item.priceMinor ? format(item.priceMinor) : "Ask for the price"}
                       </span>
                       <button
                         type="button"

@@ -18,7 +18,8 @@ function mapImage(image: typeof productImages.$inferSelect): PublicImage {
     blurData: image.blurData,
     focalX: Number(image.focalX),
     focalY: Number(image.focalY),
-    alt: image.alt,
+    // "enhanced-version" is the desk's marker for AI-enhanced photos, not alt text.
+    alt: image.alt === "enhanced-version" ? "" : image.alt,
     sortOrder: image.sortOrder,
   };
 }

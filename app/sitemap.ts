@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { buildIndex } from "@/lib/category-index";
+import { hasRealTitle } from "@/lib/piece-title";
 import { loadCategories, loadManifest } from "@/lib/public-data";
 import { siteUrl } from "@/lib/site-url";
 
@@ -19,7 +20,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: 0.7,
     })),
-    ...manifest.map((product) => ({
+    // Unnamed pieces are noindexed on their pages — leave them out of the sitemap.
+    ...manifest.filter((product) => hasRealTitle(product.title)).map((product) => ({
       url: `${base}/p/${product.slug}`,
       changeFrequency: "weekly" as const,
       priority: 0.8,
