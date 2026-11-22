@@ -13,11 +13,11 @@ async function uploadOne(file: File, signal: AbortSignal, onProgress: (pct: numb
     signal,
   });
   if (!tokenResponse.ok) throw new Error("Please sign in again.");
-  const tokenBody = (await tokenResponse.json()) as { token: string; pathname: string };
+  const tokenBody = (await tokenResponse.json()) as { token: string; pathname: string; type: string };
   return put(tokenBody.pathname, file, {
     access: "public",
     token: tokenBody.token,
-    contentType: file.type || "image/jpeg",
+    contentType: tokenBody.type || file.type || "image/jpeg",
     abortSignal: signal,
     onUploadProgress: (update) => onProgress(update.percentage),
   });

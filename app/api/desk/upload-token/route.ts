@@ -45,9 +45,10 @@ export async function POST(request: Request) {
   }
 
   const safeName = parsed.data.name.replace(/[^a-zA-Z0-9._-]/g, "").slice(0, 120) || "photo";
+  const rawName = parsed.data.name;
   const mimeType = parsed.data.type && (ALLOWED_TYPES as readonly string[]).includes(parsed.data.type)
     ? parsed.data.type
-    : mimeFromName(safeName);
+    : mimeFromName(rawName) ?? mimeFromName(rawName.replace(/[^a-zA-Z0-9._-]/g, ""));
   if (!mimeType) {
     return Response.json({ message: "Invalid upload parameters. Only JPG, PNG, WebP, HEIC, or HEIF images up to 15MB are supported." }, { status: 400 });
   }
