@@ -119,7 +119,13 @@ async function Home({
     ? `Asking about ${saved.length === 1 ? "a saved piece" : `${saved.length} saved pieces`}`
     : undefined;
 
-  const entries = buildIndex(categories, products);
+  const photographed = products.filter((product) => product.images.length > 0);
+  const detail = (settings.heroImage ? photographed.find((product) => product.images.some((image) => image.url === settings.heroImage)) : undefined)
+    ?? photographed.find((product) => product.status !== "sold")
+    ?? photographed[0]
+    ?? null;
+
+  const entries = buildIndex(categories, products, detail?.id);
   const allEntry: IndexEntry | null = products.length
     ? {
         id: "all",
@@ -127,15 +133,9 @@ async function Home({
         name: "All pieces",
         intro: "everything in the studio, including pieces without an art form yet",
         count: products.length,
-        cover: coverForCategory(null, products),
+        cover: coverForCategory(null, products, detail?.id),
       }
     : null;
-
-  const photographed = products.filter((product) => product.images.length > 0);
-  const detail = (settings.heroImage ? photographed.find((product) => product.images.some((image) => image.url === settings.heroImage)) : undefined)
-    ?? photographed.find((product) => product.status !== "sold")
-    ?? photographed[0]
-    ?? null;
 
   return (
     <main>

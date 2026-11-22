@@ -325,6 +325,9 @@ img {
   box-shadow: 0 12px 30px -12px rgba(36, 27, 19, 0.6);
 }
 .ask-chip:hover { background: var(--sap); }
+@media (min-width: 640px) {
+  .ask-chip { display: none; }
+}
 
 /* ---------- Layout & shell ---------- */
 .shell {
