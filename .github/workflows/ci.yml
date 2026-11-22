@@ -35,3 +35,10 @@ jobs:
       - name: Unit Tests
         run: pnpm test
 
+      - name: Production Build
+        run: pnpm build
+        env:
+          DATABASE_URL: "postgresql://placeholder:placeholder@127.0.0.1:5432/placeholder"
+          BLOB_READ_WRITE_TOKEN: "vercel_blob_rw_placeholder"
+          SESSION_SECRET: "placeholder_session_secret_for_build"
+          ADMIN_PATH: "test-admin-path-placeholder"
