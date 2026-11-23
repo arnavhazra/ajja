@@ -12,9 +12,12 @@ export async function DeskNav({ email }: { email: string }) {
       title: "Desk",
       links: [
         ["", "Today"],
+        ["/home", "Home page"],
         ["/add", "Add a piece"],
         ["/pieces", "My pieces"],
         ["/messages", "Messages", counts.waiting],
+        ["/poster", "Poster"],
+        ["/account", "Account"],
         ["/help", "Help"],
       ],
     },
@@ -41,7 +44,7 @@ export async function DeskNav({ email }: { email: string }) {
             View the shop
           </Link>
           <form action={leaveDesk}>
-            <button className="btn btn-quiet min-h-11 px-4 text-sm" type="submit">
+            <button className="btn btn-quiet min-h-14 px-5 text-base" type="submit">
               Sign out
             </button>
           </form>
