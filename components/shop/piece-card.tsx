@@ -1,13 +1,11 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { ViewTransition, type CSSProperties, type MouseEvent } from "react";
+import { ViewTransition, type CSSProperties } from "react";
 import { cn } from "@/lib/cn";
 import { formatMoney } from "@/lib/money";
 import { pieceKind, pieceTitle } from "@/lib/piece-title";
 import type { PublicProduct } from "@/lib/types";
-import { useFolio } from "./collectors-folio";
+import { PieceSaveButton } from "./piece-save-button";
 
 type Props = {
   product: PublicProduct;
@@ -24,32 +22,14 @@ export function PieceCard({
   className,
   index = 0,
 }: Props) {
-  const { hasItem, toggleItem, setIsOpen: setFolioOpen } = useFolio();
-
   const cover = product.images[0];
   const fullTitle = pieceTitle(product.title, product.categorySlug, product.attributes, product.id);
   const kind = pieceKind(product.categoryName, product.attributes);
   const sold = product.status === "sold";
-  const inFolio = hasItem(product.id);
 
   const price = sold ? "sold" : (formatMoney(product.priceMinor, product.currency) ?? "Ask for the price");
   const ratio = cover?.width && cover?.height ? `${cover.width} / ${cover.height}` : "4 / 5";
   const ratioValue = cover?.width && cover?.height ? cover.width / cover.height : 0.8;
-
-  const handleFolioClick = (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toggleItem({
-      id: product.id,
-      slug: product.slug,
-      title: fullTitle,
-      priceMinor: product.priceMinor,
-      imageUrl: cover?.url,
-      kind: kind ?? undefined,
-      dimensions: product.attributes.dimensions || product.attributes.size || "",
-    });
-    if (!inFolio) setFolioOpen(true);
-  };
 
   return (
     <figure
@@ -97,14 +77,15 @@ export function PieceCard({
         </ViewTransition>
         <div className="cap-acts">
           {!sold ? (
-            <button
-              type="button"
-              onClick={handleFolioClick}
-              className={cn("cap-act", inFolio && "saved")}
-              aria-label={inFolio ? `Remove ${fullTitle} from saved` : `Save ${fullTitle}`}
-            >
-              {inFolio ? "saved" : "save"}
-            </button>
+            <PieceSaveButton
+              id={product.id}
+              slug={product.slug}
+              title={fullTitle}
+              priceMinor={product.priceMinor}
+              imageUrl={cover?.url}
+              kind={kind ?? undefined}
+              dimensions={product.attributes.dimensions || product.attributes.size || ""}
+            />
           ) : null}
 
         </div>
