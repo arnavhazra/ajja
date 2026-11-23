@@ -163,10 +163,10 @@ test("photo upload makes a private draft that publishes through review", async (
   await page.getByLabel("Password").fill(adminPassword);
   await page.getByRole("button", { name: "Sign in" }).click();
   await page.getByRole("link", { name: "Add a piece", exact: true }).click();
-  await page.getByLabel("Choose photos").setInputFiles({ name: smallFile, mimeType: "image/jpeg", buffer: smallPhoto });
+  await page.getByLabel("Choose photo from this device").setInputFiles({ name: smallFile, mimeType: "image/jpeg", buffer: smallPhoto });
   // Step 2 — about this piece. The draft is private until "Show on site".
   await expect(page.getByRole("heading", { name: "About this piece" })).toBeVisible({ timeout: 60_000 });
-  await page.getByLabel("Name", { exact: true }).fill(uploadTitle);
+  await page.getByLabel("Name").fill(uploadTitle);
   await page.getByRole("button", { name: "Save and continue" }).click();
   // Step 3 — review shows the visitor view before anything goes live.
   await expect(page.getByRole("heading", { name: "Review" })).toBeVisible();

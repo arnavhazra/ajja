@@ -26,15 +26,36 @@ export default defineConfig({
   workers: 1,
   use: {
     ...desktopChrome,
-    baseURL: "http://127.0.0.1:3211",
+    baseURL: "https://127.0.0.1:3443",
+    // App + blob mock are served over TLS (upgrade-insecure-requests is part
+    // of the shipped CSP; WebKit honours it even on loopback, Chromium does
+    // not — http-only runs cannot test browser parity). Self-signed certs are
+    // trusted here; the server side trusts them via NODE_EXTRA_CA_CERTS.
+    ignoreHTTPSErrors: true,
   },
-  webServer: {
-    command:
-      "pnpm build && node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3211",
-    url: "http://127.0.0.1:3211",
-    reuseExistingServer: false,
-    timeout: 300_000,
-  },
+  webServer: [
+    {
+      command: "node e2e/blob-mock.mjs",
+      url: "https://e2e.public.blob.vercel-storage.com/healthz",
+      ignoreHTTPSErrors: true,
+      reuseExistingServer: true,
+      timeout: 15_000,
+    },
+    {
+      command:
+        "pnpm build && node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3211",
+      url: "http://127.0.0.1:3211",
+      reuseExistingServer: false,
+      timeout: 300_000,
+    },
+    {
+      command: "node e2e/https-proxy.mjs",
+      url: "https://127.0.0.1:3443",
+      ignoreHTTPSErrors: true,
+      reuseExistingServer: true,
+      timeout: 15_000,
+    },
+  ],
   projects: [
     {
       name: "chromium-desktop",

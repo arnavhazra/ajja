@@ -58,3 +58,4 @@ seed/enhance/*
 /seed/photos/
 /supabase/
 /.env.e2e
+e2e/.blob-mock-*.pem
