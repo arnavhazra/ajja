@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Courier_Prime, Newsreader } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { brand } from "@/lib/brand";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
@@ -69,6 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </nav>
         {children}
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
