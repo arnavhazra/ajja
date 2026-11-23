@@ -22,11 +22,21 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!product) notFound();
   const named = hasRealTitle(product.title);
   const title = pieceTitle(product.title, product.categorySlug, product.attributes, product.id);
+  const description =
+    product.description ||
+    (named ? undefined : `${title} — a piece in the studio in Collegeville, not yet named. Ask about it directly.`);
   return {
     title,
-    description: product.description || (named ? undefined : `${title} — a piece in the studio in Collegeville, not yet named. Ask about it directly.`),
+    description,
     robots: named ? undefined : { index: false, follow: true },
     alternates: { canonical: `/p/${product.slug}` },
+    openGraph: {
+      title,
+      description,
+      url: `${siteUrl()}/p/${product.slug}`,
+      type: "website",
+      images: product.images.map((image) => image.url),
+    },
   };
 }
 

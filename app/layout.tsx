@@ -47,6 +47,14 @@ export function generateMetadata(): Metadata {
     },
     description: brand.description,
     applicationName: brand.name,
+    openGraph: {
+      type: "website",
+      siteName: brand.name,
+      title: brand.title,
+      description: brand.description,
+      url: siteUrl(),
+    },
+    twitter: { card: "summary_large_image" },
   };
 }
 

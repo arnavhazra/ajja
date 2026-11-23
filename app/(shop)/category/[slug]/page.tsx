@@ -38,10 +38,20 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const { slug } = await params;
   const resolved = await resolve(slug);
   if (!resolved) notFound();
+  const description =
+    resolved.intro || `${resolved.name} — ${resolved.pieces.length} ${resolved.pieces.length === 1 ? "piece" : "pieces"} photographed as they are.`;
+  const image = resolved.pieces[0]?.images[0]?.url;
   return {
     title: resolved.name,
-    description: resolved.intro || `${resolved.name} — ${resolved.pieces.length} ${resolved.pieces.length === 1 ? "piece" : "pieces"} photographed as they are.`,
+    description,
     alternates: { canonical: `/category/${resolved.slug}` },
+    openGraph: {
+      title: resolved.name,
+      description,
+      url: `${siteUrl()}/category/${resolved.slug}`,
+      type: "website",
+      images: image ? [image] : undefined,
+    },
   };
 }
 
