@@ -22,7 +22,7 @@
 
 .desk .field {
   min-height: 56px;
-  font-size: 1rem;
+  font-size: 1.25rem;
 }
 
 .desk .desk-link {
@@ -47,7 +47,7 @@
 .desk-choice-note {
   font-family: var(--font-reader), "Newsreader", Georgia, serif;
   color: var(--tar-soft);
-  font-size: 1rem;
+  font-size: 1.25rem;
 }
 
 .desk-more {
@@ -116,7 +116,7 @@
 .desk-tag {
   font-family: var(--font-text), Georgia, serif;
   font-style: italic;
-  font-size: 1rem;
+  font-size: 1.25rem;
   font-weight: 400;
   letter-spacing: 0;
   color: var(--tar-soft);
@@ -149,7 +149,7 @@
   border-radius: 999px;
   background: var(--wall-sink);
   color: var(--tar);
-  font-size: 0.7rem;
+  font-size: 1.25rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   padding: 0 0.3rem;
@@ -170,7 +170,7 @@
   white-space: nowrap;
   border-radius: 999px;
   padding: 0 1rem;
-  font-size: 1rem;
+  font-size: 1.25rem;
   color: var(--tar-soft);
   transition: background-color 160ms ease-out, color 160ms ease-out;
 }
@@ -198,7 +198,7 @@
   border: 2px dashed var(--line-strong);
   border-radius: 6px;
   background: var(--wall);
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: var(--tar);
   text-align: center;
@@ -212,7 +212,7 @@
 
 .upload-card .upload-input {
   max-width: 100%;
-  font-size: 1rem;
+  font-size: 1.25rem;
 }
 
 .desk-foot {
@@ -264,7 +264,7 @@
     display: block;
     margin: 0;
     padding: 0 0.9rem 0.15rem;
-    font-size: 0.7rem;
+    font-size: 1.25rem;
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -315,7 +315,7 @@
   overflow: hidden;
   border-radius: 0.6rem;
   background: var(--wall-sink);
-  font-size: 0.7rem;
+  font-size: 1.25rem;
   color: var(--tar-soft);
 }
 
@@ -331,7 +331,7 @@
   border-radius: 999px;
   border: 1px solid var(--line-strong);
   padding: 0.1rem 0.6rem;
-  font-size: 0.8rem;
+  font-size: 1.25rem;
 }
 
 .desk-pill[data-status="published"] {
@@ -452,7 +452,7 @@
   border: 1px solid var(--line-strong);
   border-radius: 999px;
   padding: 0 1.1rem;
-  font-size: 1rem;
+  font-size: 1.25rem;
   color: var(--tar-soft);
   text-decoration: none;
 }
@@ -554,7 +554,7 @@
 }
 
 .desk-photo-label {
-  font-size: 1rem;
+  font-size: 1.25rem;
   line-height: 1.35;
   color: var(--tar-soft);
   display: -webkit-box;
@@ -578,3 +578,22 @@
   border-color: var(--cobalt);
   border-style: solid;
 }
+
+/* ---------- Accessibility floor ----------
+   Nothing inside the desk reads under 20px and no control is shorter than
+   56px. Utility classes that ask for less are clamped here, so a stray
+   text-xs or min-h-11 can never shrink a senior's desk. */
+.desk .text-xs,
+.desk .text-sm,
+.desk .text-base,
+.desk .text-lg { font-size: 1.25rem; }
+
+.desk .min-h-8,
+.desk .min-h-9,
+.desk .min-h-10,
+.desk .min-h-11,
+.desk .min-h-12,
+.desk .min-h-14,
+.desk .h-10,
+.desk .h-11,
+.desk .h-12 { min-height: 56px; }
