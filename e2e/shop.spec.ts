@@ -134,6 +134,15 @@ test("owner signs in with a password, prices, publishes, hides, undoes, and shar
   await page.getByRole("button", { name: "Share" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Link copied" })).toBeVisible();
 
+  // The funnel ends on the desk: the note shows under Messages with a reply path.
+  await page.goto(`/${path}/messages`);
+  const note = page.locator("article").filter({ hasText: "Is the studio test piece still here?" });
+  await expect(note.getByRole("heading", { name: "Test buyer" })).toBeVisible();
+  await expect(note.getByRole("link", { name: "Reply by email" })).toBeVisible();
+  // Marking it replied keeps the desk list honest.
+  await note.getByRole("button", { name: "Mark replied" }).click();
+  await expect(note).toContainText("replied");
+
   await page.goto(`/${path}/pieces`);
   await page.getByRole("link", { name: `Edit ${title}`, exact: true }).click();
   await expect(page.getByRole("heading", { name: "Edit this piece" })).toBeVisible();
