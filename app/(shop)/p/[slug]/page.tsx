@@ -143,7 +143,7 @@ async function ProductBody({
               </div>
             </ViewTransition>
             {product.description || attributes.details ? (
-              <div className="prose grid gap-4 text-tar-soft" data-reveal="">
+              <div className="prose story grid gap-4 text-tar-soft" data-reveal="">
                 {product.description ? <p>{product.description}</p> : null}
                 {attributes.details ? <p>{attributes.details}</p> : null}
               </div>

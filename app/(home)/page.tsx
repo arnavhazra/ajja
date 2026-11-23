@@ -58,7 +58,7 @@ export default function HomePage({
 
 function IndexRow({ entry, index }: { entry: IndexEntry; index: number }) {
   return (
-    <li>
+    <li data-reveal="">
       <Link href={`/category/${entry.slug}`} className="idx-row">
         <span className="idx-lead">
           <span className="idx-num" aria-hidden="true">

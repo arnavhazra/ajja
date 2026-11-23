@@ -791,8 +791,52 @@ a.cap-line { display: inline-flex; align-items: center; min-height: 44px; }
 ::view-transition-group(*) { animation-duration: 0.5s; animation-timing-function: var(--ease-out-quint); }
 ::view-transition-new(piece-label-*) { animation-name: vt-tag-slide; }
 
-/* data-reveal is an inert marker — nothing reveals it anymore. Keep content
-   visible unconditionally so a stale stylesheet can never hide it again. */
+/* ---------- Editorial deck & story ---------- */
+/* The deck: Newsreader prose carrying an art form's intro — the catalogue
+   voice, wider measure, balanced rag. */
+.deck {
+  font-family: var(--font-reader), "Newsreader", Georgia, serif;
+  font-size: clamp(1.15rem, 1.7vw, 1.45rem);
+  line-height: 1.55;
+  color: var(--tar);
+  max-width: 46ch;
+  text-wrap: pretty;
+}
+
+/* The story: the first letter of a piece's own telling lifts in the pigment
+   sampled from the piece itself — the one place colour is borrowed from the
+   work rather than left to it. */
+.story > p:first-of-type::first-letter {
+  font-family: var(--font-reader), "Newsreader", Georgia, serif;
+  font-weight: 500;
+  font-size: 3.05em;
+  line-height: 0.8;
+  float: left;
+  padding: 0.06em 0.14em 0 0;
+  color: var(--pigment, var(--sap));
+}
+
+/* ---------- Entry reveal ---------- */
+/* The 12px rise from DESIGN.md, restored as a scroll-driven CSS animation.
+   It can never strand hidden content: browsers without view() timelines skip
+   the whole block, reduced motion removes it, and an element outside the
+   entry range is simply not yet on screen. */
+@keyframes reveal-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    [data-reveal] {
+      animation: reveal-rise 0.6s var(--ease-out) both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+  }
+}
+
+/* data-reveal is visible by default — the animation above is the only thing
+   that ever hides it, and only while it is still below the fold. */
 [data-reveal] { opacity: 1; transform: none; clip-path: none; }
 
 @media (prefers-reduced-motion: reduce) {

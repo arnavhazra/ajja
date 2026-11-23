@@ -94,7 +94,7 @@ async function CategoryBody({ params }: { params: Promise<Params> }) {
             </p>
             <h1 className="disp mt-[10px] text-[clamp(2.6rem,6vw,5.5rem)]">{resolved.name}</h1>
           </div>
-          {resolved.intro ? <p className="sub type">{resolved.intro}</p> : null}
+          {resolved.intro ? <p className="deck mt-6">{resolved.intro}</p> : null}
         </header>
         <h2 className="sr-only">Pieces</h2>
         {pieces.length ? (
