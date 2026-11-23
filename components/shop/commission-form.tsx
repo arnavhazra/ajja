@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useFolio, type FolioItem } from "./collectors-folio";
 import { sendEnquiry } from "@/lib/public-actions";
@@ -34,10 +34,22 @@ function CommissionFormInner({
   onSendAnother,
 }: Props & { onSendAnother: () => void }) {
   const [state, action, pending] = useActionState(sendEnquiry, { ok: false, message: "" });
+  const [online, setOnline] = useState(() => (typeof navigator === "undefined" ? true : navigator.onLine));
   const { items } = useFolio();
   const messageRef = useRef<HTMLTextAreaElement>(null);
   const appendedRef = useRef<string | null>(null);
   const chips = items.length ? items : saved;
+  useEffect(() => {
+    const on = () => setOnline(true);
+    const off = () => setOnline(false);
+    window.addEventListener("online", on);
+    window.addEventListener("offline", off);
+    return () => {
+      window.removeEventListener("online", on);
+      window.removeEventListener("offline", off);
+    };
+  }, []);
+
   // The server accepts 2,000 characters. Only ever remove the exact line this
   // form appended before — a visitor's own "Pieces:" paragraph is left alone.
   const notePieces = () => {
@@ -139,14 +151,19 @@ function CommissionFormInner({
       ) : null}
 
       <Honeypot />
+      {!online ? (
+        <p role="status" className="f-error">
+          You appear to be offline. Reconnect to send your note — nothing has been sent yet.
+        </p>
+      ) : null}
       {state.message ? (
         <p role="alert" className="f-error">
           {state.message}
         </p>
       ) : null}
 
-      <button className="send" type="submit" disabled={pending}>
-        {pending ? "Sending…" : "Send to the studio"}
+      <button className="send" type="submit" disabled={pending || !online}>
+        {!online ? "Offline" : pending ? "Sending…" : "Send to the studio"}
       </button>
       <p className="fine">Nothing is paid on this site — your note goes straight to the studio.</p>
     </form>

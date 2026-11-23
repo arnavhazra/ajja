@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { EventBeacon } from "./event-beacon";
 import { cn } from "@/lib/cn";
 import { sendEnquiry } from "@/lib/public-actions";
@@ -14,6 +14,18 @@ export function EnquiryForm(props: Props) {
 
 function EnquiryFormInner({ productId, productName, initialMessage, onSendAnother }: Props & { onSendAnother: () => void }) {
   const [state, action, pending] = useActionState(sendEnquiry, { ok: false, message: "" });
+  const [online, setOnline] = useState(() => (typeof navigator === "undefined" ? true : navigator.onLine));
+
+  useEffect(() => {
+    const on = () => setOnline(true);
+    const off = () => setOnline(false);
+    window.addEventListener("online", on);
+    window.addEventListener("offline", off);
+    return () => {
+      window.removeEventListener("online", on);
+      window.removeEventListener("offline", off);
+    };
+  }, []);
 
   if (state.ok) {
     return (
@@ -65,6 +77,11 @@ function EnquiryFormInner({ productId, productName, initialMessage, onSendAnothe
       </details>
       <input type="hidden" name="productId" value={productId ?? ""} />
       <input className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" name="company" />
+      {!online ? (
+        <p role="status" className="border-l-2 border-warn pl-3 text-sm text-tar-soft">
+          You appear to be offline. Reconnect to send your note — nothing has been sent yet.
+        </p>
+      ) : null}
       {state.message ? (
         <p role="alert" className={cn("border-l-2 border-sold pl-3 text-sm text-sold")}>
           {state.message}
@@ -72,8 +89,8 @@ function EnquiryFormInner({ productId, productName, initialMessage, onSendAnothe
       ) : null}
       <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
         <p className="field-hint max-w-xs">Nothing is paid on this website.</p>
-        <button className="btn btn-pigment" type="submit" disabled={pending}>
-          {pending ? "Sending…" : "Send"}
+        <button className="btn btn-pigment" type="submit" disabled={pending || !online}>
+          {!online ? "Offline" : pending ? "Sending…" : "Send"}
         </button>
       </div>
     </form>
