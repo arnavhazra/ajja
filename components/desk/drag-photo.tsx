@@ -1,6 +1,6 @@
 "use client";
 
-import { reorderImages } from "@/lib/desk-actions";
+import { reorderImages } from "@/lib/desk-actions/photos";
 
 export function DragPhoto({ id, productId, ids }: { id: string; productId: string; ids: string[] }) {
   return (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { confirmImport } from "@/lib/desk-actions";
+import { confirmImport } from "@/lib/desk-actions/site";
 import { parseCsv } from "@/lib/csv";
 
 export function ImportFile() {

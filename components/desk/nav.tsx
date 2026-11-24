@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { DeskNavLinks, type DeskNavSection } from "@/components/desk/nav-links";
 import { brand } from "@/lib/brand";
-import { leaveDesk } from "@/lib/desk-actions";
+import { leaveDesk } from "@/lib/desk-actions/auth";
 import { loadNavCounts } from "@/lib/desk-data";
 import { deskPrefix } from "@/lib/desk-path";
 

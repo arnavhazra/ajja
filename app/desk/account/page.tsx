@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import { Flash, one } from "@/components/desk/flash";
 import { requireDesk } from "@/lib/desk-data";
-import { leaveDesk, updatePassword } from "@/lib/desk-actions";
+import { leaveDesk, updatePassword } from "@/lib/desk-actions/auth";
 
 export default function AccountPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   return (

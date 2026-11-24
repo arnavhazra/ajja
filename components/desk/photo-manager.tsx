@@ -1,7 +1,7 @@
 import { DragPhoto } from "@/components/desk/drag-photo";
 import { FocalPicker } from "@/components/desk/focal-picker";
 import { PhotoUpload } from "@/components/desk/upload";
-import { coverImage, cropImage, moveImage, retryEnhance, rotateImage, savePhoto, setAsHeroImage } from "@/lib/desk-actions";
+import { coverImage, cropImage, moveImage, retryEnhance, rotateImage, savePhoto, setAsHeroImage } from "@/lib/desk-actions/photos";
 import type { productImages } from "@/lib/db/schema";
 
 type Image = typeof productImages.$inferSelect;

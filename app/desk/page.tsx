@@ -3,7 +3,7 @@ import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import Link from "next/link";
 import { Flash, one } from "@/components/desk/flash";
 import { PasswordField } from "@/components/desk/password-field";
-import { completePasswordSignIn, completeSignIn, completeStaffSignIn, sendSignInCode } from "@/lib/desk-actions";
+import { completePasswordSignIn, completeSignIn, completeStaffSignIn, sendSignInCode } from "@/lib/desk-actions/auth";
 import { loadDashboard } from "@/lib/desk-data";
 import { deskPrefix } from "@/lib/desk-path";
 import { getSession } from "@/lib/auth";

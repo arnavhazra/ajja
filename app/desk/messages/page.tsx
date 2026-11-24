@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import { Flash, one } from "@/components/desk/flash";
-import { markEnquiries, saveRetention, setEnquiryStatus } from "@/lib/desk-actions";
+import { markEnquiries, saveRetention, setEnquiryStatus } from "@/lib/desk-actions/site";
 import { loadMessages, requireDesk } from "@/lib/desk-data";
 import { getSettings } from "@/lib/public-data";
 import { digits, whatsAppHref } from "@/lib/whatsapp";
