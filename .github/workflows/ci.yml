@@ -84,6 +84,99 @@ jobs:
       - name: Bundle budgets
         run: node scripts/bundle-budget.mjs
 
+  lighthouse:
+    name: Lighthouse CWV gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: main
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+      neon-proxy:
+        image: ghcr.io/timowilhelm/local-neon-http-proxy:main
+        env:
+          PG_CONNECTION_STRING: postgres://postgres:postgres@postgres:5432/main
+        ports:
+          - 4444:4444
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Wait for the Neon proxy
+        run: |
+          for i in $(seq 1 60); do
+            curl -s -o /dev/null http://localhost:4444/ && exit 0
+            sleep 1
+          done
+          echo "neon proxy did not come up" && exit 1
+
+      - name: Apply schema and seed to the CI database
+        # Same fixture rows as the E2E job: `pnpm build` prerenders cached
+        # catalog queries, so a published piece must exist before the build.
+        run: |
+          for f in drizzle/*.sql; do
+            docker exec -i "${{ job.services.postgres.id }}" psql -U postgres -d main -v ON_ERROR_STOP=1 < "$f"
+          done
+          docker exec -i "${{ job.services.postgres.id }}" psql -U postgres -d main -v ON_ERROR_STOP=1 <<'SQL'
+          insert into categories (slug, name, intro)
+            values ('e2e-paintings', 'E2E paintings', 'Fixture art form')
+            on conflict (slug) do nothing;
+          insert into products (slug, title, status, category_id)
+            select 'e2e-seed-photo', 'E2E seed photo', 'published', id
+            from categories where slug = 'e2e-paintings'
+            on conflict (slug) do nothing;
+          insert into product_images (product_id, url, width, height, alt, sort_order)
+            select id, 'https://e2e.public.blob.vercel-storage.com/e2e/seed-photo.jpg', 640, 480, 'E2E seed photo', 0
+            from products where slug = 'e2e-seed-photo';
+          SQL
+
+      - name: Production Build
+        run: pnpm build
+        env:
+          DATABASE_URL: postgres://postgres:postgres@db.localtest.me:5432/main
+          BLOB_READ_WRITE_TOKEN: "vercel_blob_rw_placeholder"
+          SESSION_SECRET: "placeholder_session_secret_for_build"
+          ADMIN_PATH: "test-admin-path-placeholder"
+          CRON_SECRET: "cron_placeholder_secret_for_build"
+
+      - name: Start production server
+        run: |
+          pnpm exec next start --hostname 127.0.0.1 --port 3100 &
+          for i in $(seq 1 60); do
+            curl -sf -o /dev/null http://127.0.0.1:3100/ && exit 0
+            sleep 2
+          done
+          echo "server did not come up" && exit 1
+        env:
+          DATABASE_URL: postgres://postgres:postgres@db.localtest.me:5432/main
+          BLOB_READ_WRITE_TOKEN: "vercel_blob_rw_placeholder"
+          SESSION_SECRET: "placeholder_session_secret_for_build"
+          ADMIN_PATH: "test-admin-path-placeholder"
+          CRON_SECRET: "cron_placeholder_secret_for_build"
+
+      - name: Lighthouse CI
+        run: pnpm dlx @lhci/cli@0.15.1 autorun
+
   e2e:
     name: Playwright E2E
     runs-on: ubuntu-latest
