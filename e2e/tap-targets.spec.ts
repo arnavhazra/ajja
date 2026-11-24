@@ -35,14 +35,14 @@ test.afterAll(async () => {
   await sql`delete from admin_users where email = ${adminEmail}`;
 });
 
-async function expectBigEnough(locator: ReturnType<import("@playwright/test").Page["locator"]>, context: string) {
+async function expectBigEnough(locator: ReturnType<import("@playwright/test").Page["locator"]>, context: string, min = 44) {
   const count = await locator.count();
   expect(count, `${context}: no targets found`).toBeGreaterThan(0);
   for (let i = 0; i < count; i += 1) {
     const box = await locator.nth(i).boundingBox();
     if (!box || (box.height === 0 && box.width === 0)) continue; // not rendered in this viewport
-    expect(box.height, `${context} #${i} height ${box.height}`).toBeGreaterThanOrEqual(44);
-    expect(box.width, `${context} #${i} width ${box.width}`).toBeGreaterThanOrEqual(44);
+    expect(box.height, `${context} #${i} height ${box.height}`).toBeGreaterThanOrEqual(min);
+    expect(box.width, `${context} #${i} width ${box.width}`).toBeGreaterThanOrEqual(min);
   }
 }
 
@@ -78,7 +78,7 @@ test("folio sheet traps focus and closes on escape", async ({ page }) => {
   await expect(dialog).toHaveCount(0);
 });
 
-test("desk editor icon buttons are at least 44px", async ({ page }) => {
+test("desk editor icon buttons are at least 56px", async ({ page }) => {
   const admin = process.env.ADMIN_PATH ?? "";
   if (admin.length < 8) throw new Error("ADMIN_PATH is not loaded");
   await page.setViewportSize({ width: 390, height: 844 });
@@ -92,5 +92,6 @@ test("desk editor icon buttons are at least 44px", async ({ page }) => {
   const [piece] = await sql`select id from products where slug = ${slug} limit 1`;
   await page.goto(`/${admin}/pieces/${piece.id}`);
   await expect(page.locator("#photos")).toBeVisible();
-  await expectBigEnough(page.locator("#photos button"), "desk photo buttons at 390px");
+  // Desk controls use the senior floor: 56px, not the public 44px.
+  await expectBigEnough(page.locator("#photos button"), "desk photo buttons at 390px", 56);
 });

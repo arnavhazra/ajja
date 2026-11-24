@@ -1,3 +1,4 @@
+import { neonConfig } from "@neondatabase/serverless";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
@@ -95,10 +96,21 @@ export function applyFixtureEnv() {
     if (key.startsWith("E2E_") && !process.env[key]) process.env[key] = value;
   }
 
+  // Fixture specs use raw neon() clients that never run lib/db's fetchEndpoint
+  // override — capture the proxy port before the scrub below deletes NEON_*.
+  const proxyPort = process.env.NEON_PROXY_PORT ?? "4444";
+
   const databaseUrl = (process.env.E2E_DATABASE_URL ?? "").trim();
   if (databaseUrl) {
-    assertSafeE2eDatabaseUrl(databaseUrl, forbidden, process.env.E2E_ISOLATED === "1");
+    const hostname = assertSafeE2eDatabaseUrl(databaseUrl, forbidden, process.env.E2E_ISOLATED === "1");
     process.env.DATABASE_URL = databaseUrl;
+    // Local/container Postgres behind a Neon-protocol proxy speaks plain HTTP
+    // on :4444 — without this, raw neon() fixture clients would post to
+    // https://localhost/sql while the app itself routes correctly.
+    if (LOCAL_HOSTS.has(hostname) || hostname.endsWith(".localtest.me")) {
+      const host = hostname.includes(":") ? `[${hostname}]` : hostname;
+      neonConfig.fetchEndpoint = () => `http://${host}:${proxyPort}/sql`;
+    }
   } else if (process.env.E2E_ISOLATED === "1") {
     // E2E_ISOLATED only counts when the fixture URL was chosen explicitly.
     // Without it an inherited (possibly production) DATABASE_URL would pass

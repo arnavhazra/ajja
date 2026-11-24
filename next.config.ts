@@ -26,7 +26,11 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   experimental: { agentUpgrade: "security" },
   images: {
-    dangerouslyAllowLocalIP: process.env.NODE_ENV !== "production",
+    // Local/test Blob endpoints resolve to loopback, which next/image refuses
+    // in production. E2E_BLOB_API_URL only exists in the browser fixture, so
+    // this stays off everywhere else.
+    dangerouslyAllowLocalIP:
+      process.env.NODE_ENV !== "production" || Boolean(process.env.E2E_BLOB_API_URL),
     qualities: [72, 74, 75],
     remotePatterns: [
       { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
