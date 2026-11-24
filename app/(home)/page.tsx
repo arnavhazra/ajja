@@ -179,8 +179,8 @@ async function Home({
               </p>
               <dl className="hero-spec">
                 <div>
-                  <dt>Custody</dt>
-                  <dd>Direct archival</dd>
+                  <dt>Studio</dt>
+                  <dd>{settings.town}, {settings.region}</dd>
                 </div>
                 <div>
                   <dt>Medium</dt>
@@ -214,7 +214,7 @@ async function Home({
                   <Link href={`/p/${detail.slug}`} className="cap-line">{pieceTitle(detail.title, detail.categorySlug, detail.attributes, detail.id)}</Link>
                   <span className="fig-status nums">[ {detail.status === "sold" ? "held in archive" : "in the studio"} ]</span>
                 </figcaption>
-                <p className="fig-prov">Documented on heavy gesso plate. Direct custody — transport arranged from the {settings.town} workshop.</p>
+                <p className="fig-prov">Documented on heavy gesso plate. Transport arranged directly from the {settings.town} workshop.</p>
               </figure>
                 );
               })()
