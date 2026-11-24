@@ -81,6 +81,9 @@ jobs:
           ADMIN_PATH: "test-admin-path-placeholder"
           CRON_SECRET: "cron_placeholder_secret_for_build"
 
+      - name: Bundle budgets
+        run: node scripts/bundle-budget.mjs
+
   e2e:
     name: Playwright E2E
     runs-on: ubuntu-latest
