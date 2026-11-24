@@ -173,7 +173,9 @@ jobs:
             curl -sk -o /dev/null https://e2e.public.blob.vercel-storage.com/healthz && break
             sleep 1
           done
-          curl -sk -X PUT --data-binary @e2e/tiny.jpg \
+          # fixture-photo.jpg is a 1600x1200 artwork-like photo (~245KB), not
+          # the 322-byte solid-color tiny.jpg, so transfer/resize cost is real.
+          curl -sk -X PUT --data-binary @e2e/fixture-photo.jpg \
             "https://e2e.public.blob.vercel-storage.com/?pathname=e2e/seed-photo.jpg" -o /dev/null
 
       - name: Production Build
@@ -202,6 +204,9 @@ jobs:
           ADMIN_PATH: "test-admin-path-placeholder"
           CRON_SECRET: "cron_placeholder_secret_for_build"
           E2E_BLOB_API_URL: "https://e2e.public.blob.vercel-storage.com"
+          # `next start` fetches the hero through next/image from the blob
+          # mock's self-signed cert; trust it for this job only.
+          NODE_EXTRA_CA_CERTS: ${{ github.workspace }}/e2e/.blob-mock-cert.pem
 
       - name: Lighthouse CI
         run: pnpm dlx @lhci/cli@0.15.1 autorun
