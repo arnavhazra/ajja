@@ -50,7 +50,10 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
       description,
       url: `${siteUrl()}/category/${resolved.slug}`,
       type: "website",
-      images: image ? [image] : undefined,
+      // The `images` key must be absent (not undefined) when a category has no
+      // photograph, otherwise Next.js treats it as explicitly set and suppresses
+      // the file-based fallback share card.
+      ...(image ? { images: [image] } : {}),
     },
   };
 }

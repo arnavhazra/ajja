@@ -1,7 +1,19 @@
 import type { Metadata } from "next";
 import { getSettings } from "@/lib/public-data";
+import { brand } from "@/lib/brand";
 
-export const metadata: Metadata = { title: "Privacy" };
+export const metadata: Metadata = {
+  title: "Privacy",
+  description: "What the studio keeps when you send a message, and what it never stores.",
+  alternates: { canonical: "/privacy" },
+  openGraph: {
+    type: "website",
+    siteName: brand.name,
+    title: `Privacy — ${brand.name}`,
+    description: "What the studio keeps when you send a message, and what it never stores.",
+    url: "/privacy",
+  },
+};
 
 export default async function PrivacyPage() {
   const settings = await getSettings();

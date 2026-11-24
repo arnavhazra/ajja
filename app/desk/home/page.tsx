@@ -79,16 +79,10 @@ async function HomeEditor({ searchParams }: { searchParams: Promise<Record<strin
         </fieldset>
         <fieldset className="grid gap-3">
           <legend className="text-2xl">Photographs</legend>
-          <div className="grid gap-1">
-            Hero photograph
-            <PhotoChoice name="heroImage" current={settings.heroImage} photos={photos} noneLabel="No hero photograph" />
-          </div>
+          <PhotoChoice name="heroImage" label="Hero photograph" current={settings.heroImage} photos={photos} noneLabel="No hero photograph" />
           <input type="hidden" name="heroFocalX" value={String(settings.heroFocalX)} />
           <input type="hidden" name="heroFocalY" value={String(settings.heroFocalY)} />
-          <div className="grid gap-1">
-            Your photo
-            <PhotoChoice name="ownerPhoto" current={settings.ownerPhoto} photos={photos} noneLabel="Not added yet" />
-          </div>
+          <PhotoChoice name="ownerPhoto" label="Your photo" current={settings.ownerPhoto} photos={photos} noneLabel="Not added yet" />
         </fieldset>
         <fieldset className="grid gap-3">
           <legend className="text-2xl">Ways to reach you</legend>

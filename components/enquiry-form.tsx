@@ -14,12 +14,11 @@ export function EnquiryForm(props: Props) {
 
 function EnquiryFormInner({ productId, productName, initialMessage, onSendAnother }: Props & { onSendAnother: () => void }) {
   const [state, action, pending] = useActionState(sendEnquiry, { ok: false, message: "" });
-  // Init true so SSR and the first client render agree — Node 22 exposes
-  // `navigator` without `onLine`, so reading it eagerly renders disabled.
-  const [online, setOnline] = useState(true);
+  // `navigator.onLine` is undefined in the Node SSR runtime, so only an explicit
+  // `false` counts as offline — this keeps server and client first render in agreement.
+  const [online, setOnline] = useState(() => (typeof navigator === "undefined" ? true : navigator.onLine !== false));
 
   useEffect(() => {
-    setOnline(window.navigator.onLine);
     const on = () => setOnline(true);
     const off = () => setOnline(false);
     window.addEventListener("online", on);
