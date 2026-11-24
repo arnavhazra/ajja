@@ -122,6 +122,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Prepare blob mock certificates
+        # The seeded fixture piece's hero image lives on the blob mock, so
+        # Lighthouse measures the homepage with a real photo. Same setup as
+        # the E2E job: self-signed cert on :443, gitignored, regenerated.
+        run: |
+          openssl req -x509 -newkey rsa:2048 -nodes \
+            -keyout e2e/.blob-mock-key.pem -out e2e/.blob-mock-cert.pem -days 1 \
+            -subj "/CN=e2e.local" \
+            -addext "subjectAltName=DNS:e2e.public.blob.vercel-storage.com,DNS:localhost,IP:127.0.0.1"
+
+      - name: Map blob mock host to loopback
+        run: echo "127.0.0.1 e2e.public.blob.vercel-storage.com" | sudo tee -a /etc/hosts
+
+      - name: Allow node to bind port 443
+        run: sudo setcap 'cap_net_bind_service=+ep' "$(readlink -f "$(which node)")"
+
       - name: Wait for the Neon proxy
         run: |
           for i in $(seq 1 60); do
@@ -150,6 +166,16 @@ jobs:
             from products where slug = 'e2e-seed-photo';
           SQL
 
+      - name: Start blob mock and upload fixture image
+        run: |
+          node e2e/blob-mock.mjs &
+          for i in $(seq 1 30); do
+            curl -sk -o /dev/null https://e2e.public.blob.vercel-storage.com/healthz && break
+            sleep 1
+          done
+          curl -sk -X PUT --data-binary @e2e/tiny.jpg \
+            "https://e2e.public.blob.vercel-storage.com/?pathname=e2e/seed-photo.jpg" -o /dev/null
+
       - name: Production Build
         run: pnpm build
         env:
@@ -158,6 +184,8 @@ jobs:
           SESSION_SECRET: "placeholder_session_secret_for_build"
           ADMIN_PATH: "test-admin-path-placeholder"
           CRON_SECRET: "cron_placeholder_secret_for_build"
+          # Lets next/image fetch the loopback blob mock (see next.config.ts).
+          E2E_BLOB_API_URL: "https://e2e.public.blob.vercel-storage.com"
 
       - name: Start production server
         run: |
@@ -173,6 +201,7 @@ jobs:
           SESSION_SECRET: "placeholder_session_secret_for_build"
           ADMIN_PATH: "test-admin-path-placeholder"
           CRON_SECRET: "cron_placeholder_secret_for_build"
+          E2E_BLOB_API_URL: "https://e2e.public.blob.vercel-storage.com"
 
       - name: Lighthouse CI
         run: pnpm dlx @lhci/cli@0.15.1 autorun
