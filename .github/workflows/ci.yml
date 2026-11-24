@@ -169,6 +169,8 @@ jobs:
         # and scrubs every production companion variable. The dummy Blob
         # token satisfies assertEnv at boot; uploads land in the local mock.
         run: |
+          echo "::add-mask::${E2E_DATABASE_URL}"
+          echo "::add-mask::${E2E_BLOB_READ_WRITE_TOKEN}"
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             pnpm exec playwright test --config playwright.prod.config.ts --project=chromium-desktop
           else
