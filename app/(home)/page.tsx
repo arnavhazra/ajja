@@ -67,8 +67,8 @@ function IndexRow({ entry, index }: { entry: IndexEntry; index: number }) {
           <span>
             <span className="idx-name block">{entry.name}</span>
             <span className="idx-meta">
-              <span className="nums">
-                {entry.count} {entry.count === 1 ? "piece" : "pieces"}
+              <span className="nums idx-brack">
+                [ {entry.count} {entry.count === 1 ? "piece" : "pieces"} ]
               </span>
               {entry.intro ? <span>{entry.intro}</span> : null}
             </span>
@@ -158,12 +158,16 @@ async function Home({
 
       <section id="index" aria-labelledby="index-title" className="hairline-b">
         <div className="shell">
+          <div className="folio-meta">
+            <span>A family studio · {settings.town}, {settings.region}</span>
+            <span className="nums">Folio no. 2025/{settings.region} — vol. iv</span>
+          </div>
           <div className="index-head">
             <div>
               <p className="kicker">
-                {brand.name} — a family studio in {settings.town}, {settings.region}
+                <span className="nums">§ 001</span> — Catalogue aperçu
               </p>
-              <h1 id="index-title" className="disp mt-[10px] text-[clamp(2.6rem,6vw,5.5rem)]">
+              <h1 id="index-title" className="disp mt-[10px] text-balance text-[clamp(2.4rem,4.6vw,4.25rem)]">
                 {settings.heroHeadline?.trim() || "Handmade paintings, woodwork, and studio pieces."}
               </h1>
               <p className="sub type">
@@ -173,6 +177,20 @@ async function Home({
               <p className="sub type mt-3">
                 <a href="#index-list" className="cap-line">Browse the material index</a>
               </p>
+              <dl className="hero-spec">
+                <div>
+                  <dt>Custody</dt>
+                  <dd>Direct archival</dd>
+                </div>
+                <div>
+                  <dt>Medium</dt>
+                  <dd>{detail ? pieceTitle(detail.title, detail.categorySlug, detail.attributes, detail.id).split("·")[0].trim() : "Mineral · Walnut"}</dd>
+                </div>
+                <div>
+                  <dt>Editions</dt>
+                  <dd>Unique 1 of 1</dd>
+                </div>
+              </dl>
             </div>
             {detail?.images[0] ? (
               (() => {
@@ -191,10 +209,12 @@ async function Home({
                     className="object-contain p-3"
                   />
                 </Link>
-                <figcaption className="idx-meta mt-2">
+                <figcaption className="fig-cap idx-meta mt-2">
+                  <span className="fig-tick" aria-hidden="true">✓</span>
                   <Link href={`/p/${detail.slug}`} className="cap-line">{pieceTitle(detail.title, detail.categorySlug, detail.attributes, detail.id)}</Link>
-                  <span> — in the studio</span>
+                  <span className="fig-status nums">[ {detail.status === "sold" ? "held in archive" : "in the studio"} ]</span>
                 </figcaption>
+                <p className="fig-prov">Documented on heavy gesso plate. Direct custody — transport arranged from the {settings.town} workshop.</p>
               </figure>
                 );
               })()
