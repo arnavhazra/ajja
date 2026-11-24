@@ -80,3 +80,114 @@ jobs:
           SESSION_SECRET: "placeholder_session_secret_for_build"
           ADMIN_PATH: "test-admin-path-placeholder"
           CRON_SECRET: "cron_placeholder_secret_for_build"
+
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: main
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+      neon-proxy:
+        # Same Neon-protocol proxy as the check job: the app's DB driver
+        # speaks HTTP to localhost:4444/sql, so E2E_DATABASE_URL uses a plain
+        # localhost postgres URL and no cloud database or secret is involved.
+        image: ghcr.io/timowilhelm/local-neon-http-proxy:main
+        env:
+          PG_CONNECTION_STRING: postgres://postgres:postgres@postgres:5432/main
+        ports:
+          - 4444:4444
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        # PRs gate on Chromium only (fast); pushes to main run the full
+        # three-browser matrix for cross-browser parity.
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            pnpm exec playwright install --with-deps chromium
+          else
+            pnpm exec playwright install --with-deps chromium webkit firefox
+          fi
+
+      - name: Prepare blob mock certificates
+        # Self-signed cert shared by e2e/blob-mock.mjs (Blob API stand-in on
+        # :443) and e2e/https-proxy.mjs (TLS in front of `next start` on
+        # :3443). Gitignored; regenerated here on every run.
+        run: |
+          openssl req -x509 -newkey rsa:2048 -nodes \
+            -keyout e2e/.blob-mock-key.pem -out e2e/.blob-mock-cert.pem -days 1 \
+            -subj "/CN=e2e.local" \
+            -addext "subjectAltName=DNS:e2e.public.blob.vercel-storage.com,DNS:localhost,IP:127.0.0.1"
+
+      - name: Map blob mock host to loopback
+        run: echo "127.0.0.1 e2e.public.blob.vercel-storage.com" | sudo tee -a /etc/hosts
+
+      - name: Allow node to bind port 443
+        run: sudo setcap 'cap_net_bind_service=+ep' "$(readlink -f "$(which node)")"
+
+      - name: Wait for the Neon proxy
+        run: |
+          for i in $(seq 1 60); do
+            curl -s -o /dev/null http://localhost:4444/ && exit 0
+            sleep 1
+          done
+          echo "neon proxy did not come up" && exit 1
+
+      - name: Apply schema to the CI database
+        run: |
+          for f in drizzle/*.sql; do
+            docker exec -i "${{ job.services.postgres.id }}" psql -U postgres -d main -v ON_ERROR_STOP=1 < "$f"
+          done
+
+      - name: Run E2E suite
+        # playwright.prod.config.ts builds the app and serves it via
+        # `next start` + TLS proxy; applyFixtureEnv points DATABASE_URL at
+        # the isolated container Postgres (localhost passes the safety gate)
+        # and scrubs every production companion variable. The dummy Blob
+        # token satisfies assertEnv at boot; uploads land in the local mock.
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            pnpm exec playwright test --config playwright.prod.config.ts --project=chromium-desktop
+          else
+            pnpm exec playwright test --config playwright.prod.config.ts
+          fi
+        env:
+          E2E_DATABASE_URL: "postgres://postgres:postgres@localhost:5432/main"
+          E2E_ADMIN_PATH: "e2e-desk-ci-path"
+          E2E_SESSION_SECRET: "e2e-ci-session-secret-0123456789abcdef"
+          E2E_BLOB_API_URL: "https://e2e.public.blob.vercel-storage.com"
+          E2E_BLOB_READ_WRITE_TOKEN: "vercel_blob_rw_e2e_ci_mock"
+
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            test-results/
+            screenshots/
+          retention-days: 14
+          if-no-files-found: ignore
