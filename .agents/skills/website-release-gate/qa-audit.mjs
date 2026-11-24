@@ -67,7 +67,7 @@ async function auditRoute(context, route, vp) {
   await page.waitForTimeout(1000);
 
   const stuck = await page.$$eval(
-    "h1, h2, a, button, [role='button'], article, section > *",
+    "h1, h2, a, button, [role='button'], article, section > *, li, figure",
     (els) =>
       els
         .filter((el) => {
