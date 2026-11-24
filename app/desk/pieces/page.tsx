@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { Flash, one } from "@/components/desk/flash";
 import { DeskRowsSkeleton } from "@/components/desk/skeleton";
-import { emptyTrash } from "@/lib/desk-actions";
+import { emptyTrash } from "@/lib/desk-actions/quick-edits";
 import { PiecesTable, type DeskPieceRow } from "@/components/desk/pieces-table";
 import { loadDeskPieces, loadNeedCounts, requireDesk } from "@/lib/desk-data";
 import { deskPrefix } from "@/lib/desk-path";

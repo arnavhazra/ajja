@@ -1,4 +1,4 @@
-import { savePiece } from "@/lib/desk-actions";
+import { savePiece } from "@/lib/desk-actions/pieces";
 import { minorToDollars } from "@/lib/money";
 import { formatNewYorkInput } from "@/lib/time";
 import type { categories, products } from "@/lib/db/schema";

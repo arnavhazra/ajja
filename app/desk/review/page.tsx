@@ -3,7 +3,7 @@ import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import Image from "next/image";
 import Link from "next/link";
 import { Flash, one } from "@/components/desk/flash";
-import { sprintSave } from "@/lib/desk-actions";
+import { sprintSave } from "@/lib/desk-actions/quick-edits";
 import { requireDesk, loadReview } from "@/lib/desk-data";
 import { deskPrefix } from "@/lib/desk-path";
 import { minorToDollars } from "@/lib/money";

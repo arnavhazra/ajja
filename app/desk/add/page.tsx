@@ -5,7 +5,7 @@ import { DraftAboutForm } from "@/components/desk/draft-about-form";
 import { Flash, one } from "@/components/desk/flash";
 import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import { PhotoUpload } from "@/components/desk/upload";
-import { publishPiece } from "@/lib/desk-actions";
+import { publishPiece } from "@/lib/desk-actions/pieces";
 import { loadDeskPiece, loadDeskPieces, requireDesk } from "@/lib/desk-data";
 import { deskPrefix } from "@/lib/desk-path";
 import { formatMoney } from "@/lib/money";

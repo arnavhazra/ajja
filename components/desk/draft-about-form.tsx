@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { saveAboutPiece } from "@/lib/desk-actions";
+import { saveAboutPiece } from "@/lib/desk-actions/quick-edits";
 
 type Draft = { id: string; title: string; categoryId: string; description: string; price: string };
 type Group = { id: string; name: string };

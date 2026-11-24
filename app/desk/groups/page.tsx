@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import { Flash, one } from "@/components/desk/flash";
-import { moveCategory, removeCategory, removeCollection, saveCategory, saveCollection } from "@/lib/desk-actions";
+import { moveCategory, removeCategory, removeCollection, saveCategory, saveCollection } from "@/lib/desk-actions/catalog";
 import { loadGroups, requireDesk } from "@/lib/desk-data";
 
 export default function GroupsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {

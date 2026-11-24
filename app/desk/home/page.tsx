@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { PhotoChoice } from "@/components/desk/photo-choice";
 import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import { Flash, one } from "@/components/desk/flash";
-import { removeTestimonial, saveHome, saveTestimonial } from "@/lib/desk-actions";
+import { removeTestimonial, saveHome, saveTestimonial } from "@/lib/desk-actions/site";
 import { loadQuotes, requireDesk } from "@/lib/desk-data";
 import { WEEKDAY_NAMES } from "@/lib/open-now";
 import { getSettings, loadManifest } from "@/lib/public-data";

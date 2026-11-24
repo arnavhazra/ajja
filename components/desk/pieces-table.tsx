@@ -4,20 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { cn } from "@/lib/cn";
-import {
-  bulkApply,
-  draftPiece,
-  duplicatePiece,
-  hidePiece,
-  moveFeatured,
-  publishPiece,
-  restorePiece,
-  saveInlineField,
-  sellPiece,
-  toggleFeatured,
-  trashPiece,
-  undoInline,
-} from "@/lib/desk-actions";
+import { draftPiece, duplicatePiece, hidePiece, publishPiece, restorePiece, sellPiece, trashPiece, undoInline } from "@/lib/desk-actions/pieces";
+import { bulkApply, moveFeatured, saveInlineField, toggleFeatured } from "@/lib/desk-actions/quick-edits";
 
 export type DeskPieceRow = {
   id: string;
