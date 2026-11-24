@@ -25,7 +25,8 @@ export default async function PoliciesPage() {
   return (
     <main className="shell max-w-4xl py-16 md:py-24">
       <header className="border-b border-line pb-10">
-        <h1 className="display text-[clamp(3rem,8vw,7rem)]">Policies</h1>
+        <p className="kicker">Direct arrangements — <span className="nums">ledger · the terms</span></p>
+        <h1 className="display mt-[10px] text-[clamp(2.4rem,4.6vw,4.25rem)]">Policies</h1>
       </header>
       <div className="mt-2">
         {sections.map(([title, body]) => (

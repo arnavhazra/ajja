@@ -101,11 +101,14 @@ async function CategoryBody({ params }: { params: Promise<Params> }) {
         </Link>
         <header className="index-head pt-2">
           <div>
-            <p className="kicker nums">
-              {pieces.length} {pieces.length === 1 ? "piece" : "pieces"}
-              {available !== pieces.length ? ` — ${available} available` : ""}
+            <p className="kicker">
+              The index — <span className="nums">folio · {resolved.slug}</span>
             </p>
-            <h1 className="disp mt-[10px] text-[clamp(2.6rem,6vw,5.5rem)]">{resolved.name}</h1>
+            <h1 className="disp mt-[10px] text-[clamp(2.4rem,4.6vw,4.25rem)]">{resolved.name}</h1>
+            <p className="idx-meta mt-3">
+              <span className="nums idx-brack">[ {pieces.length} {pieces.length === 1 ? "piece" : "pieces"} ]</span>
+              {available !== pieces.length ? <span>{available} available</span> : null}
+            </p>
           </div>
           {resolved.intro ? <p className="deck mt-6">{resolved.intro}</p> : null}
         </header>

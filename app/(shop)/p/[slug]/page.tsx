@@ -144,9 +144,10 @@ async function ProductBody({
           <div className="grid content-start gap-8 md:sticky md:top-24 md:col-span-5 md:col-start-8">
             <ViewTransition name={`piece-label-${product.id}`}>
               <div className="wall-label grid gap-3 p-5" data-reveal="">
+                <p className="kicker nums">Monograph · no. {product.sku ?? product.id.slice(0, 6)}</p>
                 <p className="tag flex items-center gap-2">
                   <span aria-hidden="true" className="size-3 rounded-full bg-pigment" />
-                  {sold ? "Sold" : "In the studio"}
+                  {sold ? "[ held in archive ]" : "[ in the studio ]"}
                 </p>
                 <h1 className="display text-[clamp(2.5rem,4.5vw,4.25rem)]">{title}</h1>
                 <p className="nums text-2xl">{sold ? "Sold" : (price ?? "Ask for the price")}</p>
