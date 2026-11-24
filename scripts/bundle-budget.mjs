@@ -37,8 +37,18 @@ if (total > MAX_TOTAL_JS_BYTES) {
   failures.push(`total client JS ${(total / 1024).toFixed(0)}KB (limit ${MAX_TOTAL_JS_BYTES / 1024}KB)`);
 }
 
-// Per-route first-load JS: union of the shared build manifest + each page's
-// files listed in the app-build manifest.
+// Per-route first-load JS: Turbopack emits `*_client-reference-manifest.js`
+// per route under `.next/server/app` listing the chunks the route needs.
+const routeManifests = [];
+function walkServer(dir) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) walkServer(path);
+    else if (entry.name.endsWith("_client-reference-manifest.js")) routeManifests.push(path);
+  }
+}
+walkServer(".next/server/app");
+
 const sizes = new Map();
 const sizeOf = (rel) => {
   if (!sizes.has(rel)) {
@@ -51,22 +61,20 @@ const sizeOf = (rel) => {
   return sizes.get(rel);
 };
 
-try {
-  const shared = JSON.parse(readFileSync(".next/build-manifest.json", "utf8"));
-  const sharedFiles = [...(shared.pages?.["/_app"] ?? []), ...(shared.rootMainFiles ?? [])];
-  const appPages = JSON.parse(readFileSync(".next/app-build-manifest.json", "utf8")).pages ?? {};
-  let biggestPage = { page: "", bytes: 0 };
-  for (const [page, files] of Object.entries(appPages)) {
-    const bytes = new Set([...sharedFiles, ...files]).reduce((sum, f) => sum + sizeOf(f), 0);
-    if (bytes > biggestPage.bytes) biggestPage = { page, bytes };
-    if (bytes > MAX_PAGE_JS_BYTES) {
-      failures.push(`route ${page} loads ${(bytes / 1024).toFixed(0)}KB first-load JS (limit ${MAX_PAGE_JS_BYTES / 1024}KB)`);
-    }
+const chunkRef = /"static\/chunks\/[^"]+\.js"/g;
+let biggestPage = { page: "", bytes: 0 };
+for (const manifest of routeManifests) {
+  const route = manifest
+    .replace(/^\.next\/server\/app\//, "")
+    .replace(/_client-reference-manifest\.js$/, "");
+  const files = readFileSync(manifest, "utf8").match(chunkRef) ?? [];
+  const bytes = [...new Set(files.map((f) => f.slice(1, -1)))].reduce((sum, f) => sum + sizeOf(f), 0);
+  if (bytes > biggestPage.bytes) biggestPage = { page: route, bytes };
+  if (bytes > MAX_PAGE_JS_BYTES) {
+    failures.push(`route ${route} references ${(bytes / 1024).toFixed(0)}KB client JS (limit ${MAX_PAGE_JS_BYTES / 1024}KB)`);
   }
-  console.log(`client JS: ${(total / 1024).toFixed(0)}KB total; largest chunk ${(largest.bytes / 1024).toFixed(0)}KB; heaviest route ${biggestPage.page} ${(biggestPage.bytes / 1024).toFixed(0)}KB`);
-} catch (error) {
-  console.log(`client JS: ${(total / 1024).toFixed(0)}KB total; largest chunk ${(largest.bytes / 1024).toFixed(0)}KB (no route manifests: ${error.message})`);
 }
+console.log(`client JS: ${(total / 1024).toFixed(0)}KB total; largest chunk ${(largest.bytes / 1024).toFixed(0)}KB; heaviest route ${biggestPage.page} ${(biggestPage.bytes / 1024).toFixed(0)}KB`);
 
 if (failures.length) {
   console.error("bundle budget exceeded:\n" + failures.map((f) => `  - ${f}`).join("\n"));
