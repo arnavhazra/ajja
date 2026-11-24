@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Lighthouse CI config is consumed by @lhci/cli, not app code.
+    "lighthouserc.json",
   ]),
 ]);
 
