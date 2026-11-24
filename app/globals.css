@@ -450,9 +450,9 @@ section[id] { scroll-margin-top: 78px; }
 .sec-head h2 { font-size: clamp(40px, 5.6vw, 88px); }
 .sec-head .sub { max-width: 40ch; color: var(--tar-soft); font-size: 15px; }
 
-.wall { display: grid; grid-template-columns: 1fr; column-gap: 2rem; row-gap: 3rem; align-items: start; padding-bottom: 10px; }
-@media (min-width: 640px) { .wall { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1024px) { .wall { grid-template-columns: repeat(3, 1fr); } }
+.wall { display: grid; grid-template-columns: minmax(0, 1fr); column-gap: 2rem; row-gap: 3rem; align-items: start; padding-bottom: 10px; }
+@media (min-width: 640px) { .wall { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .wall { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .piece { margin: 0; }
 .piece .ph { position: relative; display: block; width: 100%; overflow: hidden; background: var(--wall-deep); padding: 0.75rem; }
 .cap {

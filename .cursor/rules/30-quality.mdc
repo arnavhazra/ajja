@@ -5,6 +5,8 @@ alwaysApply: true
 
 Before finishing a task, run lint, typecheck, and unit tests when the change can affect them.
 
+Before finishing any change to a public-facing route (`app/(home)`, `app/(shop)`, `components/site-header.tsx`, shared shop components, `app/globals.css`), always execute the release gate in `.agents/skills/website-release-gate/SKILL.md`: production build plus the Playwright audit across 375x812, 768x1024, and 1440x900 on every public route.
+
 Do not leave placeholder copy, lorem ipsum, or invented facts on a published page.
 
 Do not print secrets, database URLs, or tokens.
