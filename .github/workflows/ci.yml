@@ -162,6 +162,24 @@ jobs:
             docker exec -i "${{ job.services.postgres.id }}" psql -U postgres -d main -v ON_ERROR_STOP=1 < "$f"
           done
 
+      - name: Seed E2E fixture rows
+        # `pnpm build` prerenders cached catalog queries — rows must exist
+        # before the build, so the seed lives here rather than in Playwright
+        # global setup (which only uploads the photo bytes to the blob mock).
+        run: |
+          docker exec -i "${{ job.services.postgres.id }}" psql -U postgres -d main -v ON_ERROR_STOP=1 <<'SQL'
+          insert into categories (slug, name, intro)
+            values ('e2e-paintings', 'E2E paintings', 'Fixture art form')
+            on conflict (slug) do nothing;
+          insert into products (slug, title, status, category_id)
+            select 'e2e-seed-photo', 'E2E seed photo', 'published', id
+            from categories where slug = 'e2e-paintings'
+            on conflict (slug) do nothing;
+          insert into product_images (product_id, url, width, height, alt, sort_order)
+            select id, 'https://e2e.public.blob.vercel-storage.com/e2e/seed-photo.jpg', 640, 480, 'E2E seed photo', 0
+            from products where slug = 'e2e-seed-photo';
+          SQL
+
       - name: Run E2E suite
         # playwright.prod.config.ts builds the app and serves it via
         # `next start` + TLS proxy; applyFixtureEnv points DATABASE_URL at
