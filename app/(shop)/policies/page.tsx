@@ -1,7 +1,19 @@
 import type { Metadata } from "next";
 import { getSettings } from "@/lib/public-data";
+import { brand } from "@/lib/brand";
 
-export const metadata: Metadata = { title: "Policies" };
+export const metadata: Metadata = {
+  title: "Policies",
+  description: "Buying, collection, and returns for pieces from the studio.",
+  alternates: { canonical: "/policies" },
+  openGraph: {
+    type: "website",
+    siteName: brand.name,
+    title: `Policies — ${brand.name}`,
+    description: "Buying, collection, and returns for pieces from the studio.",
+    url: "/policies",
+  },
+};
 
 export default async function PoliciesPage() {
   const settings = await getSettings();

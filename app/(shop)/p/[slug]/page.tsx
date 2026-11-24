@@ -22,11 +22,21 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!product) notFound();
   const named = hasRealTitle(product.title);
   const title = pieceTitle(product.title, product.categorySlug, product.attributes, product.id);
+  const description =
+    product.description ||
+    (named ? undefined : `${title} — a piece in the studio in Collegeville, not yet named. Ask about it directly.`);
   return {
     title,
-    description: product.description || (named ? undefined : `${title} — a piece in the studio in Collegeville, not yet named. Ask about it directly.`),
+    description,
     robots: named ? undefined : { index: false, follow: true },
     alternates: { canonical: `/p/${product.slug}` },
+    openGraph: {
+      title,
+      description,
+      url: `${siteUrl()}/p/${product.slug}`,
+      type: "website",
+      images: product.images.map((image) => image.url),
+    },
   };
 }
 
@@ -143,7 +153,7 @@ async function ProductBody({
               </div>
             </ViewTransition>
             {product.description || attributes.details ? (
-              <div className="prose grid gap-4 text-tar-soft" data-reveal="">
+              <div className="prose story grid gap-4 text-tar-soft" data-reveal="">
                 {product.description ? <p>{product.description}</p> : null}
                 {attributes.details ? <p>{attributes.details}</p> : null}
               </div>

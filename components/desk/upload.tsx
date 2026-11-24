@@ -5,7 +5,7 @@ import { useState } from "react";
 import { addPhotoToPiece, ingestUpload } from "@/lib/desk-actions";
 import { UPLOAD_ATTEMPTS, UPLOAD_MAX_FILES, planUpload } from "@/lib/upload-plan";
 
-async function uploadOne(file: File, signal: AbortSignal, onProgress: (pct: number) => void) {
+async function uploadOne(file: File, signal: AbortSignal) {
   const tokenResponse = await fetch("/api/desk/upload-token", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -13,13 +13,14 @@ async function uploadOne(file: File, signal: AbortSignal, onProgress: (pct: numb
     signal,
   });
   if (!tokenResponse.ok) throw new Error("Please sign in again.");
-  const tokenBody = (await tokenResponse.json()) as { token: string; pathname: string };
+  const tokenBody = (await tokenResponse.json()) as { token: string; pathname: string; type: string };
+  // No onUploadProgress: it switches the client to streaming fetch (duplex),
+  // which only works over HTTP/2 and silently stalls on plain HTTP/1 dev.
   return put(tokenBody.pathname, file, {
     access: "public",
     token: tokenBody.token,
-    contentType: file.type || "image/jpeg",
+    contentType: tokenBody.type || file.type || "image/jpeg",
     abortSignal: signal,
-    onUploadProgress: (update) => onProgress(update.percentage),
   });
 }
 
@@ -51,9 +52,7 @@ export function PhotoUpload({ productId, prefix = "" }: { productId?: string; pr
         for (let attempt = 1; attempt <= UPLOAD_ATTEMPTS; attempt += 1) {
           try {
             setStatus(`Uploading ${index + 1} of ${files.length}${attempt > 1 ? ` — try ${attempt}` : ""}…`);
-            const blob = await uploadOne(file, controller.signal, (pct) =>
-              setStatus(`Uploading ${index + 1} of ${files.length}… ${Math.round(pct)}%`),
-            );
+            const blob = await uploadOne(file, controller.signal);
             if (productId) {
               const saved = await addPhotoToPiece(productId, blob.url);
               if (!saved.ok) throw new Error(saved.message);

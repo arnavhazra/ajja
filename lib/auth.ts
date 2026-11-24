@@ -7,12 +7,22 @@ import { getDb } from "./db";
 import { adminUsers, auditLog, loginCodes, sessions } from "./db/schema";
 import { checkPassword, hashPassword } from "./password";
 import { verifyTotp } from "./totp";
+import { allowRate } from "./rate-limit";
 
 export const SESSION_COOKIE = "ajja_session";
 const MONTH = 60 * 60 * 24 * 30;
 
+function getSessionSecret(): string {
+  const secret = process.env.SESSION_SECRET;
+  if (secret) return secret;
+  if (process.env.NODE_ENV !== "production") {
+    return "dev-insecure-session-secret";
+  }
+  throw new Error("SESSION_SECRET is required in production.");
+}
+
 function hashCode(code: string) {
-  return createHash("sha256").update(`${code}:${process.env.SESSION_SECRET ?? ""}`).digest("hex");
+  return createHash("sha256").update(`${code}:${getSessionSecret()}`).digest("hex");
 }
 
 function same(left: string, right: string) {
@@ -88,6 +98,16 @@ export async function requestCode(emailRaw: string) {
   const email = emailRaw.trim().toLowerCase();
   const generic = "If this address is allowed, a code is on its way.";
   if (!allowedEmails().includes(email)) return { ok: true as const, message: generic };
+
+  const headerList = await headers();
+  const forwardedFor = headerList.get("x-forwarded-for");
+  const ip = forwardedFor?.split(",").pop()?.trim() || headerList.get("x-real-ip")?.trim() || "127.0.0.1";
+  const rateBucket = `req-code:${email}:${ip.slice(0, 64)}`;
+  const allowed = await allowRate(rateBucket, 3, 60 * 10);
+  if (!allowed) {
+    return { ok: true as const, message: generic };
+  }
+
   const db = getDb();
   const [latest] = await db.select().from(loginCodes).where(eq(loginCodes.email, email)).orderBy(desc(loginCodes.createdAt)).limit(1);
   if (latest?.lockedUntil && latest.lockedUntil.getTime() > Date.now()) {
@@ -139,12 +159,50 @@ export async function verifyStaff(emailRaw: string, password: string, token: str
   const expectedEmail = process.env.DEV_ADMIN_EMAIL?.trim().toLowerCase() ?? "";
   const expectedPassword = process.env.DEV_ADMIN_PASSWORD ?? "";
   const secret = process.env.DEV_ADMIN_TOTP_SECRET ?? "";
+
+  const headerList = await headers();
+  const forwardedFor = headerList.get("x-forwarded-for");
+  const ip = forwardedFor?.split(",").pop()?.trim() || headerList.get("x-real-ip")?.trim() || "127.0.0.1";
+  const rateAllowed = await allowRate(`verify-staff:${ip.slice(0, 64)}`, 10, 60 * 15);
+  if (!rateAllowed) {
+    return { ok: false as const, message: "Too many tries. Wait 15 minutes." };
+  }
+
   const emailOk = email.length > 0 && expectedEmail.length > 0 && same(email, expectedEmail);
   const passwordOk = password.length > 0 && expectedPassword.length > 0 && same(password, expectedPassword);
   const tokenOk = secret.length > 0 && verifyTotp(secret, token);
   if (!emailOk || !passwordOk || !tokenOk) {
+    const db = getDb();
+    const [devUser] = await db.select().from(adminUsers).where(eq(adminUsers.email, email)).limit(1);
+    if (devUser) {
+      if (devUser.lockedUntil && devUser.lockedUntil.getTime() > Date.now()) {
+        return { ok: false as const, message: `Too many tries. Wait ${LOCK_MINUTES} minutes.` };
+      }
+      const attempts = devUser.failedAttempts + 1;
+      const locked = attempts >= LOCK_AFTER;
+      await db
+        .update(adminUsers)
+        .set({
+          failedAttempts: locked ? 0 : attempts,
+          lockedUntil: locked ? new Date(Date.now() + LOCK_MINUTES * 60 * 1000) : null,
+        })
+        .where(eq(adminUsers.id, devUser.id));
+      await db.insert(auditLog).values({
+        userId: devUser.id,
+        action: "Failed staff sign-in attempt",
+        entity: "admin_user",
+        entityId: devUser.id,
+        meta: { email, locked },
+      });
+      if (locked) {
+        return { ok: false as const, message: `Too many tries. Wait ${LOCK_MINUTES} minutes.` };
+      }
+    }
     return { ok: false as const, message: "Those details did not work." };
   }
+
+  const db = getDb();
+  await db.update(adminUsers).set({ failedAttempts: 0, lockedUntil: null }).where(eq(adminUsers.email, email));
   await startSession(email, "developer");
   return { ok: true as const, message: "Signed in." };
 }
@@ -192,6 +250,7 @@ export async function changePassword(userId: string, current: string, next: stri
   const db = getDb();
   const [user] = await db.select().from(adminUsers).where(eq(adminUsers.id, userId)).limit(1);
   if (!user) return { ok: false as const, message: "Please sign in again." };
+
   if (user.passwordHash) {
     if (!(await checkPassword(current, user.passwordHash))) {
       return { ok: false as const, message: "Your current password did not match." };
@@ -201,6 +260,10 @@ export async function changePassword(userId: string, current: string, next: stri
     if (!expected || !same(current, expected)) {
       return { ok: false as const, message: "Your current password did not match." };
     }
+  } else if (current.trim() !== "") {
+    // First-time setup: an owner with no password yet proves identity by the
+    // current session, so only a blank current password is accepted here.
+    return { ok: false as const, message: "Your current password did not match." };
   }
   await db
     .update(adminUsers)

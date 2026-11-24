@@ -108,6 +108,7 @@ export function applyFixtureEnv() {
 
   process.env.ADMIN_PATH = (process.env.E2E_ADMIN_PATH ?? "").trim();
   process.env.SESSION_SECRET = (process.env.E2E_SESSION_SECRET ?? "").trim();
+  if (!process.env.CRON_SECRET) process.env.CRON_SECRET = "e2e-cron";
 
   // Scrub every Postgres/Neon companion so nothing falls back to .env.local.
   for (const key of Object.keys(process.env)) {
@@ -116,6 +117,19 @@ export function applyFixtureEnv() {
 
   // Live integrations stay off; the Blob test store is opt-in only.
   process.env.BLOB_READ_WRITE_TOKEN = (process.env.E2E_BLOB_READ_WRITE_TOKEN ?? "").trim();
+  // Point the blob client at the local mock (e2e/blob-mock.mjs) when given —
+  // uploads then run fully offline while assertBlobUrl still sees a
+  // *.public.blob.vercel-storage.com URL (/etc/hosts maps it to 127.0.0.1).
+  const blobApiUrl = (process.env.E2E_BLOB_API_URL ?? "").trim();
+  if (blobApiUrl) {
+    // e2e/blob-mock.mjs serves real-shaped https://*.public.blob.vercel-storage.com
+    // URLs on 127.0.0.1 — the same origin for browser and server callers.
+    process.env.VERCEL_BLOB_API_URL = blobApiUrl;
+    process.env.NEXT_PUBLIC_VERCEL_BLOB_API_URL = blobApiUrl;
+    // Server-side fetches (ingestUpload/storeImage/del) must trust the
+    // self-signed cert; the browser uses playwright's ignoreHTTPSErrors.
+    process.env.NODE_EXTRA_CA_CERTS = path.resolve("e2e/.blob-mock-cert.pem");
+  }
   process.env.RESEND_API_KEY = "";
   process.env.OPENROUTER_API_KEY = "";
   process.env.GEMINI_API_KEY = "";

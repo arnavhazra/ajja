@@ -41,10 +41,6 @@ export function SiteHeader({ name, hasStory }: { name: string; hasStory: boolean
         </nav>
 
         <div className="ml-auto flex items-center gap-[18px] text-[13.5px]">
-          <Link href="/category/all" className="hidden min-h-11 items-center text-tar-soft hover:text-tar lg:inline-flex">
-            all pieces
-          </Link>
-
           <button
             type="button"
             onClick={() => setFolioOpen(true)}
@@ -62,7 +58,7 @@ export function SiteHeader({ name, hasStory }: { name: string; hasStory: boolean
             type="button"
             ref={menuButtonRef}
             onClick={() => setMobileMenuOpen(true)}
-            className="inline-flex min-h-11 items-center justify-center border border-line-strong px-3.5 text-sm font-semibold cursor-pointer"
+            className="inline-flex min-h-11 items-center justify-center border border-line-strong px-3.5 text-sm font-semibold cursor-pointer lg:hidden"
             aria-expanded={mobileMenuOpen}
             aria-label="Menu"
           >

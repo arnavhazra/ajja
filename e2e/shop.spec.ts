@@ -134,6 +134,15 @@ test("owner signs in with a password, prices, publishes, hides, undoes, and shar
   await page.getByRole("button", { name: "Share" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Link copied" })).toBeVisible();
 
+  // The funnel ends on the desk: the note shows under Messages with a reply path.
+  await page.goto(`/${path}/messages`);
+  const note = page.locator("article").filter({ hasText: "Is the studio test piece still here?" });
+  await expect(note.getByRole("heading", { name: "Test buyer" })).toBeVisible();
+  await expect(note.getByRole("link", { name: "Reply by email" })).toBeVisible();
+  // Marking it replied keeps the desk list honest.
+  await note.getByRole("button", { name: "Mark replied" }).click();
+  await expect(note).toContainText("replied");
+
   await page.goto(`/${path}/pieces`);
   await page.getByRole("link", { name: `Edit ${title}`, exact: true }).click();
   await expect(page.getByRole("heading", { name: "Edit this piece" })).toBeVisible();
@@ -154,10 +163,10 @@ test("photo upload makes a private draft that publishes through review", async (
   await page.getByLabel("Password").fill(adminPassword);
   await page.getByRole("button", { name: "Sign in" }).click();
   await page.getByRole("link", { name: "Add a piece", exact: true }).click();
-  await page.getByLabel("Choose photos").setInputFiles({ name: smallFile, mimeType: "image/jpeg", buffer: smallPhoto });
+  await page.getByLabel("Choose photo from this device").setInputFiles({ name: smallFile, mimeType: "image/jpeg", buffer: smallPhoto });
   // Step 2 — about this piece. The draft is private until "Show on site".
   await expect(page.getByRole("heading", { name: "About this piece" })).toBeVisible({ timeout: 60_000 });
-  await page.getByLabel("Name", { exact: true }).fill(uploadTitle);
+  await page.getByLabel("Name").fill(uploadTitle);
   await page.getByRole("button", { name: "Save and continue" }).click();
   // Step 3 — review shows the visitor view before anything goes live.
   await expect(page.getByRole("heading", { name: "Review" })).toBeVisible();

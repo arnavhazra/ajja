@@ -10,6 +10,26 @@ jobs:
   check:
     name: Lint, Typecheck & Tests
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: main
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+      neon-proxy:
+        # Speaks the Neon serverless HTTP protocol to the local Postgres, so
+        # `pnpm build` prerenders real queries with no cloud dependency or secret.
+        image: ghcr.io/timowilhelm/local-neon-http-proxy:main
+        env:
+          PG_CONNECTION_STRING: postgres://postgres:postgres@postgres:5432/main
+        ports:
+          - 4444:4444
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,3 +55,28 @@ jobs:
       - name: Unit Tests
         run: pnpm test
 
+      - name: Wait for the Neon proxy
+        run: |
+          for i in $(seq 1 60); do
+            curl -s -o /dev/null http://localhost:4444/ && exit 0
+            sleep 1
+          done
+          echo "neon proxy did not come up" && exit 1
+
+      - name: Apply schema to the CI database
+        run: |
+          for f in drizzle/*.sql; do
+            docker exec -i "${{ job.services.postgres.id }}" psql -U postgres -d main -v ON_ERROR_STOP=1 < "$f"
+          done
+
+      - name: Production Build
+        # Next.js 16 prerenders cached queries at build time, so this needs a
+        # real DATABASE_URL — here an isolated containerised Postgres (never
+        # production) reached through the Neon-protocol proxy on :4444.
+        run: pnpm build
+        env:
+          DATABASE_URL: postgres://postgres:postgres@db.localtest.me:5432/main
+          BLOB_READ_WRITE_TOKEN: "vercel_blob_rw_placeholder"
+          SESSION_SECRET: "placeholder_session_secret_for_build"
+          ADMIN_PATH: "test-admin-path-placeholder"
+          CRON_SECRET: "cron_placeholder_secret_for_build"

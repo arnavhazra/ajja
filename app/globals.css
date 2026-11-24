@@ -325,6 +325,9 @@ img {
   box-shadow: 0 12px 30px -12px rgba(36, 27, 19, 0.6);
 }
 .ask-chip:hover { background: var(--sap); }
+@media (min-width: 640px) {
+  .ask-chip { display: none; }
+}
 
 /* ---------- Layout & shell ---------- */
 .shell {
@@ -380,13 +383,13 @@ section[id] { scroll-margin-top: 78px; }
 @media (max-width: 899px) {
   .index-head > div, .index-hero { grid-column: 1 / -1; }
 }
-.index-head { padding: clamp(22px, 4vh, 44px) 0 clamp(16px, 3vh, 28px); }
+.index-head { padding: clamp(30px, 6vh, 64px) 0 clamp(20px, 3.6vh, 36px); }
 .index-head .sub { max-width: 44ch; color: var(--tar-soft); }
 .idx { border-top: 2px solid var(--laterite); box-shadow: 0 -1px 0 var(--line-strong) inset; }
 .idx-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(160px, min(220px, 22vw));
-  gap: clamp(14px, 3vw, 40px);
+  grid-template-columns: minmax(0, 1fr) minmax(200px, min(340px, 26vw));
+  gap: clamp(18px, 3vw, 48px);
   align-items: center;
   padding: clamp(18px, 3.4vh, 34px) 0;
   border-bottom: 1px solid var(--line);
@@ -788,8 +791,52 @@ a.cap-line { display: inline-flex; align-items: center; min-height: 44px; }
 ::view-transition-group(*) { animation-duration: 0.5s; animation-timing-function: var(--ease-out-quint); }
 ::view-transition-new(piece-label-*) { animation-name: vt-tag-slide; }
 
-/* data-reveal is an inert marker — nothing reveals it anymore. Keep content
-   visible unconditionally so a stale stylesheet can never hide it again. */
+/* ---------- Editorial deck & story ---------- */
+/* The deck: Newsreader prose carrying an art form's intro — the catalogue
+   voice, wider measure, balanced rag. */
+.deck {
+  font-family: var(--font-reader), "Newsreader", Georgia, serif;
+  font-size: clamp(1.15rem, 1.7vw, 1.45rem);
+  line-height: 1.55;
+  color: var(--tar);
+  max-width: 46ch;
+  text-wrap: pretty;
+}
+
+/* The story: the first letter of a piece's own telling lifts in the pigment
+   sampled from the piece itself — the one place colour is borrowed from the
+   work rather than left to it. */
+.story > p:first-of-type::first-letter {
+  font-family: var(--font-reader), "Newsreader", Georgia, serif;
+  font-weight: 500;
+  font-size: 3.05em;
+  line-height: 0.8;
+  float: left;
+  padding: 0.06em 0.14em 0 0;
+  color: var(--pigment, var(--sap));
+}
+
+/* ---------- Entry reveal ---------- */
+/* The 12px rise from DESIGN.md, restored as a scroll-driven CSS animation.
+   It can never strand hidden content: browsers without view() timelines skip
+   the whole block, reduced motion removes it, and an element outside the
+   entry range is simply not yet on screen. */
+@keyframes reveal-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    [data-reveal] {
+      animation: reveal-rise 0.6s var(--ease-out) both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+  }
+}
+
+/* data-reveal is visible by default — the animation above is the only thing
+   that ever hides it, and only while it is still below the fold. */
 [data-reveal] { opacity: 1; transform: none; clip-path: none; }
 
 @media (prefers-reduced-motion: reduce) {

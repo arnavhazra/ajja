@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { PhotoChoice } from "@/components/desk/photo-choice";
 import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import { Flash, one } from "@/components/desk/flash";
 import { removeTestimonial, saveHome, saveTestimonial } from "@/lib/desk-actions";
@@ -37,106 +38,91 @@ async function HomeEditor({ searchParams }: { searchParams: Promise<Record<strin
         {settings.copyNeedsApproval ? <p className="desk-note">Needs your approval.</p> : <p className="desk-note">You marked this wording as approved.</p>}
       </div>
       <form action={saveHome} className="grid gap-3">
-        <label className="grid gap-1">
-          Shop name
-          <input className="field" name="businessName" defaultValue={settings.businessName} />
-        </label>
-        <label className="grid gap-1">
-          Your name on the site
-          <input className="field" name="ownerName" defaultValue={settings.ownerName} />
-        </label>
-        <label className="grid gap-1">
-          Town
-          <input className="field" name="town" defaultValue={settings.town} />
-        </label>
-        <label className="grid gap-1">
-          State
-          <input className="field" name="region" defaultValue={settings.region} />
-        </label>
-        <label className="grid gap-1">
-          Headline
-          <input className="field" name="heroHeadline" defaultValue={settings.heroHeadline} />
-        </label>
-        <label className="grid gap-1">
-          Under the headline
-          <textarea className="field" name="heroText" defaultValue={settings.heroText} />
-        </label>
-        <label className="grid gap-1">
-          Story
-          <textarea className="field" name="story" defaultValue={settings.story} />
-        </label>
-        <label className="grid gap-1">
-          Announcement
-          <input className="field" name="announcement" defaultValue={settings.announcement} />
-        </label>
-        <label className="flex min-h-12 items-center gap-3">
-          <input type="checkbox" name="announcementLive" defaultChecked={settings.announcementLive} />
-          Show the announcement
-        </label>
-        <label className="grid gap-1">
-          Hero photograph
-          <select className="field" name="heroImage" defaultValue={settings.heroImage}>
-            <option value="">No photograph yet</option>
-            {photos.map((photo) => (
-              <option key={photo.url} value={photo.url}>
-                {photo.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <input type="hidden" name="heroFocalX" value={String(settings.heroFocalX)} />
-        <input type="hidden" name="heroFocalY" value={String(settings.heroFocalY)} />
-        <label className="grid gap-1">
-          Your photo
-          <select className="field" name="ownerPhoto" defaultValue={settings.ownerPhoto}>
-            <option value="">Not added yet</option>
-            {photos.map((photo) => (
-              <option key={`owner-${photo.url}`} value={photo.url}>
-                {photo.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="grid gap-1">
-          WhatsApp number
-          <input className="field" name="whatsapp" defaultValue={settings.whatsapp} />
-        </label>
-        <label className="grid gap-1">
-          Phone
-          <input className="field" name="phone" defaultValue={settings.phone} />
-        </label>
-        <label className="grid gap-1">
-          Email for messages
-          <input className="field" name="email" type="email" defaultValue={settings.email} />
-        </label>
-        <label className="grid gap-1">
-          Street address
-          <input className="field" name="address" defaultValue={settings.address} />
-        </label>
-        <label className="grid gap-1">
-          Map link
-          <input className="field" name="mapUrl" defaultValue={settings.mapUrl} />
-        </label>
-        <label className="grid gap-1">
-          Instagram link
-          <input className="field" name="instagram" defaultValue={settings.instagram} />
-        </label>
-        <label className="grid gap-1">
-          Facebook link
-          <input className="field" name="facebook" defaultValue={settings.facebook} />
-        </label>
-        <label className="grid gap-1">
-          WhatsApp channel link
-          <input className="field" name="whatsappChannel" defaultValue={settings.whatsappChannel} />
-        </label>
-        <label className="grid gap-1">
-          How you reply
-          <textarea className="field" name="responseNote" defaultValue={settings.responseNote} />
-        </label>
-        <label className="grid gap-1">
-          Payment note
-          <textarea className="field" name="paymentNote" defaultValue={settings.paymentNote} />
-        </label>
+        <fieldset className="grid gap-3">
+          <legend className="text-2xl">The name and words</legend>
+          <label className="grid gap-1">
+            Shop name
+            <input className="field" name="businessName" defaultValue={settings.businessName} />
+          </label>
+          <label className="grid gap-1">
+            Your name on the site
+            <input className="field" name="ownerName" defaultValue={settings.ownerName} />
+          </label>
+          <label className="grid gap-1">
+            Town
+            <input className="field" name="town" defaultValue={settings.town} />
+          </label>
+          <label className="grid gap-1">
+            State
+            <input className="field" name="region" defaultValue={settings.region} />
+          </label>
+          <label className="grid gap-1">
+            Headline
+            <input className="field" name="heroHeadline" defaultValue={settings.heroHeadline} />
+          </label>
+          <label className="grid gap-1">
+            Under the headline
+            <textarea className="field" name="heroText" defaultValue={settings.heroText} />
+          </label>
+          <label className="grid gap-1">
+            Story
+            <textarea className="field" name="story" defaultValue={settings.story} />
+          </label>
+          <label className="grid gap-1">
+            Announcement
+            <input className="field" name="announcement" defaultValue={settings.announcement} />
+          </label>
+          <label className="flex min-h-12 items-center gap-3">
+            <input type="checkbox" name="announcementLive" defaultChecked={settings.announcementLive} />
+            Show the announcement
+          </label>
+        </fieldset>
+        <fieldset className="grid gap-3">
+          <legend className="text-2xl">Photographs</legend>
+          <PhotoChoice name="heroImage" label="Hero photograph" current={settings.heroImage} photos={photos} noneLabel="No hero photograph" />
+          <input type="hidden" name="heroFocalX" value={String(settings.heroFocalX)} />
+          <input type="hidden" name="heroFocalY" value={String(settings.heroFocalY)} />
+          <PhotoChoice name="ownerPhoto" label="Your photo" current={settings.ownerPhoto} photos={photos} noneLabel="Not added yet" />
+        </fieldset>
+        <fieldset className="grid gap-3">
+          <legend className="text-2xl">Ways to reach you</legend>
+          <label className="grid gap-1">
+            WhatsApp number
+            <input className="field" name="whatsapp" defaultValue={settings.whatsapp} />
+          </label>
+          <label className="grid gap-1">
+            Phone
+            <input className="field" name="phone" defaultValue={settings.phone} />
+          </label>
+          <label className="grid gap-1">
+            Email for messages
+            <input className="field" name="email" type="email" defaultValue={settings.email} />
+          </label>
+          <label className="grid gap-1">
+            Street address
+            <input className="field" name="address" defaultValue={settings.address} />
+          </label>
+          <label className="grid gap-1">
+            Map link
+            <input className="field" name="mapUrl" defaultValue={settings.mapUrl} />
+          </label>
+          <label className="grid gap-1">
+            Instagram link
+            <input className="field" name="instagram" defaultValue={settings.instagram} />
+          </label>
+          <label className="grid gap-1">
+            Facebook link
+            <input className="field" name="facebook" defaultValue={settings.facebook} />
+          </label>
+          <label className="grid gap-1">
+            WhatsApp channel link
+            <input className="field" name="whatsappChannel" defaultValue={settings.whatsappChannel} />
+          </label>
+          <label className="grid gap-1">
+            How you reply
+            <textarea className="field" name="responseNote" defaultValue={settings.responseNote} />
+          </label>
+        </fieldset>
         <fieldset className="grid gap-3">
           <legend className="text-2xl">Hours</legend>
           {WEEKDAY_NAMES.map((day) => {
@@ -168,7 +154,7 @@ async function HomeEditor({ searchParams }: { searchParams: Promise<Record<strin
           </div>
         </fieldset>
         <fieldset className="grid gap-3">
-          <legend className="text-2xl">Timing &amp; ways of working</legend>
+          <legend className="text-2xl">Commissions &amp; timing</legend>
           <label className="grid gap-1">
             Lead times — how long a piece or a commission takes
             <textarea className="field" name="leadTime" defaultValue={settings.leadTime} />
@@ -182,18 +168,25 @@ async function HomeEditor({ searchParams }: { searchParams: Promise<Record<strin
             <textarea className="field" name="commissions" defaultValue={settings.commissions} />
           </label>
         </fieldset>
-        <label className="grid gap-1">
-          Buying
-          <textarea className="field" name="buying" defaultValue={settings.policies.buying} />
-        </label>
-        <label className="grid gap-1">
-          Collection
-          <textarea className="field" name="collection" defaultValue={settings.policies.collection} />
-        </label>
-        <label className="grid gap-1">
-          Returns
-          <textarea className="field" name="returns" defaultValue={settings.policies.returns} />
-        </label>
+        <fieldset className="grid gap-3">
+          <legend className="text-2xl">Terms shown on the site</legend>
+          <label className="grid gap-1">
+            Payment note
+            <textarea className="field" name="paymentNote" defaultValue={settings.paymentNote} />
+          </label>
+          <label className="grid gap-1">
+            Buying
+            <textarea className="field" name="buying" defaultValue={settings.policies.buying} />
+          </label>
+          <label className="grid gap-1">
+            Collection
+            <textarea className="field" name="collection" defaultValue={settings.policies.collection} />
+          </label>
+          <label className="grid gap-1">
+            Returns
+            <textarea className="field" name="returns" defaultValue={settings.policies.returns} />
+          </label>
+        </fieldset>
         <input type="hidden" name="theme" value={settings.theme} />
         <input type="hidden" name="fontPair" value={settings.fontPair} />
         <label className="flex min-h-12 items-center gap-3">

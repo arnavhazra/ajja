@@ -1,0 +1,10 @@
+create index if not exists admin_users_email_idx on admin_users (email);
+create index if not exists login_codes_email_created_idx on login_codes (email, created_at desc);
+create index if not exists sessions_email_created_idx on sessions (email, created_at desc);
+create index if not exists sessions_expires_at_idx on sessions (expires_at);
+create index if not exists products_listed_idx on products (created_at desc) where deleted_at is null and status in ('published', 'sold');
+create index if not exists products_category_created_idx on products (category_id, created_at desc) where deleted_at is null and status in ('published', 'sold');
+create index if not exists product_images_product_sort_idx on product_images (product_id, sort_order);
+create index if not exists enquiries_product_created_idx on enquiries (product_id, created_at desc);
+create index if not exists events_product_created_idx on events (product_id, created_at desc);
+create index if not exists events_type_created_idx on events (type, created_at desc);

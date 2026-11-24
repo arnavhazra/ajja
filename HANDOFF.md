@@ -123,3 +123,46 @@ password-reset email — the code door is the recovery path.
 - `E2E_DATABASE_URL` — pooled connection string for the isolated branch
 - `E2E_ADMIN_PATH` — desk path fixture (e.g. `e2e-desk-secret-path`)
 - `E2E_SESSION_SECRET` — session secret fixture (e.g. `e2e-fixture-secret-32chars`)
+- `E2E_BLOB_API_URL` — point uploads at the local blob mock (e.g. `https://e2e.public.blob.vercel-storage.com`)
+- `E2E_DESK_EMAIL`, `OWNER_EMAIL`, `EMAIL_FROM`, `DEV_ADMIN_*` — desk sign-in fixtures
+
+The prod suite (`playwright.prod.config.ts`) serves everything over TLS because
+the shipped CSP sends `upgrade-insecure-requests`, which WebKit honours even on
+loopback. `e2e/blob-mock.mjs` answers Blob API calls on :443 as
+`e2e.public.blob.vercel-storage.com` (add to `/etc/hosts`), and
+`e2e/https-proxy.mjs` terminates TLS in front of `next start` on :3443. Both
+share a self-signed cert at `e2e/.blob-mock-cert.pem` (gitignored) — regenerate
+with:
+
+```
+openssl req -x509 -newkey rsa:2048 -nodes \
+  -keyout e2e/.blob-mock-key.pem -out e2e/.blob-mock-cert.pem -days 365 \
+  -subj "/CN=e2e.local" \
+  -addext "subjectAltName=DNS:e2e.public.blob.vercel-storage.com,DNS:localhost,IP:127.0.0.1"
+```
+
+Binding :443 needs `sudo -n setcap 'cap_net_bind_service=+ep' "$(readlink -f "$(which node)")"`
+on a fresh VM. `pnpm exec playwright install` fetches the WebKit and Firefox
+binaries.
+
+## Watching the site
+
+- Vercel Analytics + Speed Insights are wired in `app/layout.tsx`; page and
+  Core Web Vitals data land on the project's Vercel dashboard — nothing else
+  to configure.
+- First-party shop events (views, enquiries, saves) flow through
+  `EventBeacon` into `app/api/events`.
+- `GET /api/health` returns `{ ok: true }` when the app can reach the
+  database, 503 otherwise — point an uptime check at it.
+- CI runs lint, typecheck, unit tests and a real `pnpm build` on every push
+  and PR, with zero secrets (containerised Postgres behind a Neon-protocol
+  proxy). A red build means the change does not ship.
+
+## Rolling back
+
+- Site: Vercel dashboard → Deployments → pick the last good production
+  deployment → **Promote to Production**. Instant rollback, no rebuild.
+- Data: Neon console → the project → **Branches** → the production branch →
+  **Restore** — instant point-in-time restore to before the bad change.
+- The desk **Save a copy** zip (words + photographs) is the off-site backup;
+  take one before any risky change and after publishing batches.

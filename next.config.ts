@@ -22,6 +22,7 @@ const csp = [
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
+  poweredByHeader: false,
   devIndicators: false,
   experimental: { agentUpgrade: "security" },
   images: {

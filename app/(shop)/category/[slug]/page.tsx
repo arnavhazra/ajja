@@ -38,10 +38,23 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const { slug } = await params;
   const resolved = await resolve(slug);
   if (!resolved) notFound();
+  const description =
+    resolved.intro || `${resolved.name} — ${resolved.pieces.length} ${resolved.pieces.length === 1 ? "piece" : "pieces"} photographed as they are.`;
+  const image = resolved.pieces[0]?.images[0]?.url;
   return {
     title: resolved.name,
-    description: resolved.intro || `${resolved.name} — ${resolved.pieces.length} ${resolved.pieces.length === 1 ? "piece" : "pieces"} photographed as they are.`,
+    description,
     alternates: { canonical: `/category/${resolved.slug}` },
+    openGraph: {
+      title: resolved.name,
+      description,
+      url: `${siteUrl()}/category/${resolved.slug}`,
+      type: "website",
+      // The `images` key must be absent (not undefined) when a category has no
+      // photograph, otherwise Next.js treats it as explicitly set and suppresses
+      // the file-based fallback share card.
+      ...(image ? { images: [image] } : {}),
+    },
   };
 }
 
@@ -94,7 +107,7 @@ async function CategoryBody({ params }: { params: Promise<Params> }) {
             </p>
             <h1 className="disp mt-[10px] text-[clamp(2.6rem,6vw,5.5rem)]">{resolved.name}</h1>
           </div>
-          {resolved.intro ? <p className="sub type">{resolved.intro}</p> : null}
+          {resolved.intro ? <p className="deck mt-6">{resolved.intro}</p> : null}
         </header>
         <h2 className="sr-only">Pieces</h2>
         {pieces.length ? (
