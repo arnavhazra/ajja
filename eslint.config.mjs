@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Lighthouse CI config is consumed by @lhci/cli, not app code.
     "lighthouserc.json",
+    // Vendored agent skills ship minified demos and third-party sources.
+    ".agents/skills/**",
   ]),
 ]);
 
