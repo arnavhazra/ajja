@@ -34,13 +34,12 @@ function CommissionFormInner({
   onSendAnother,
 }: Props & { onSendAnother: () => void }) {
   const [state, action, pending] = useActionState(sendEnquiry, { ok: false, message: "" });
-  // `navigator.onLine` is undefined in the Node SSR runtime, so only an explicit
-  // `false` counts as offline — this keeps server and client first render in agreement.
   const [online, setOnline] = useState(() => (typeof navigator === "undefined" ? true : navigator.onLine !== false));
   const { items } = useFolio();
   const messageRef = useRef<HTMLTextAreaElement>(null);
   const appendedRef = useRef<string | null>(null);
   const chips = items.length ? items : saved;
+
   useEffect(() => {
     const on = () => setOnline(true);
     const off = () => setOnline(false);
@@ -52,8 +51,6 @@ function CommissionFormInner({
     };
   }, []);
 
-  // The server accepts 2,000 characters. Only ever remove the exact line this
-  // form appended before — a visitor's own "Pieces:" paragraph is left alone.
   const notePieces = () => {
     const field = messageRef.current;
     if (!field) return;
@@ -77,11 +74,13 @@ function CommissionFormInner({
 
   if (state.ok) {
     return (
-      <div role="status" className="note-card note-done">
-        <span className="note-done-dot" aria-hidden="true" />
-        <p className="display-wide text-3xl">Thank you — your note is with the studio.</p>
-        <p className="type text-tar-soft">{state.message || responseNote || "We will reply by phone or email within a few days."}</p>
-        <button type="button" onClick={onSendAnother} className="btn btn-secondary w-fit">
+      <div role="status" className="grid gap-4 rounded-[2px] border border-line bg-surface-low p-7 md:p-9">
+        <span className="inline-block size-3.5 rounded-full bg-ok" aria-hidden="true" />
+        <p className="disp text-2xl text-tar md:text-3xl">Thank you — your note is with the studio.</p>
+        <p className="type text-base text-tar-soft">
+          {state.message || responseNote || "We will reply by phone or email within a few days."}
+        </p>
+        <button type="button" onClick={onSendAnother} className="btn btn-secondary mt-2 w-fit">
           Send another note
         </button>
         <Honeypot />
@@ -91,68 +90,99 @@ function CommissionFormInner({
   }
 
   return (
-    <form action={action} className="note-card" onSubmit={notePieces}>
+    <form
+      action={action}
+      onSubmit={notePieces}
+      className="flex flex-col gap-5 rounded-[2px] border border-line bg-surface-low p-6 md:p-8"
+    >
       {productId ? <input type="hidden" name="productId" value={productId} /> : null}
       {productName ? (
-        <p className="f-about">
-          About <strong>{productName}</strong>
+        <p className="ledger border-b border-line pb-3 text-xs text-tar-soft">
+          ABOUT: <strong className="text-tar">{productName}</strong>
         </p>
       ) : null}
 
-      <div className="f-row">
-        <label htmlFor="note-name">Your name *</label>
-        <input id="note-name" name="name" type="text" required maxLength={120} autoComplete="name" />
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="note-name" className="micro-label text-tar">
+            Your name *
+          </label>
+          <input
+            id="note-name"
+            name="name"
+            type="text"
+            required
+            maxLength={120}
+            autoComplete="name"
+            placeholder="Your full name"
+            className="h-11 w-full rounded-[2px] border border-line-strong bg-wall px-3.5 text-base text-tar outline-none transition-colors placeholder:text-tar-soft/75 focus:border-sap focus:ring-1 focus:ring-sap"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="note-contact" className="micro-label text-tar">
+            Phone or email *
+          </label>
+          <input
+            id="note-contact"
+            name="contact"
+            type="text"
+            required
+            maxLength={160}
+            autoComplete="tel"
+            inputMode="text"
+            pattern=".*@.*|(.*[0-9].*){7,}"
+            title="A phone number or an email address the studio can reply to"
+            placeholder="610 555 0123 or you@example.com"
+            className="h-11 w-full rounded-[2px] border border-line-strong bg-wall px-3.5 text-base text-tar outline-none transition-colors placeholder:text-tar-soft/75 focus:border-sap focus:ring-1 focus:ring-sap"
+          />
+        </div>
       </div>
-      <div className="f-row">
-        <label htmlFor="note-contact">Phone or email *</label>
-        <input
-          id="note-contact"
-          name="contact"
-          type="text"
-          required
-          maxLength={160}
-          autoComplete="tel"
-          inputMode="text"
-          pattern=".*@.*|(.*[0-9].*){7,}"
-          title="A phone number or an email address the studio can reply to"
-          placeholder="e.g. 610 555 0123 or you@example.com"
-        />
-      </div>
-      <div className="f-row">
-        <label htmlFor="note-subject">Subject</label>
+
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="note-subject" className="micro-label text-tar">
+          Piece of interest / Subject
+        </label>
         <input
           id="note-subject"
           name="subject"
           type="text"
           defaultValue={productName ? `Asking about ${productName}` : (defaultSubject ?? "A question for the studio")}
+          className="h-11 w-full rounded-[2px] border border-line-strong bg-wall px-3.5 text-base text-tar outline-none transition-colors placeholder:text-tar-soft/75 focus:border-sap focus:ring-1 focus:ring-sap"
         />
       </div>
-      <div className="f-row">
-        <label htmlFor="note-message">Message *</label>
+
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="note-message" className="micro-label text-tar">
+          Your note *
+        </label>
         <textarea
           id="note-message"
           name="message"
           ref={messageRef}
           required
+          rows={4}
           maxLength={2000}
           defaultValue={initialMessage ?? (productName ? `I would like to ask about ${productName}.` : "")}
-          placeholder="Which piece, or what would you like made — size, wood, where it will live?"
+          placeholder="Tell us which piece caught your eye, or what you would like made — size, wood, where it will live."
+          className="min-h-28 w-full resize-y rounded-[2px] border border-line-strong bg-wall p-3.5 text-base text-tar outline-none transition-colors placeholder:text-tar-soft/75 focus:border-sap focus:ring-1 focus:ring-sap"
         />
       </div>
 
       {chips.length ? (
         <div className="f-chips" aria-label="Pieces included in this note">
           {chips.slice(0, 4).map((item) => (
-            <span key={item.id} className="f-chip" title={item.title}>
+            <span key={item.id} className="f-chip rounded-[2px] bg-wall" title={item.title}>
               {item.imageUrl ? <Image src={item.imageUrl} alt="" width={28} height={28} className="object-cover" /> : null}
               <span className="f-chip-title">{item.title}</span>
             </span>
           ))}
-          {chips.length > 4 ? <span className="f-chip f-chip-more">+{chips.length - 4} more</span> : null}
+          {chips.length > 4 ? <span className="f-chip f-chip-more rounded-[2px] bg-wall">+{chips.length - 4} more</span> : null}
         </div>
       ) : null}
 
       <Honeypot />
+
       {!online ? (
         <p role="status" className="f-error">
           You appear to be offline. Reconnect to send your note — nothing has been sent yet.
@@ -164,10 +194,16 @@ function CommissionFormInner({
         </p>
       ) : null}
 
-      <button className="send" type="submit" disabled={pending || !online}>
-        {!online ? "Offline" : pending ? "Sending…" : "Send to the studio"}
-      </button>
-      <p className="fine">Nothing is paid on this site — your note goes straight to the studio.</p>
+      <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
+        <button
+          className="ledger inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-[2px] bg-tar px-6 text-xs font-bold uppercase tracking-wider text-wall transition-colors hover:bg-sap disabled:cursor-default disabled:opacity-60"
+          type="submit"
+          disabled={pending || !online}
+        >
+          {!online ? "Offline" : pending ? "Sending…" : "Send a note →"}
+        </button>
+        <p className="ledger text-xs text-tar-soft">No online payment. Direct correspondence only.</p>
+      </div>
     </form>
   );
 }

@@ -3,9 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { JsonLd } from "@/components/json-ld";
-import { PieceCard } from "@/components/shop/piece-card";
+import { CategoryWall } from "@/components/shop/category-wall";
 import { orderForIndex } from "@/lib/category-index";
-import { loadCategory, loadCategoryPieces, loadManifest } from "@/lib/public-data";
+import { getSettings, loadCategory, loadCategoryPieces, loadManifest } from "@/lib/public-data";
 import { siteUrl } from "@/lib/site-url";
 import type { PublicProduct } from "@/lib/types";
 
@@ -39,7 +39,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const resolved = await resolve(slug);
   if (!resolved) notFound();
   const description =
-    resolved.intro || `${resolved.name} — ${resolved.pieces.length} ${resolved.pieces.length === 1 ? "piece" : "pieces"} photographed as they are.`;
+    resolved.intro ||
+    `${resolved.name} — ${resolved.pieces.length} ${resolved.pieces.length === 1 ? "piece" : "pieces"} photographed as they are.`;
   const image = resolved.pieces[0]?.images[0]?.url;
   return {
     title: resolved.name,
@@ -68,10 +69,9 @@ export default function CategoryPage({ params }: { params: Promise<Params> }) {
 
 async function CategoryBody({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
-  const resolved = await resolve(slug);
+  const [resolved, settings] = await Promise.all([resolve(slug), getSettings()]);
   if (!resolved) notFound();
   const pieces: PublicProduct[] = resolved.pieces;
-  const available = pieces.filter((piece) => piece.status !== "sold").length;
   const canonical = `${siteUrl()}/category/${resolved.slug}`;
 
   return (
@@ -94,40 +94,78 @@ async function CategoryBody({ params }: { params: Promise<Params> }) {
           ],
         }}
       />
-      <div className="shell pb-24 pt-4 md:pb-32">
-        <Link href="/#index" className="inline-flex min-h-11 items-center gap-2 text-sm text-tar-soft">
-          <span aria-hidden="true">←</span>
-          <span className="ink-link">The index</span>
-        </Link>
-        <header className="index-head pt-2">
-          <div>
-            <p className="kicker">
-              The index — <span className="nums">folio · {resolved.slug}</span>
-            </p>
-            <h1 className="disp mt-[10px] text-[clamp(2.4rem,4.6vw,4.25rem)]">{resolved.name}</h1>
-            <p className="idx-meta mt-3">
-              <span className="nums idx-brack">[ {pieces.length} {pieces.length === 1 ? "piece" : "pieces"} ]</span>
-              {available !== pieces.length ? <span>{available} available</span> : null}
-            </p>
+
+      <div className="shell pb-20 pt-6 md:pb-28 md:pt-8">
+        {/* Folio Header Strip */}
+        <header className="border-b border-line pb-8">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <Link
+              href="/#index"
+              className="micro-label inline-flex min-h-11 items-center gap-2.5 text-tar hover:text-sap"
+            >
+              <span
+                aria-hidden="true"
+                className="inline-flex size-5 items-center justify-center rounded-full bg-sap text-[11px] font-bold text-wall"
+              >
+                §
+              </span>
+              <span>The index / {resolved.slug} · Monograph folio</span>
+            </Link>
+            <span className="micro-label text-tar-soft">
+              Folio no. 2025/{settings.region.toUpperCase()} · {settings.town}, {settings.region}
+            </span>
           </div>
-          {resolved.intro ? <p className="deck mt-6">{resolved.intro}</p> : null}
+
+          <div className="grid grid-cols-1 items-baseline gap-5 lg:grid-cols-12">
+            <div className="flex flex-wrap items-baseline gap-4 lg:col-span-6">
+              <h1 className="disp text-[clamp(2.6rem,5vw,4.5rem)] leading-[0.98] text-tar">{resolved.name}</h1>
+              <span className="ledger text-sm text-tar-soft">
+                [ {pieces.length} {pieces.length === 1 ? "PIECE" : "PIECES"} ]
+              </span>
+            </div>
+            {resolved.intro ? (
+              <div className="lg:col-span-6">
+                <p className="type max-w-xl text-base leading-relaxed text-tar-soft md:text-lg">{resolved.intro}</p>
+              </div>
+            ) : null}
+          </div>
         </header>
+
         <h2 className="sr-only">Pieces</h2>
         {pieces.length ? (
-          <div className="wall">
-            {pieces.map((product, index) => (
-              <PieceCard
-                key={product.id}
-                product={product}
-                index={index}
-                priority={index < 3}
-                sizes="(min-width: 1180px) 22vw, (min-width: 900px) 30vw, (min-width: 560px) 46vw, 94vw"
-              />
-            ))}
-          </div>
+          <CategoryWall pieces={pieces} />
         ) : (
-          <p className="type py-10 text-tar-soft">Nothing public in this art form yet — ask the studio what is in progress.</p>
+          <p className="type py-12 text-tar-soft">
+            Nothing public in this art form yet — ask the studio what is in progress.
+          </p>
         )}
+
+        {/* Bottom Studio Dispatch Strip */}
+        <section className="mt-6 border-t-2 border-tar pt-8">
+          <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-12">
+            <div className="ledger text-xs text-tar-soft lg:col-span-4">
+              <strong className="text-tar">[ {pieces.length} WORKS ]</strong> — {settings.town.toUpperCase()},{" "}
+              {settings.region.toUpperCase()}
+            </div>
+            <p className="type text-sm text-tar-soft lg:col-span-5">
+              {settings.paymentNote || "Direct maker contact. No online cart — send a note about any piece."}
+            </p>
+            <div className="flex flex-wrap items-center gap-3 lg:col-span-3 lg:justify-end">
+              <Link
+                href="/#index"
+                className="ledger inline-flex min-h-11 items-center rounded-[2px] bg-wall-deep px-4 text-xs uppercase tracking-wider text-tar hover:bg-wall-sink"
+              >
+                ← The index
+              </Link>
+              <Link
+                href="/#inquire"
+                className="ledger inline-flex min-h-11 items-center rounded-[2px] bg-tar px-4 text-xs font-bold uppercase tracking-wider text-wall hover:bg-sap"
+              >
+                Send a note →
+              </Link>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   );
@@ -140,10 +178,10 @@ function CategorySkeleton() {
         <div className="h-4 w-28 bg-wall-sink" />
         <div className="h-12 w-1/2 bg-wall-deep" />
       </div>
-      <div className="mt-8 grid animate-pulse grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
-        {Array.from({ length: 8 }, (_, i) => (
+      <div className="mt-8 grid animate-pulse grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }, (_, i) => (
           <div key={i} className="grid gap-3">
-            <div className="aspect-[4/5] bg-wall-deep" />
+            <div className="aspect-[4/3] bg-wall-deep" />
             <div className="h-4 w-3/4 bg-wall-deep" />
           </div>
         ))}

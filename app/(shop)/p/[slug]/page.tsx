@@ -8,10 +8,11 @@ import { EventBeacon } from "@/components/event-beacon";
 import { JsonLd } from "@/components/json-ld";
 import { ShareButton } from "@/components/share-button";
 import { PieceCard } from "@/components/shop/piece-card";
+import { PieceSaveButton } from "@/components/shop/piece-save-button";
 import { PieceViewer } from "@/components/shop/piece-viewer";
 import { enquiryPrefillMessage, parsePiecesParam } from "@/lib/folio";
 import { formatMoney } from "@/lib/money";
-import { hasRealTitle, pieceKind, pieceTitle } from "@/lib/piece-title";
+import { hasRealTitle, pieceKind, pieceRef, pieceTitle } from "@/lib/piece-title";
 import { getSettings, loadProduct, loadRelated, loadSaved } from "@/lib/public-data";
 import { siteUrl } from "@/lib/site-url";
 
@@ -82,13 +83,15 @@ async function ProductBody({
   const attributes = product.attributes ?? {};
   const title = pieceTitle(product.title, product.categorySlug, attributes, product.id);
   const kind = pieceKind(product.categoryName, attributes);
+  const dimensions = attributes.dimensions || attributes.size || undefined;
+  const refCode = (product.sku || pieceRef(product.id)).toUpperCase();
   const canonical = `${siteUrl()}/p/${product.slug}`;
   const facts = [
     kind ? ["Medium", kind] : null,
-    attributes.size ? ["Size", attributes.size] : null,
+    dimensions ? ["Dimensions", dimensions] : null,
     product.condition ? ["Condition", product.condition] : null,
     ["Made in", `${settings.town}, ${settings.region}`],
-    product.quantity === 1 && !sold ? ["Edition", "One of one"] : null,
+    product.quantity === 1 && !sold ? ["Edition", "Unique 1 of 1"] : null,
   ].filter((item): item is [string, string] => item !== null);
 
   return (
@@ -117,91 +120,187 @@ async function ProductBody({
           "@type": "BreadcrumbList",
           itemListElement: [
             { "@type": "ListItem", position: 1, name: "The index", item: `${siteUrl()}/#index` },
-            { "@type": "ListItem", position: 2, name: product.categoryName ?? "All pieces", item: `${siteUrl()}/category/${product.categorySlug ?? "all"}` },
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: product.categoryName ?? "All pieces",
+              item: `${siteUrl()}/category/${product.categorySlug ?? "all"}`,
+            },
             { "@type": "ListItem", position: 3, name: title, item: canonical },
           ],
         }}
       />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[70svh]"
-        style={{ background: "linear-gradient(to bottom, color-mix(in srgb, var(--pigment) 14%, var(--wall)), var(--wall))" }}
-      />
-      <div className="shell pb-24 pt-4 md:pb-32">
-        <Link
-          href={product.categorySlug ? `/category/${product.categorySlug}` : "/category/all"}
-          className="inline-flex min-h-11 items-center gap-2 text-sm text-tar-soft"
-        >
-          <span aria-hidden="true">←</span>
-          <span className="ink-link">{product.categoryName ?? "All pieces"}</span>
-        </Link>
-        <div className="mt-4 grid items-start gap-10 md:grid-cols-12 md:gap-6">
-          <div className="md:col-span-7">
+
+      <div className="shell pb-20 pt-4 md:pb-28 md:pt-6">
+        {/* Folio Breadcrumb & Status Strip */}
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-3 border-b border-line py-3">
+          <nav aria-label="Breadcrumb" className="ledger flex flex-wrap items-center gap-2 text-xs uppercase tracking-wider text-tar-soft">
+            <Link href="/#index" className="inline-flex min-h-11 items-center hover:text-tar">
+              Folio catalogue
+            </Link>
+            <span aria-hidden="true">/</span>
+            <Link
+              href={product.categorySlug ? `/category/${product.categorySlug}` : "/category/all"}
+              className="inline-flex min-h-11 items-center hover:text-tar"
+            >
+              {product.categoryName ?? "All pieces"}
+            </Link>
+            <span aria-hidden="true">/</span>
+            <span className="font-bold text-tar">REF. {refCode}</span>
+          </nav>
+
+          <div className="flex items-center gap-3">
+            <span
+              className={`micro-label inline-flex items-center gap-1.5 rounded-[2px] border px-2.5 py-1 ${
+                sold ? "border-sold/30 bg-wall-deep text-sold" : "border-ok/30 bg-wall-deep text-ok"
+              }`}
+            >
+              <span className={`size-1.5 rounded-full ${sold ? "bg-sold" : "bg-ok"}`} aria-hidden="true" />
+              {sold ? "Held in archive" : "In the studio"}
+            </span>
+            <span className="ledger hidden text-xs uppercase text-tar-soft sm:inline">
+              {settings.town}, {settings.region}
+            </span>
+          </div>
+        </div>
+
+        {/* Main 12-Col Asymmetric Stage */}
+        <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-12">
+          <div className="lg:col-span-7">
             <ViewTransition name={`piece-${product.id}`}>
-              <PieceViewer images={product.images} title={title} />
+              <PieceViewer images={product.images} title={title} dimensions={dimensions} />
             </ViewTransition>
           </div>
-          <div className="grid content-start gap-8 md:sticky md:top-24 md:col-span-5 md:col-start-8">
+
+          <div className="flex flex-col gap-6 lg:sticky lg:top-24 lg:col-span-5">
+            {/* Identity & Nomenclature */}
             <ViewTransition name={`piece-label-${product.id}`}>
-              <div className="wall-label grid gap-3 p-5" data-reveal="">
-                <p className="kicker nums">Monograph · no. {product.sku ?? product.id.slice(0, 6)}</p>
-                <p className="tag flex items-center gap-2">
+              <div className="border-b border-line pb-5" data-reveal="">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <span className="micro-label font-bold text-sap">
+                    {(product.categoryName || "Studio work").toUpperCase()} · NO. {refCode}
+                  </span>
                   <span aria-hidden="true" className="size-3 rounded-full bg-pigment" />
-                  {sold ? "[ held in archive ]" : "[ in the studio ]"}
-                </p>
-                <h1 className="display text-[clamp(2.5rem,4.5vw,4.25rem)]">{title}</h1>
-                <p className="nums text-2xl">{sold ? "Sold" : (price ?? "Ask for the price")}</p>
+                </div>
+                <h1 className="disp text-[clamp(2.1rem,3.6vw,3.1rem)] leading-[1.02] text-tar">{title}</h1>
+                {kind ? <p className="type mt-2 text-lg italic text-tar-soft">{kind}</p> : null}
               </div>
             </ViewTransition>
+
+            {/* Status & Valuation Ledger Row */}
+            <div
+              className="flex flex-wrap items-baseline justify-between gap-4 rounded-[2px] border border-line bg-surface-low p-4"
+              data-reveal=""
+            >
+              <div className="flex items-center gap-2.5">
+                <span
+                  className={`micro-label inline-flex items-center gap-1.5 rounded-[2px] border px-2 py-0.5 ${
+                    sold ? "border-sold/30 bg-sold/10 text-sold" : "border-ok/30 bg-ok/10 text-ok"
+                  }`}
+                >
+                  ● {sold ? "Sold" : "Available"}
+                </span>
+                <span className="ledger text-xs text-tar-soft">Single original</span>
+              </div>
+              <div className="text-right">
+                <p className="ledger nums text-xl font-bold text-tar">
+                  {sold ? "Sold" : (price ?? "Ask for the price")}
+                </p>
+                <p className="ledger text-[0.72rem] text-tar-soft">(direct from studio)</p>
+              </div>
+            </div>
+
+            {/* Curatorial Narrative */}
             {product.description || attributes.details ? (
-              <div className="prose story grid gap-4 text-tar-soft" data-reveal="">
+              <div className="prose story grid gap-3.5 text-tar" data-reveal="">
                 {product.description ? <p>{product.description}</p> : null}
-                {attributes.details ? <p>{attributes.details}</p> : null}
+                {attributes.details ? <p className="text-base text-tar-soft">{attributes.details}</p> : null}
               </div>
             ) : null}
-            <dl className="wall-label grid gap-0 p-5" data-reveal="">
-              {facts.map(([label, value]) => (
-                <div key={label} className="flex justify-between gap-6 border-b border-line py-3 last:border-b-0">
-                  <dt className="tag">{label}</dt>
-                  <dd className="text-right">{value}</dd>
-                </div>
-              ))}
-            </dl>
-            <div className="flex flex-wrap gap-3" data-reveal="">
-              {!sold ? (
-                <a href="#enquire" className="btn btn-primary">
-                  Ask about this piece
-                </a>
-              ) : null}
-              <ShareButton label={title} />
+
+            {/* Primary Actions */}
+            <div className="flex flex-col gap-3" data-reveal="">
+              <div className="flex flex-wrap items-center gap-3">
+                {!sold ? (
+                  <a
+                    href="#enquire"
+                    className="ledger inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-[2px] bg-tar px-5 text-xs font-bold uppercase tracking-wider text-wall transition-colors hover:bg-sap"
+                  >
+                    Ask about this piece →
+                  </a>
+                ) : null}
+                {!sold ? (
+                  <PieceSaveButton
+                    id={product.id}
+                    slug={product.slug}
+                    title={title}
+                    priceMinor={product.priceMinor}
+                    imageUrl={product.images[0]?.url}
+                    kind={kind ?? undefined}
+                    dimensions={dimensions}
+                  />
+                ) : null}
+                <ShareButton label={title} />
+              </div>
+
+              <p className="ledger rounded-[2px] border border-line bg-wall-deep/55 px-3.5 py-2.5 text-center text-[0.72rem] text-tar-soft">
+                Direct maker contact · No online cart · {settings.town}, {settings.region}
+              </p>
+            </div>
+
+            {/* Archival Specifications Table */}
+            <div className="border-t border-line pt-5" data-reveal="">
+              <p className="micro-label mb-2 text-tar-soft">Archival specifications</p>
+              <dl className="ledger divide-y divide-line text-sm">
+                {facts.map(([label, value]) => (
+                  <div key={label} className="flex justify-between gap-6 py-2.5">
+                    <dt className="text-tar-soft">{label}</dt>
+                    <dd className="text-right text-tar">{value}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Direct Inquiry Section */}
       {!sold ? (
-        <section id="enquire" aria-label={`Ask about ${title}`} className="scroll-mt-20 bg-wall-deep py-20 md:py-28">
-          <div className="shell grid gap-10 md:grid-cols-12 md:gap-6">
-            <div className="md:col-span-4">
-              <h2 className="display text-[clamp(2.5rem,5vw,4.5rem)]">Ask the studio</h2>
-              <p className="caption mt-4 max-w-xs">{settings.paymentNote}</p>
+        <section id="enquire" aria-label={`Ask about ${title}`} className="scroll-mt-20 border-t-2 border-tar bg-wall-deep/45 py-16 md:py-24">
+          <div className="shell grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
+            <div className="lg:col-span-5">
+              <p className="micro-label text-sap">Direct correspondence</p>
+              <h2 className="disp mt-2.5 text-[clamp(2.2rem,4vw,3.5rem)] text-tar">Ask the studio</h2>
+              <p className="type mt-4 max-w-sm text-base leading-relaxed text-tar-soft">{settings.paymentNote}</p>
             </div>
-            <div className="md:col-span-7 md:col-start-6">
+            <div className="lg:col-span-7">
               <EnquiryForm productId={product.id} productName={title} initialMessage={initialMessage} />
             </div>
           </div>
         </section>
       ) : null}
 
+      {/* Companion Works */}
       {related.length ? (
-        <section aria-labelledby="related-title" className="shell py-20 md:py-28">
-          <h2 id="related-title" className="display-wide text-3xl md:text-4xl">
-            Also in the studio
-          </h2>
-          <ul className="mt-10 grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+        <section aria-labelledby="related-title" className="shell border-t border-line py-16 md:py-24">
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="micro-label text-sap">Monograph selections</p>
+              <h2 id="related-title" className="disp mt-1.5 text-2xl text-tar md:text-3xl">
+                Also in the studio
+              </h2>
+            </div>
+            <Link
+              href={product.categorySlug ? `/category/${product.categorySlug}` : "/category/all"}
+              className="ledger inline-flex min-h-11 items-center gap-1.5 text-xs uppercase tracking-wider text-tar hover:text-sap"
+            >
+              View all works →
+            </Link>
+          </div>
+          <ul className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
             {related.map((item) => (
               <li key={item.id}>
-                <PieceCard product={item} sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" />
+                <PieceCard product={item} sizes="(min-width: 1024px) 24vw, (min-width: 640px) 46vw, 94vw" />
               </li>
             ))}
           </ul>
@@ -219,59 +318,34 @@ async function ProductBody({
   );
 }
 
-/** Skeleton that mirrors the page structure so the streamed swap doesn't shift
- *  the footer — blocks match the real layout heights per breakpoint. */
+/** Skeleton that mirrors the page structure so the streamed swap doesn't shift the footer. */
 function ProductSkeleton() {
   const bar = "bg-wall-deep";
   return (
     <main className="relative" aria-busy="true">
       <div className="shell pb-24 pt-4 md:pb-32">
         <div className="min-h-11" />
-        <div className="mt-4 grid items-start gap-10 md:grid-cols-12 md:gap-6">
-          <div className="md:col-span-7">
-            <div className={`aspect-[4/5] w-full ${bar}`} />
+        <div className="mt-4 grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
+          <div className="lg:col-span-7">
+            <div className={`aspect-[4/3] w-full ${bar}`} />
           </div>
-          <div className="grid content-start gap-8 md:col-span-5 md:col-start-8">
-            <div className="wall-label grid gap-3 p-5">
-              <div className={`h-4 w-24 ${bar}`} />
-              <div className={`h-14 w-3/4 ${bar}`} />
-              <div className={`h-8 w-28 ${bar}`} />
+          <div className="grid content-start gap-6 lg:col-span-5">
+            <div className="grid gap-3 border-b border-line pb-5">
+              <div className={`h-4 w-28 ${bar}`} />
+              <div className={`h-12 w-3/4 ${bar}`} />
+              <div className={`h-6 w-32 ${bar}`} />
             </div>
-            <div className="grid gap-4">
+            <div className="grid gap-3">
               <div className={`h-5 w-full ${bar}`} />
               <div className={`h-5 w-5/6 ${bar}`} />
-              <div className={`h-5 w-2/3 ${bar}`} />
             </div>
             <div className="flex gap-2">
-              <div className={`h-11 w-40 ${bar}`} />
-              <div className={`h-11 w-24 ${bar}`} />
+              <div className={`h-12 w-44 ${bar}`} />
+              <div className={`h-12 w-24 ${bar}`} />
             </div>
           </div>
         </div>
       </div>
-      <section className="bg-wall-deep py-20 md:py-28" aria-hidden="true">
-        <div className="shell grid gap-10 md:grid-cols-12 md:gap-6">
-          <div className="md:col-span-4">
-            <div className="h-14 w-56 bg-wall" />
-            <div className="mt-4 h-5 w-40 bg-wall" />
-          </div>
-          <div className="md:col-span-7 md:col-start-6">
-            <div className="h-40 w-full bg-wall" />
-          </div>
-        </div>
-      </section>
-      <section className="shell py-20 md:py-28" aria-hidden="true">
-        <div className={`h-10 w-64 ${bar}`} />
-        <ul className="mt-10 grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
-          {[0, 1, 2, 3].map((i) => (
-            <li key={i} className="grid gap-3">
-              <div className={`aspect-[4/5] w-full ${bar}`} />
-              <div className={`h-5 w-2/3 ${bar}`} />
-              <div className={`h-4 w-24 ${bar}`} />
-            </li>
-          ))}
-        </ul>
-      </section>
     </main>
   );
 }

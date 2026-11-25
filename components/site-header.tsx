@@ -26,10 +26,11 @@ export function SiteHeader({ name, hasStory }: { name: string; hasStory: boolean
   }, [mobileMenuOpen]);
 
   return (
-    <header className="mast sticky top-0 z-40 w-full border-b border-line bg-wall no-print">
-      <div className="shell flex min-h-[60px] items-center gap-[22px]">
-        <Link href="/" className="word inline-flex min-h-11 items-center text-tar">
-          {name}
+    <header className="mast sticky top-0 z-40 w-full border-b border-line bg-wall/95 backdrop-blur-sm no-print">
+      <div className="shell flex min-h-[64px] items-center justify-between gap-5">
+        <Link href="/" className="inline-flex min-h-11 items-baseline gap-2.5 text-tar">
+          <span className="ledger text-[0.875rem] font-bold uppercase tracking-[0.16em] text-tar">{name}</span>
+          <span className="ledger hidden text-xs text-tar-soft sm:inline">[folio]</span>
         </Link>
 
         <nav aria-label="Sections" className="mast-nav hidden lg:flex">
@@ -40,17 +41,21 @@ export function SiteHeader({ name, hasStory }: { name: string; hasStory: boolean
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-[18px] text-[13.5px]">
+        <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => setFolioOpen(true)}
-            className="hidden min-h-11 items-center gap-1 text-tar-soft hover:text-tar cursor-pointer sm:inline-flex"
+            className="ledger hidden min-h-11 cursor-pointer items-center gap-1.5 rounded-[2px] border border-line bg-wall-deep/70 px-3.5 text-xs text-tar transition-colors hover:border-line-strong hover:bg-wall-deep sm:inline-flex"
             aria-label={`Saved ${items.length} ${items.length === 1 ? "piece" : "pieces"}`}
           >
-            saved <b className="font-bold text-tar">({items.length})</b>
+            <span>saved</span>
+            <b className="font-bold text-tar">({items.length})</b>
           </button>
 
-          <Link href="/#inquire" className="ask hidden sm:inline-flex">
+          <Link
+            href="/#inquire"
+            className="ledger hidden min-h-11 items-center gap-1.5 rounded-[2px] bg-tar px-4 text-xs font-bold text-wall transition-colors hover:bg-sap sm:inline-flex"
+          >
             ask the studio →
           </Link>
 
@@ -58,7 +63,7 @@ export function SiteHeader({ name, hasStory }: { name: string; hasStory: boolean
             type="button"
             ref={menuButtonRef}
             onClick={() => setMobileMenuOpen(true)}
-            className="inline-flex min-h-11 items-center justify-center border border-line-strong px-3.5 text-sm font-semibold cursor-pointer lg:hidden"
+            className="ledger inline-flex min-h-11 cursor-pointer items-center justify-center rounded-[2px] border border-line-strong px-3.5 text-xs font-bold uppercase tracking-widest text-tar lg:hidden"
             aria-expanded={mobileMenuOpen}
             aria-label="Menu"
           >
@@ -89,12 +94,14 @@ export function SiteHeader({ name, hasStory }: { name: string; hasStory: boolean
           if (e.target === dialogRef.current) setMobileMenuOpen(false);
         }}
       >
-        <div className="safe-bottom ml-auto grid h-dvh w-full max-w-md content-start gap-5 bg-wall p-6">
+        <div className="safe-bottom ml-auto grid h-dvh w-full max-w-md content-start gap-6 border-l border-line bg-wall p-6">
           <div className="flex items-center justify-between border-b border-line pb-4">
-            <span className="word">{name}</span>
+            <span className="ledger text-sm font-bold uppercase tracking-[0.16em] text-tar">
+              {name} <span className="font-normal text-tar-soft">[folio]</span>
+            </span>
             <button
               type="button"
-              className="btn btn-quiet min-h-11 px-2 text-sm cursor-pointer"
+              className="ledger inline-flex min-h-11 cursor-pointer items-center px-3 text-xs uppercase tracking-widest text-tar-soft hover:text-tar"
               onClick={() => setMobileMenuOpen(false)}
             >
               close
@@ -102,14 +109,15 @@ export function SiteHeader({ name, hasStory }: { name: string; hasStory: boolean
           </div>
 
           <nav aria-label="Menu links" className="grid gap-1">
-            {links.map((link) => (
+            {links.map((link, idx) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="disp inline-flex min-h-11 items-center border-b border-line py-3 text-3xl"
+                className="inline-flex min-h-11 items-baseline gap-3 border-b border-line py-3.5 text-tar hover:text-sap"
               >
-                {link.label}
+                <span className="ledger text-xs text-sap">{String(idx + 1).padStart(2, "0")}</span>
+                <span className="disp text-2xl">{link.label}</span>
               </Link>
             ))}
             <button
@@ -118,13 +126,17 @@ export function SiteHeader({ name, hasStory }: { name: string; hasStory: boolean
                 setMobileMenuOpen(false);
                 setFolioOpen(true);
               }}
-              className="inline-flex min-h-11 items-center py-3 text-left text-tar-soft cursor-pointer"
+              className="ledger inline-flex min-h-11 cursor-pointer items-center py-3 text-left text-sm text-tar-soft hover:text-tar"
             >
-              saved <b className="ml-1 font-bold text-tar">({items.length})</b>
+              saved <b className="ml-1.5 font-bold text-tar">({items.length})</b>
             </button>
           </nav>
 
-          <Link href="/#inquire" onClick={() => setMobileMenuOpen(false)} className="ask w-full justify-center min-h-11">
+          <Link
+            href="/#inquire"
+            onClick={() => setMobileMenuOpen(false)}
+            className="ledger inline-flex min-h-12 w-full items-center justify-center rounded-[2px] bg-tar px-5 text-xs font-bold uppercase tracking-widest text-wall hover:bg-sap"
+          >
             ask the studio →
           </Link>
         </div>
