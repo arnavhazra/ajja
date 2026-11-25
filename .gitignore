@@ -59,3 +59,6 @@ seed/enhance/*
 /supabase/
 /.env.e2e
 e2e/.blob-mock-*.pem
+
+# website-release-gate QA artifacts
+.qa-screenshots/

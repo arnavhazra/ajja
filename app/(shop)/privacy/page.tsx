@@ -20,7 +20,8 @@ export default async function PrivacyPage() {
   return (
     <main className="shell max-w-4xl py-16 md:py-24">
       <header className="border-b border-line pb-10">
-        <h1 className="display text-[clamp(3rem,8vw,7rem)]">Privacy</h1>
+        <p className="kicker">House rules — <span className="nums">ledger · what the studio keeps</span></p>
+        <h1 className="display mt-[10px] text-[clamp(2.4rem,4.6vw,4.25rem)]">Privacy</h1>
       </header>
       <div className="prose max-w-[65ch] mt-10 grid gap-5 text-tar-soft">
         <p>This shop does not ask you to make an account.</p>

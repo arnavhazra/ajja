@@ -69,8 +69,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </a>
         </nav>
         {children}
-        <Analytics />
-        <SpeedInsights />
+        {process.env.VERCEL ? (
+          <>
+            <Analytics />
+            <SpeedInsights />
+          </>
+        ) : null}
       </body>
     </html>
   );
