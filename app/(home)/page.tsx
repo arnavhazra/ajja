@@ -127,7 +127,10 @@ async function Home({
     photographed[0] ??
     null;
 
-  const entries = buildIndex(categories, products, detail?.id);
+  // Category rows hang first in desk order; the "All pieces" row comes last
+  // and yields to them, so no photograph ever hangs on two rows of the index.
+  const usedCovers = new Set<string>();
+  const entries = buildIndex(categories, products, detail?.id, usedCovers);
   const allEntry: IndexEntry | null = products.length
     ? {
         id: "all",
@@ -135,7 +138,7 @@ async function Home({
         name: "All pieces",
         intro: "Everything currently documented in the studio archive",
         count: products.length,
-        cover: coverForCategory(null, products, detail?.id),
+        cover: coverForCategory(null, products, detail?.id, usedCovers),
       }
     : null;
 
