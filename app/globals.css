@@ -104,6 +104,7 @@
 }
 
 html {
+  scrollbar-gutter: stable;
   background: var(--wall);
   color: var(--tar);
   font-family: var(--font-display), "Bricolage Grotesque", system-ui, sans-serif;
