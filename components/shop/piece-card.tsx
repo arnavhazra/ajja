@@ -48,7 +48,7 @@ export function PieceCard({
         <Link
           href={`/p/${product.slug}`}
           className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-[2px] border border-line bg-wall-deep p-4 transition-colors duration-200 group-hover:border-line-strong"
-          aria-label={fullTitle}
+          aria-label={cover ? undefined : fullTitle}
         >
           {cover ? (
             <Image
