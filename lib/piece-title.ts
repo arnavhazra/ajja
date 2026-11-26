@@ -37,3 +37,15 @@ export function isProvisionalSlug(slug?: string | null) {
 export function pieceKind(categoryName: string | null, attributes?: Record<string, string>) {
   return attributes?.medium || categoryName || null;
 }
+
+/**
+ * The measurement shown publicly. `size` is the canonical desk field and always
+ * wins; `dimensions` is a legacy/extra key that only shows when no size is
+ * recorded. Never invert this — a stale dimensions fallback must not override
+ * an explicit Size edit.
+ */
+export function displaySize(attributes?: Record<string, string> | null): string {
+  const size = attributes?.size?.trim();
+  if (size) return size;
+  return attributes?.dimensions?.trim() ?? "";
+}

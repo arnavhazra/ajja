@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ViewTransition, type CSSProperties } from "react";
 import { cn } from "@/lib/cn";
 import { formatMoney } from "@/lib/money";
-import { pieceKind, pieceTitle } from "@/lib/piece-title";
+import { displaySize, pieceKind, pieceRef, pieceTitle } from "@/lib/piece-title";
 import type { PublicProduct } from "@/lib/types";
 import { PieceSaveButton } from "./piece-save-button";
 
@@ -18,7 +18,7 @@ type Props = {
 export function PieceCard({
   product,
   priority = false,
-  sizes = "(min-width: 1180px) 22vw, (min-width: 900px) 30vw, (min-width: 560px) 46vw, 94vw",
+  sizes = "(min-width: 1024px) 30vw, (min-width: 640px) 46vw, 94vw",
   className,
   index = 0,
 }: Props) {
@@ -26,19 +26,17 @@ export function PieceCard({
   const fullTitle = pieceTitle(product.title, product.categorySlug, product.attributes, product.id);
   const kind = pieceKind(product.categoryName, product.attributes);
   const sold = product.status === "sold";
-
-  const price = sold ? "sold" : (formatMoney(product.priceMinor, product.currency) ?? "Ask for the price");
-  const ratio = cover?.width && cover?.height ? `${cover.width} / ${cover.height}` : "4 / 5";
-  const ratioValue = cover?.width && cover?.height ? cover.width / cover.height : 0.8;
+  const dimensions = displaySize(product.attributes);
+  const refCode = (product.sku || pieceRef(product.id)).toUpperCase();
+  const price = sold ? "Private archive" : (formatMoney(product.priceMinor, product.currency) ?? "Price on inquiry");
 
   return (
-    <figure
-      className={cn("piece", className)}
+    <article
+      className={cn("group flex flex-col", className)}
       style={
         {
           "--pig": product.pigment,
           "--pig-ink": product.pigmentInk,
-          "--r": ratioValue,
           "--reveal-delay": `${(index % 4) * 60}ms`,
         } as CSSProperties
       }
@@ -47,7 +45,11 @@ export function PieceCard({
       data-sold={sold ? "" : undefined}
     >
       <ViewTransition name={`piece-${product.id}`}>
-        <Link href={`/p/${product.slug}`} className="ph" style={{ aspectRatio: ratio }} aria-label={fullTitle}>
+        <Link
+          href={`/p/${product.slug}`}
+          className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-[2px] border border-line bg-wall-deep p-4 transition-colors duration-200 group-hover:border-line-strong"
+          aria-label={cover ? undefined : fullTitle}
+        >
           {cover ? (
             <Image
               src={cover.url}
@@ -57,39 +59,63 @@ export function PieceCard({
               priority={priority}
               placeholder={cover.blurData ? "blur" : "empty"}
               blurDataURL={cover.blurData ?? undefined}
-              className="object-contain"
+              className="object-contain p-4 transition-transform duration-300 group-hover:scale-[1.015]"
             />
           ) : null}
+          <span
+            aria-hidden="true"
+            className="micro-label pointer-events-none absolute left-3 top-2.5 text-[0.68rem] text-tar/60"
+          >
+            REF. {refCode}
+          </span>
         </Link>
       </ViewTransition>
-      <figcaption>
-        <ViewTransition name={`piece-label-${product.id}`}>
-          <span className="cap">
-            <span className="tick" aria-hidden="true" />
-            <Link href={`/p/${product.slug}`} className="cap-line inline-flex min-h-11 min-w-0 flex-1 items-center">
-              <span className="truncate">
-                {fullTitle}
-                {kind ? ` — ${kind}` : ""}
-              </span>
-            </Link>
-            <span className="cap-price">{price}</span>
-          </span>
-        </ViewTransition>
-        <div className="cap-acts">
-          {!sold ? (
-            <PieceSaveButton
-              id={product.id}
-              slug={product.slug}
-              title={fullTitle}
-              priceMinor={product.priceMinor}
-              imageUrl={cover?.url}
-              kind={kind ?? undefined}
-              dimensions={product.attributes.dimensions || product.attributes.size || ""}
-            />
-          ) : null}
 
+      <div className="flex items-center justify-between gap-2 border-b border-line pt-2.5 pb-1">
+        <ViewTransition name={`piece-label-${product.id}`}>
+          <Link
+            href={`/p/${product.slug}`}
+            className="inline-flex min-h-11 min-w-0 flex-1 items-center gap-2 text-tar transition-colors hover:text-sap"
+          >
+            <span className="ledger shrink-0 text-sap" aria-hidden="true">
+              §
+            </span>
+            <span className="type truncate text-base font-medium">{fullTitle}</span>
+          </Link>
+        </ViewTransition>
+        {!sold ? (
+          <PieceSaveButton
+            id={product.id}
+            slug={product.slug}
+            title={fullTitle}
+            priceMinor={product.priceMinor}
+            imageUrl={cover?.url}
+            kind={kind ?? undefined}
+            dimensions={dimensions}
+          />
+        ) : null}
+      </div>
+
+      <div className="ledger flex flex-wrap items-center justify-between gap-2 pt-2 text-xs text-tar-soft">
+        <div className="flex flex-wrap items-center gap-2">
+          {dimensions ? (
+            <>
+              <span>{dimensions}</span>
+              <span aria-hidden="true">·</span>
+            </>
+          ) : kind ? (
+            <>
+              <span>{kind}</span>
+              <span aria-hidden="true">·</span>
+            </>
+          ) : null}
+          <span className={cn("inline-flex items-center gap-1.5 font-bold uppercase tracking-wider", sold ? "text-sold" : "text-ok")}>
+            <span className={cn("size-1.5 rounded-full", sold ? "bg-sold" : "bg-ok")} aria-hidden="true" />
+            {sold ? "Held in archive" : "Available direct"}
+          </span>
         </div>
-      </figcaption>
-    </figure>
+        <span className={cn("nums font-bold tracking-tight", sold ? "text-tar-soft" : "text-tar")}>{price}</span>
+      </div>
+    </article>
   );
 }

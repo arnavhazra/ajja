@@ -156,7 +156,10 @@ export async function savePiece(formData: FormData) {
   attributes.details = parsed.data.details;
   for (const [key, value] of formData.entries()) {
     if (typeof key === "string" && key.startsWith("field:") && typeof value === "string") {
-      attributes[key.slice(6)] = value.trim();
+      // A blanked-out extra is removed, not kept as an empty string — otherwise
+      // stale facts (like an old dimensions fallback) linger in the catalogue.
+      if (value.trim()) attributes[key.slice(6)] = value.trim();
+      else delete attributes[key.slice(6)];
     }
   }
   const custom = String(formData.get("custom") ?? "");
