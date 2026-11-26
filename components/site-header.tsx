@@ -49,7 +49,7 @@ export function SiteHeader({ name, hasStory }: { name: string; hasStory: boolean
             aria-label={`Saved ${items.length} ${items.length === 1 ? "piece" : "pieces"}`}
           >
             <span>saved</span>
-            <b className="font-bold text-tar">({items.length})</b>
+            {items.length > 0 ? <b className="font-bold text-tar">({items.length})</b> : null}
           </button>
 
           <Link
@@ -128,7 +128,7 @@ export function SiteHeader({ name, hasStory }: { name: string; hasStory: boolean
               }}
               className="ledger inline-flex min-h-11 cursor-pointer items-center py-3 text-left text-sm text-tar-soft hover:text-tar"
             >
-              saved <b className="ml-1.5 font-bold text-tar">({items.length})</b>
+              saved {items.length > 0 ? <b className="ml-1.5 font-bold text-tar">({items.length})</b> : null}
             </button>
           </nav>
 

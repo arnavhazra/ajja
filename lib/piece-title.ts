@@ -5,7 +5,7 @@ export function hasRealTitle(title?: string | null) {
 
 function shortRef(ref?: string | null) {
   const clean = (ref ?? "").replace(/^piece-/i, "").replace(/[^a-z0-9]/gi, "");
-  return clean.slice(0, 6).toLowerCase() || "000000";
+  return clean.slice(0, 6).toUpperCase() || "000000";
 }
 
 /** The six-character inventory number shown in typed captions ("no. f8930a"). */

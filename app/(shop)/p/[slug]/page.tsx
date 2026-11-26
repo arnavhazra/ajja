@@ -204,7 +204,7 @@ async function ProductBody({
               </div>
               <div className="text-right">
                 <p className="ledger nums text-xl font-bold text-tar">
-                  {sold ? "Sold" : (price ?? "Ask for the price")}
+                  {sold ? "Sold" : (price ?? "Price on inquiry")}
                 </p>
                 <p className="ledger text-[0.72rem] text-tar-soft">(direct from studio)</p>
               </div>

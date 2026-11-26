@@ -10,9 +10,9 @@ describe("pieceTitle fallback", () => {
     const a = pieceTitle("", "paintings", {}, "abc12345-xxxx");
     const b = pieceTitle("", "paintings", {}, "def67890-xxxx");
     const c = pieceTitle("", "woodwork", {}, "abc12345-xxxx");
-    expect(a).toBe("Poured painting · No. abc123");
-    expect(b).toBe("Poured painting · No. def678");
-    expect(c).toBe("Handmade woodwork · No. abc123");
+    expect(a).toBe("Poured painting · No. ABC123");
+    expect(b).toBe("Poured painting · No. DEF678");
+    expect(c).toBe("Handmade woodwork · No. ABC123");
     expect(new Set([a, b, c]).size).toBe(3);
   });
 
@@ -24,6 +24,6 @@ describe("pieceTitle fallback", () => {
   });
 
   it("uses the slug tail when no id is given", () => {
-    expect(pieceTitle("", null, {}, "piece-abc123xyz")).toBe("Studio piece · No. abc123");
+    expect(pieceTitle("", null, {}, "piece-abc123xyz")).toBe("Studio piece · No. ABC123");
   });
 });

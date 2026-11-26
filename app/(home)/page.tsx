@@ -244,7 +244,7 @@ async function Home({
                 <figure className="m-0 rounded-[2px] border border-line bg-wall-deep p-3.5">
                   <Link
                     href={`/p/${detail.slug}`}
-                    className="relative block aspect-[4/3] w-full overflow-hidden bg-wall-sink"
+                    className="relative block aspect-[4/3] w-full overflow-hidden"
                     aria-label={heroTitle}
                   >
                     <Image
@@ -255,7 +255,7 @@ async function Home({
                       sizes="(min-width: 1024px) 40vw, 94vw"
                       placeholder={heroPhoto.blurData ? "blur" : "empty"}
                       blurDataURL={heroPhoto.blurData ?? undefined}
-                      className="object-contain p-2 transition-transform duration-500 hover:scale-[1.015]"
+                      className="object-contain transition-transform duration-500 hover:scale-[1.015]"
                     />
                   </Link>
 

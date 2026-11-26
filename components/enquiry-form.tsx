@@ -104,7 +104,7 @@ function EnquiryFormInner({ productId, productName, initialMessage, onSendAnothe
       </label>
       <details className="group">
         <summary className="inline-flex min-h-11 cursor-pointer list-none items-center text-sm text-tar-soft [&::-webkit-details-marker]:hidden">
-          <span className="ink-link">Is it a gift? Add a note</span>
+          <span className="ink-link">Adding it as a gift? Tell us here</span>
         </summary>
         <textarea
           className="mt-2 min-h-[84px] w-full resize-y border border-line-strong bg-wall px-3.5 py-2.5 text-base text-tar placeholder:text-tar-soft/60 focus:border-tar focus:outline-none"

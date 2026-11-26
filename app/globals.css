@@ -447,7 +447,7 @@ section[id] { scroll-margin-top: 78px; }
 .idx { border-top: 1px solid var(--line); }
 .idx-row {
   display: grid;
-  grid-template-columns: 3.5rem minmax(0, 1.35fr) auto minmax(0, 1.4fr) 6.5rem 2rem;
+  grid-template-columns: 3.5rem 1.35fr auto 1.4fr 6.5rem 2rem;
   gap: 0.75rem clamp(12px, 2vw, 28px);
   align-items: center;
   padding: clamp(20px, 3vh, 30px) 12px;
@@ -902,8 +902,8 @@ a.cap-line { display: inline-flex; align-items: center; min-height: 44px; }
   .idx-row .idx-cover {
     grid-column: 1 / -1;
     order: -1;
-    max-width: 100%;
-    aspect-ratio: 16 / 10;
+    max-width: 280px;
+    aspect-ratio: 4 / 3;
   }
   .idx-row .idx-count,
   .idx-row .idx-desc {
@@ -985,3 +985,7 @@ a.cap-line { display: inline-flex; align-items: center; min-height: 44px; }
   .no-print { display: none !important; }
 }
 
+
+@media (max-width: 900px) {
+  main { padding-bottom: 5rem; }
+}

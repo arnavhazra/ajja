@@ -12,7 +12,7 @@ export default async function ProductImage({ params }: { params: Promise<{ slug:
   const { slug } = await params;
   const { product } = await loadProduct(slug);
   const title = pieceTitle(product?.title ?? "", product?.categorySlug, product?.attributes, product?.id ?? product?.slug);
-  const price = formatMoney(product?.priceMinor ?? null, product?.currency) ?? "Ask for the price";
+  const price = formatMoney(product?.priceMinor ?? null, product?.currency) ?? "Price on inquiry";
   const cover = product?.images[0];
   const pigment = product?.pigment ?? "#894636";
   const pigmentInk = product?.pigmentInk ?? "#f6f0e5";
