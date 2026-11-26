@@ -126,8 +126,8 @@ test("owner signs in with a password, prices, publishes, hides, undoes, and shar
   const enquire = page.locator("#enquire");
   await enquire.getByLabel("Your name").fill("Test buyer");
   await enquire.getByLabel("Phone or email").fill("test@example.com");
-  await enquire.getByLabel("Message").fill("Is the studio test piece still here?");
-  await enquire.getByRole("button", { name: "Send", exact: true }).click();
+  await enquire.getByLabel("Your note").fill("Is the studio test piece still here?");
+  await enquire.getByRole("button", { name: "Send a note" }).click();
   await expect(page.getByRole("status")).toContainText("Message saved");
 
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]).catch(() => undefined);
