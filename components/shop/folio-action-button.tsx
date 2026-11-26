@@ -2,6 +2,7 @@
 
 import { useFolio } from "./collectors-folio";
 import { cn } from "@/lib/cn";
+import { displaySize } from "@/lib/piece-title";
 import type { PublicProduct } from "@/lib/types";
 
 export function FolioActionButton({
@@ -27,7 +28,7 @@ export function FolioActionButton({
       priceMinor: product.priceMinor,
       imageUrl: cover?.url,
       kind,
-      dimensions: product.attributes.size || product.attributes.dimensions,
+      dimensions: displaySize(product.attributes) || undefined,
     });
     if (!inFolio) {
       setIsOpen(true);

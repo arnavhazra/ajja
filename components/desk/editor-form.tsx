@@ -91,7 +91,7 @@ export function EditorForm({
         </label>
         <label className="grid gap-1">
           Dimensions
-          <input className="field" name="field:dimensions" placeholder="e.g. 24 × 36 in (61 × 91 cm)" defaultValue={attributes.dimensions || attributes.size || ""} />
+          <input className="field" name="field:dimensions" placeholder="e.g. 24 × 36 in (61 × 91 cm)" defaultValue={attributes.dimensions || ""} />
         </label>
         {fields.map((field) =>
           field.key && field.key !== "medium" && field.key !== "dimensions" ? (

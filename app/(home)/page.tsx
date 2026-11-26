@@ -10,7 +10,7 @@ import { brand } from "@/lib/brand";
 import { buildIndex, coverForCategory, type IndexEntry } from "@/lib/category-index";
 import { enquiryPrefillMessage, parsePiecesParam } from "@/lib/folio";
 import { formatMoney } from "@/lib/money";
-import { pieceKind, pieceTitle } from "@/lib/piece-title";
+import { displaySize, pieceKind, pieceTitle } from "@/lib/piece-title";
 import { getSettings, loadCategories, loadManifest, loadSaved } from "@/lib/public-data";
 import { siteUrl } from "@/lib/site-url";
 
@@ -141,7 +141,7 @@ async function Home({
 
   const heroTitle = detail ? pieceTitle(detail.title, detail.categorySlug, detail.attributes, detail.id) : null;
   const heroKind = detail ? pieceKind(detail.categoryName, detail.attributes) : null;
-  const heroSize = detail?.attributes.dimensions || detail?.attributes.size || null;
+  const heroSize = detail ? displaySize(detail.attributes) || null : null;
   const heroPhoto = detail
     ? (detail.images.find((image) => image.url === settings.heroImage) ?? detail.images[0])
     : null;

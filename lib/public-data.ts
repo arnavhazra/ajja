@@ -8,6 +8,7 @@ import { withDefaults } from "./settings";
 import { siteSettings } from "./db/schema";
 import type { PublicImage, PublicProduct } from "./types";
 import { pigmentFromDataUri, type Pigment } from "./pigment";
+import { publicAttributes } from "./public-attributes";
 
 function mapImage(image: typeof productImages.$inferSelect): PublicImage {
   return {
@@ -42,7 +43,9 @@ function mapProduct(
     condition: row.condition,
     quantity: row.quantity,
     sku: row.sku,
-    attributes,
+    // Public product shapes cross the server/client boundary whole — only
+    // public-safe attribute keys may leave the server.
+    attributes: publicAttributes(attributes),
     tags: row.tags ?? [],
     status: row.status,
     featured: row.featured,
@@ -136,19 +139,6 @@ export async function hasPricedProducts() {
   return Boolean(row);
 }
 
-export async function loadStudio() {
-  "use cache";
-  cacheTag("studio");
-  cacheLife("minutes");
-  const rows = await getDb()
-    .select()
-    .from(products)
-    .where(and(isNull(products.deletedAt), eq(products.showInStudio, true), sql`${products.status} <> 'hidden'`))
-    .orderBy(desc(products.createdAt))
-    .limit(300);
-  return hydrate(rows);
-}
-
 export async function loadCategories() {
   "use cache";
   cacheTag("catalog");
@@ -208,9 +198,8 @@ export async function loadSold(limit = 8) {
 export async function loadSaved(slugs: string[]) {
   const clean = slugs.map((slug) => slug.slice(0, 80)).filter(Boolean).slice(0, 40);
   if (!clean.length) return [];
-  const rows = await getDb()
-    .select()
-    .from(products)
-    .where(and(isNull(products.deletedAt), inArray(products.slug, clean), sql`${products.status} <> 'hidden'`));
+  // Saved lists are public — they follow the same visibility rule as the shop,
+  // so a piece reverted to draft can never leak through a remembered slug.
+  const rows = await getDb().select().from(products).where(and(inArray(products.slug, clean), listed()));
   return hydrate(rows);
 }

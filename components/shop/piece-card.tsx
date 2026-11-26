@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ViewTransition, type CSSProperties } from "react";
 import { cn } from "@/lib/cn";
 import { formatMoney } from "@/lib/money";
-import { pieceKind, pieceRef, pieceTitle } from "@/lib/piece-title";
+import { displaySize, pieceKind, pieceRef, pieceTitle } from "@/lib/piece-title";
 import type { PublicProduct } from "@/lib/types";
 import { PieceSaveButton } from "./piece-save-button";
 
@@ -26,7 +26,7 @@ export function PieceCard({
   const fullTitle = pieceTitle(product.title, product.categorySlug, product.attributes, product.id);
   const kind = pieceKind(product.categoryName, product.attributes);
   const sold = product.status === "sold";
-  const dimensions = product.attributes.dimensions || product.attributes.size || "";
+  const dimensions = displaySize(product.attributes);
   const refCode = (product.sku || pieceRef(product.id)).toUpperCase();
   const price = sold ? "Private archive" : (formatMoney(product.priceMinor, product.currency) ?? "Price on inquiry");
 

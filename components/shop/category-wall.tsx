@@ -2,41 +2,18 @@
 
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/cn";
-import { pieceTitle } from "@/lib/piece-title";
 import type { PublicProduct } from "@/lib/types";
+import { orderWallPieces, type WallFilter, type WallSort } from "@/lib/wall-order";
 import { PieceCard } from "./piece-card";
 
-type FilterMode = "all" | "available" | "sold";
-type SortMode = "catalogue" | "title" | "price-asc";
-
 export function CategoryWall({ pieces }: { pieces: PublicProduct[] }) {
-  const [filter, setFilter] = useState<FilterMode>("all");
-  const [sort, setSort] = useState<SortMode>("catalogue");
+  const [filter, setFilter] = useState<WallFilter>("all");
+  const [sort, setSort] = useState<WallSort>("catalogue");
 
   const availableCount = useMemo(() => pieces.filter((p) => p.status !== "sold").length, [pieces]);
   const soldCount = pieces.length - availableCount;
 
-  const visible = useMemo(() => {
-    const filtered =
-      filter === "available"
-        ? pieces.filter((p) => p.status !== "sold")
-        : filter === "sold"
-          ? pieces.filter((p) => p.status === "sold")
-          : pieces;
-
-    if (sort === "catalogue") return filtered;
-    const copy = [...filtered];
-    if (sort === "title") {
-      copy.sort((a, b) =>
-        pieceTitle(a.title, a.categorySlug, a.attributes, a.id).localeCompare(
-          pieceTitle(b.title, b.categorySlug, b.attributes, b.id),
-        ),
-      );
-    } else if (sort === "price-asc") {
-      copy.sort((a, b) => (a.priceMinor ?? Number.MAX_SAFE_INTEGER) - (b.priceMinor ?? Number.MAX_SAFE_INTEGER));
-    }
-    return copy;
-  }, [pieces, filter, sort]);
+  const visible = useMemo(() => orderWallPieces(pieces, filter, sort), [pieces, filter, sort]);
 
   return (
     <>
@@ -93,7 +70,7 @@ export function CategoryWall({ pieces }: { pieces: PublicProduct[] }) {
           <span>Sort:</span>
           <select
             value={sort}
-            onChange={(e) => setSort(e.target.value as SortMode)}
+            onChange={(e) => setSort(e.target.value as WallSort)}
             className="min-h-11 cursor-pointer rounded-[2px] border border-line bg-wall px-2.5 text-xs uppercase text-tar outline-none focus:border-sap"
           >
             <option value="catalogue">Catalogue order</option>

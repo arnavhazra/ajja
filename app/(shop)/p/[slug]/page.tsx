@@ -12,7 +12,7 @@ import { PieceSaveButton } from "@/components/shop/piece-save-button";
 import { PieceViewer } from "@/components/shop/piece-viewer";
 import { enquiryPrefillMessage, parsePiecesParam } from "@/lib/folio";
 import { formatMoney } from "@/lib/money";
-import { hasRealTitle, pieceKind, pieceRef, pieceTitle } from "@/lib/piece-title";
+import { displaySize, hasRealTitle, pieceKind, pieceRef, pieceTitle } from "@/lib/piece-title";
 import { getSettings, loadProduct, loadRelated, loadSaved } from "@/lib/public-data";
 import { siteUrl } from "@/lib/site-url";
 
@@ -83,7 +83,7 @@ async function ProductBody({
   const attributes = product.attributes ?? {};
   const title = pieceTitle(product.title, product.categorySlug, attributes, product.id);
   const kind = pieceKind(product.categoryName, attributes);
-  const dimensions = attributes.dimensions || attributes.size || undefined;
+  const dimensions = displaySize(attributes) || undefined;
   const refCode = (product.sku || pieceRef(product.id)).toUpperCase();
   const canonical = `${siteUrl()}/p/${product.slug}`;
   const facts = [
