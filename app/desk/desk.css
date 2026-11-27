@@ -189,6 +189,37 @@
   border: 1px solid var(--line-strong);
 }
 
+
+@media (max-width: 63.99rem) {
+  .desk-side {
+    gap: 0.5rem;
+    padding-bottom: 0.6rem;
+  }
+
+  .desk-bar {
+    flex-wrap: wrap;
+  }
+
+  .desk-bar > p {
+    width: 100%;
+  }
+
+  .desk-bar > div {
+    width: 100%;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+  }
+
+  .desk-bar form {
+    margin-left: auto;
+  }
+
+  .desk-nav {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+}
+
 .upload-card {
   display: grid;
   gap: 0.75rem;

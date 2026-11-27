@@ -67,11 +67,11 @@ export function PieceViewer({ images, title, dimensions }: { images: PublicImage
               <button
                 type="button"
                 onClick={() => setIndex(i)}
-                aria-label={`Photograph ${i + 1} of ${images.length}`}
+                aria-label={`FIG. ${String(i + 1).padStart(2, "0")} — photograph ${i + 1} of ${images.length}`}
                 aria-current={i === index}
                 className={cn(
                   "flex w-full cursor-pointer flex-col gap-1.5 rounded-[2px] border bg-wall-deep p-2 text-left transition-colors",
-                  i === index ? "border-tar ring-1 ring-tar" : "border-line opacity-75 hover:border-line-strong hover:opacity-100",
+                  i === index ? "border-tar ring-1 ring-tar" : "border-line hover:border-line-strong",
                 )}
               >
                 <span className="relative block aspect-[4/3] w-full overflow-hidden bg-wall-sink/40">

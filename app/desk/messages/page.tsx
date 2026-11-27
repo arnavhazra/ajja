@@ -38,10 +38,12 @@ async function Messages({ searchParams }: { searchParams: Promise<Record<string,
             {label}
           </a>
         ))}
-        <a className="btn btn-secondary" href="/api/desk/messages">
-          Export
-        </a>
       </nav>
+      <div className="flex justify-end">
+        <a className="btn btn-secondary" href="/api/desk/messages">
+          Export as CSV
+        </a>
+      </div>
       <form className="flex flex-wrap items-end gap-2" method="get">
         <label className="grid gap-1">
           <span className="field-label">Search</span>

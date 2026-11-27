@@ -12,10 +12,11 @@ type Props = {
   imageUrl?: string;
   kind?: string;
   dimensions?: string;
+  variant?: "inline" | "button";
 };
 
 /** The [save] toggle under a piece card — the only client leaf on the card. */
-export function PieceSaveButton({ id, slug, title, priceMinor, imageUrl, kind, dimensions }: Props) {
+export function PieceSaveButton({ id, slug, title, priceMinor, imageUrl, kind, dimensions, variant = "inline" }: Props) {
   const { hasItem, toggleItem, setIsOpen: setFolioOpen } = useFolio();
   const inFolio = hasItem(id);
 
@@ -30,7 +31,7 @@ export function PieceSaveButton({ id, slug, title, priceMinor, imageUrl, kind, d
     <button
       type="button"
       onClick={handleClick}
-      className={cn("cap-act", inFolio && "saved")}
+      className={cn(variant === "button" ? "btn btn-secondary" : "cap-act", inFolio && "saved")}
       aria-label={inFolio ? `Remove ${title} from saved` : `Save ${title}`}
     >
       {inFolio ? "saved" : "save"}

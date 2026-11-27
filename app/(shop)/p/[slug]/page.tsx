@@ -238,6 +238,7 @@ async function ProductBody({
                     imageUrl={product.images[0]?.url}
                     kind={kind ?? undefined}
                     dimensions={dimensions}
+                    variant="button"
                   />
                 ) : null}
                 <ShareButton label={title} />

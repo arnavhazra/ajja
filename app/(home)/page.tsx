@@ -148,6 +148,7 @@ async function Home({
   const heroPhoto = detail
     ? (detail.images.find((image) => image.url === settings.heroImage) ?? detail.images[0])
     : null;
+  const studioDetail = photographed.find((product) => product.id !== detail?.id) ?? detail;
 
   return (
     <main>
@@ -182,8 +183,8 @@ async function Home({
 
           <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-12">
             {/* Left Column: Editorial Display & Ledger Specs */}
-            <div className="flex flex-col justify-between lg:col-span-7 lg:pr-4">
-              <div>
+            <div className="contents lg:flex lg:flex-col lg:justify-between lg:col-span-7 lg:pr-4">
+              <div className="order-1">
                 <p className="ledger mb-4 inline-flex items-center gap-3 text-xs text-tar-soft">
                   <span>§ 001</span>
                   <span className="inline-block h-px w-8 bg-line-strong" aria-hidden="true" />
@@ -192,18 +193,18 @@ async function Home({
 
                 <h1
                   id="index-title"
-                  className="disp text-balance text-[clamp(2.75rem,5.4vw,4.85rem)] leading-[0.98] text-tar"
+                  className="disp text-balance text-[clamp(2.45rem,5.4vw,4.85rem)] leading-[0.98] text-tar"
                 >
                   {settings.heroHeadline?.trim() || "Objects shaped by patience, poured pigment, and timber."}
                 </h1>
 
-                <p className="type mt-6 max-w-xl text-lg leading-relaxed text-tar-soft md:text-[1.2rem]">
+                <p className="type mt-4 max-w-xl text-base leading-relaxed text-tar-soft md:mt-6 md:text-[1.2rem]">
                   Original poured paintings and fine handcrafted woodwork from our studio in {settings.town},{" "}
                   {settings.region}. Each piece is strictly one of a kind. Inquiries are welcomed directly.
                 </p>
               </div>
 
-              <dl className="mt-8 grid grid-cols-2 gap-6 border-t border-line pt-6 sm:grid-cols-3">
+              <dl className="order-3 mt-6 grid grid-cols-2 gap-6 border-t border-line pt-5 sm:grid-cols-3 lg:mt-8">
                 <div>
                   <dt className="micro-label text-tar-soft">Studio</dt>
                   <dd className="ledger mt-1 font-bold text-tar">
@@ -222,7 +223,7 @@ async function Home({
                 </div>
               </dl>
 
-              <div className="mt-8 flex flex-wrap items-center gap-3.5">
+              <div className="order-4 mt-6 flex flex-wrap items-center gap-3.5 lg:mt-8">
                 <a
                   href="#inquire"
                   className="ledger inline-flex min-h-12 items-center justify-center rounded-[2px] bg-tar px-6 text-xs font-bold uppercase tracking-wider text-wall transition-colors hover:bg-sap"
@@ -240,7 +241,7 @@ async function Home({
 
             {/* Right Column: Flat-Matted Artwork Plate */}
             {detail && heroPhoto && heroTitle ? (
-              <div className="flex flex-col lg:col-span-5">
+              <div className="order-2 flex flex-col lg:order-none lg:col-span-5">
                 <figure className="m-0 rounded-[2px] border border-line bg-wall-deep p-3.5">
                   <Link
                     href={`/p/${detail.slug}`}
@@ -336,7 +337,7 @@ async function Home({
         </div>
       </section>
 
-      <StudioIntro settings={settings} detail={detail} />
+      <StudioIntro settings={settings} detail={studioDetail} />
 
       <AcquisitionFaq settings={settings} />
 
