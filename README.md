@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# megele.art
 
-## Getting Started
+A direct-enquiry catalogue and private studio desk for a family art and woodwork studio in Collegeville, Pennsylvania. The public site presents real one-of-a-kind pieces; it intentionally has no cart or online payment flow.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Next.js 16, React, TypeScript strict, Tailwind CSS 4
+- Neon Postgres through `@neondatabase/serverless` and Drizzle schema types
+- Vercel Blob for artwork photographs
+- Vercel cron for scheduled publishing and retention cleanup
+- Vitest unit tests, Playwright production-build browser tests, Lighthouse CI
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Install pnpm dependencies: `pnpm install`
+2. Copy `.env.example` to `.env.local` and fill the shop values. Never commit `.env*`.
+3. Apply the SQL files in `drizzle/` to the target Neon branch in order.
+4. Run the app: `pnpm dev`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The production build requires real `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `SESSION_SECRET`, `ADMIN_PATH`, and `CRON_SECRET` values because Next.js prerenders cached catalogue queries.
 
-## Learn More
+## Commands
 
-To learn more about Next.js, take a look at the following resources:
+- `pnpm dev` — local development server
+- `pnpm build` — production build
+- `pnpm start` — serve the production build
+- `pnpm lint` — ESLint
+- `pnpm typecheck` — strict TypeScript
+- `pnpm test` — Vitest unit suite
+- `pnpm test:e2e` — Playwright production-build suite through `playwright.prod.config.ts`
+- `pnpm seed` — ingest local artwork photos into private drafts
+- `pnpm admin:password owner@example.com` — create or reset a desk password
+- `node scripts/bundle-budget.mjs` — enforce client-JavaScript budgets after a build
+- `node scripts/shot.mjs <url> <name>` — capture desktop/mobile screenshots for design review
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Private desk
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The desk lives under the secret `ADMIN_PATH` and is rewritten by `proxy.ts`; direct `/desk` access is not the intended public route. Authentication is checked again inside server actions and API routes. Use plain desk language and prefer undo over destructive confirmation flows.
 
-## Deploy on Vercel
+## Browser tests
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`pnpm test:e2e` requires an isolated database and never falls back to production companions. Put fixture values in gitignored `.env.e2e`; see `HANDOFF.md` for the full TLS/blob-mock setup. Required names are documented in `.env.example`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Operational notes
+
+- `HANDOFF.md` covers environment variables, backups, recovery, E2E, monitoring, and rollback.
+- `DIRECTORY_OVERVIEW.md` is the current architecture map.
+- `.impeccable/design-full.md` carries the full design-system document; root `DESIGN.md` is its compact map.

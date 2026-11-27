@@ -14,11 +14,11 @@ Shop:
 - `SESSION_SECRET`
 - `CRON_SECRET`
 
-Owner sign-in, still waiting:
+Owner sign-in and notifications:
 
-- `OWNER_EMAIL` (present, empty)
-- `RESEND_API_KEY` (not in `.env.local` yet)
-- `EMAIL_FROM` (not in `.env.local` yet)
+- `OWNER_EMAIL`
+- `RESEND_API_KEY`
+- `EMAIL_FROM`
 
 Staff door, local setup:
 
@@ -105,7 +105,7 @@ Leave these open until he supplies them:
 - Hours
 - Street
 
-The Visit page already says the street and the hours are not listed yet. Do not invent them on the profile.
+The public site does not list a street or hours until the owner supplies them. Do not invent them on the profile.
 
 ## Sign-in recovery
 
@@ -124,6 +124,7 @@ password-reset email — the code door is the recovery path.
 - `E2E_ADMIN_PATH` — desk path fixture (e.g. `e2e-desk-secret-path`)
 - `E2E_SESSION_SECRET` — session secret fixture (e.g. `e2e-fixture-secret-32chars`)
 - `E2E_BLOB_API_URL` — point uploads at the local blob mock (e.g. `https://e2e.public.blob.vercel-storage.com`)
+- `E2E_BLOB_READ_WRITE_TOKEN` — dummy token accepted by the local blob mock
 - `E2E_DESK_EMAIL`, `OWNER_EMAIL`, `EMAIL_FROM`, `DEV_ADMIN_*` — desk sign-in fixtures
 
 The prod suite (`playwright.prod.config.ts`) serves everything over TLS because

@@ -5,6 +5,7 @@ import { getDb } from "@/lib/db";
 import { auditLog } from "@/lib/db/schema";
 import { allowRate } from "@/lib/rate-limit";
 import { getSession } from "@/lib/auth";
+import { clientIp } from "@/lib/request-ip";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"] as const;
 const MAX_SIZE_BYTES = 15 * 1024 * 1024;
@@ -31,8 +32,7 @@ export async function POST(request: Request) {
   }
 
   const headerList = await headers();
-  const forwardedFor = headerList.get("x-forwarded-for");
-  const ip = forwardedFor?.split(",").pop()?.trim() || headerList.get("x-real-ip")?.trim() || "127.0.0.1";
+  const ip = clientIp(headerList);
   const rateAllowed = await allowRate(`upload-token:${session.userId}:${ip}`, 60, 60 * 10);
   if (!rateAllowed) {
     return Response.json({ message: "Too many upload requests. Please wait a moment." }, { status: 429 });

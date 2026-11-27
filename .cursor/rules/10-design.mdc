@@ -4,7 +4,7 @@ globs: "**/*.{tsx,css}"
 alwaysApply: false
 ---
 
-Follow DESIGN.md. Use the Wet Edge CSS tokens (gesso, plate, ink, cobalt, per-piece pour).
+Follow DESIGN.md. Use the Material Index CSS tokens (gesso, plate, jackwood, laterite, cobalt, per-piece pigment).
 
 Display and UI type is Bricolage Grotesque. Prose and captions are Newsreader.
 

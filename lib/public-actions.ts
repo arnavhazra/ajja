@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 import { enquirySchema } from "./schemas";
 import { getDb } from "./db";
@@ -8,6 +8,7 @@ import { auditLog, enquiries, products } from "./db/schema";
 import { allowRate } from "./rate-limit";
 import { dayHash } from "./day-hash";
 import { getSettings } from "./public-data";
+import { clientIp } from "./request-ip";
 
 export async function sendEnquiry(_state: { ok: boolean; message: string }, formData: FormData) {
   const quantity = String(formData.get("quantity") ?? "").trim();
@@ -27,7 +28,7 @@ export async function sendEnquiry(_state: { ok: boolean; message: string }, form
   }
   if (parsed.data.company) return { ok: true, message: "Message saved. The studio will read it." };
   const headerList = await headers();
-  const ip = headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "0";
+  const ip = clientIp(headerList);
   const hash = dayHash(ip, headerList.get("user-agent") ?? "", process.env.SESSION_SECRET ?? "ajja");
   const allowed = await allowRate(`enquiry:${hash}`, 5, 60 * 60);
   if (!allowed) return { ok: false, message: "Too many messages from this device. Try again later." };
@@ -40,7 +41,16 @@ export async function sendEnquiry(_state: { ok: boolean; message: string }, form
     const [row] = await db
       .select({ id: products.id })
       .from(products)
-      .where(and(eq(products.id, productId), isNull(products.deletedAt), inArray(products.status, ["published", "sold"])))
+      .where(
+        and(
+          eq(products.id, productId),
+          isNull(products.deletedAt),
+          sql`(
+            ${products.status} in ('published', 'sold')
+            or (${products.status} = 'scheduled' and ${products.publishAt} is not null and ${products.publishAt} <= now())
+          )`,
+        ),
+      )
       .limit(1);
     if (!row) productId = null;
   }

@@ -62,3 +62,8 @@ e2e/.blob-mock-*.pem
 
 # website-release-gate QA artifacts
 .qa-screenshots/
+
+# impeccable local state (design-full.md and config.json may be committed)
+.impeccable/config.local.json
+.impeccable/cache/
+.impeccable/pending/

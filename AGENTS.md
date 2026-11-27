@@ -9,14 +9,14 @@ Shop and private desk for a family studio in Collegeville, Pennsylvania. Neon Po
 - `pnpm lint` — ESLint
 - `pnpm typecheck` — TypeScript
 - `pnpm test` — Vitest
-- `pnpm test:e2e` — Playwright
+- `pnpm test:e2e` — production-build Playwright suite
 - `pnpm seed` — read photos, strip metadata, upload to Blob, create drafts
 
 Seed looks at `SEED_DIR`, then `seed/photos`, then `/Users/arnavhazra/Downloads/ajja-art-site-assets`.
 
 ## Folder map
 
-- `app/(shop)` — public pages
+- `app/(home)` and `app/(shop)` — public pages
 - `app/desk` — private desk, reached only by rewrite from `ADMIN_PATH`
 - `app/api` — enquiries, events, upload token, backup, cron
 - `lib` — database, auth, images, copy

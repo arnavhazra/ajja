@@ -5,6 +5,7 @@ import { getDb } from "@/lib/db";
 import { events, products } from "@/lib/db/schema";
 import { dayHash } from "@/lib/day-hash";
 import { allowRate } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/request-ip";
 
 const eventSchema = z.object({
   type: z.enum(["view", "whatsapp", "call", "form", "share", "save", "search", "search-empty"]),
@@ -20,8 +21,7 @@ export async function POST(request: Request) {
   }
 
   const headerList = await headers();
-  const forwardedFor = headerList.get("x-forwarded-for");
-  const ip = forwardedFor?.split(",").pop()?.trim() || headerList.get("x-real-ip")?.trim() || "127.0.0.1";
+  const ip = clientIp(headerList);
   const userAgent = headerList.get("user-agent") ?? "";
   const hash = dayHash(ip, userAgent, process.env.SESSION_SECRET ?? "dev-anonymous-events");
   const rateHash = dayHash(ip, "quota", process.env.SESSION_SECRET ?? "dev-anonymous-events");
