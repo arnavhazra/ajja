@@ -38,6 +38,10 @@ Seed looks at `SEED_DIR`, then `seed/photos`, then `/Users/arnavhazra/Downloads/
 
 See `HANDOFF.md`. Never commit `.env*`.
 
+## Release verification
+
+Before the public release gate, check for stale `next-server` listeners on the chosen port (`lsof -nP -iTCP:3100 -sTCP:LISTEN`); orphaned servers can serve old prerendered HTML and cause false chunk failures. Start one production server, warm the routes, then run `.agents/skills/website-release-gate/qa-audit.mjs` with every public route.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 ## This is NOT the Next.js you know
