@@ -2,7 +2,7 @@
 
 import { put } from "@vercel/blob/client";
 import { useState } from "react";
-import { addPhotoToPiece, ingestUpload } from "@/lib/desk-actions/pieces";
+import { addPhotoToPiece, ingestUpload } from "@/lib/desk-actions/pieces-ingest";
 import { UPLOAD_ATTEMPTS, UPLOAD_MAX_FILES, planUpload } from "@/lib/upload-plan";
 
 async function uploadOne(file: File, signal: AbortSignal) {

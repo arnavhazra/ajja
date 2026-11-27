@@ -1,4 +1,4 @@
-import { undoChange } from "@/lib/desk-actions/pieces";
+import { undoChange } from "@/lib/desk-actions/pieces-undo";
 
 export function Flash({ note, undo, back }: { note: string; undo: string; back: string }) {
   if (!note) return null;

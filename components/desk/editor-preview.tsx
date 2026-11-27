@@ -1,5 +1,5 @@
 import { PieceCard } from "@/components/shop/piece-card";
-import { draftPiece, duplicatePiece, hidePiece, publishPiece, sellPiece, trashPiece } from "@/lib/desk-actions/pieces";
+import { draftPiece, duplicatePiece, hidePiece, publishPiece, sellPiece, trashPiece } from "@/lib/desk-actions/pieces-status";
 import { hasRealTitle } from "@/lib/piece-title";
 import type { PublicProduct } from "@/lib/types";
 
