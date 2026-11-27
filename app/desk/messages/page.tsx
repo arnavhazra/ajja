@@ -85,7 +85,7 @@ async function Messages({ searchParams }: { searchParams: Promise<Record<string,
               {row.giftNote ? <p>Gift note: {row.giftNote}</p> : null}
               {row.quantity ? <p>Quantity: {row.quantity}</p> : null}
               {row.bulk ? <p>Asked about a bulk price.</p> : null}
-              <p>{row.status}</p>
+              <p><span className="desk-pill text-xs">{row.status === "new" ? "New" : row.status === "replied" ? "Replied" : "Closed"}</span></p>
               <div className="flex flex-wrap gap-2">
                 {href ? (
                   <a className="btn btn-primary" href={href}>
@@ -97,27 +97,33 @@ async function Messages({ searchParams }: { searchParams: Promise<Record<string,
                     Reply by email
                   </a>
                 ) : null}
-                <form action={setEnquiryStatus}>
-                  <input type="hidden" name="id" value={row.id} />
-                  <input type="hidden" name="status" value="replied" />
-                  <button className="btn btn-secondary" type="submit">
-                    Mark replied
-                  </button>
-                </form>
-                <form action={setEnquiryStatus}>
-                  <input type="hidden" name="id" value={row.id} />
-                  <input type="hidden" name="status" value="closed" />
-                  <button className="btn btn-quiet" type="submit">
-                    Close
-                  </button>
-                </form>
-                <form action={setEnquiryStatus}>
-                  <input type="hidden" name="id" value={row.id} />
-                  <input type="hidden" name="status" value="new" />
-                  <button className="btn btn-quiet" type="submit">
-                    Mark new
-                  </button>
-                </form>
+                {row.status !== "replied" ? (
+                  <form action={setEnquiryStatus}>
+                    <input type="hidden" name="id" value={row.id} />
+                    <input type="hidden" name="status" value="replied" />
+                    <button className="btn btn-secondary" type="submit">
+                      Mark replied
+                    </button>
+                  </form>
+                ) : null}
+                {row.status !== "closed" ? (
+                  <form action={setEnquiryStatus}>
+                    <input type="hidden" name="id" value={row.id} />
+                    <input type="hidden" name="status" value="closed" />
+                    <button className="btn btn-quiet" type="submit">
+                      Close
+                    </button>
+                  </form>
+                ) : null}
+                {row.status !== "new" ? (
+                  <form action={setEnquiryStatus}>
+                    <input type="hidden" name="id" value={row.id} />
+                    <input type="hidden" name="status" value="new" />
+                    <button className="btn btn-quiet" type="submit">
+                      Mark new
+                    </button>
+                  </form>
+                ) : null}
               </div>
             </article>
           );

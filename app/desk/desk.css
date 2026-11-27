@@ -210,9 +210,22 @@
   background: var(--wall-deep);
 }
 
+.upload-card {
+  position: relative;
+}
+
+.upload-card:focus-within {
+  outline: 3px solid var(--cobalt);
+  outline-offset: 2px;
+}
+
 .upload-card .upload-input {
-  max-width: 100%;
-  font-size: 1.25rem;
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: 0;
+  opacity: 0;
+  overflow: hidden;
 }
 
 .desk-foot {
@@ -416,11 +429,25 @@
 
 .desk-trow {
   display: grid;
-  grid-template-columns: 2.5rem 3.25rem minmax(0, 1fr);
+  grid-template-columns: 2rem 3.25rem minmax(0, 1fr);
+  grid-template-areas:
+    "check thumb main"
+    "price price status"
+    "tail tail tail";
   align-items: center;
-  gap: 0.35rem 0.75rem;
-  padding: 0.6rem 0;
+  gap: 0.45rem 0.75rem;
+  padding: 0.75rem 0;
   border-bottom: 1px solid var(--line);
+}
+
+.desk-cell-check { grid-area: check; }
+.desk-cell-thumb { grid-area: thumb; }
+.desk-cell-main { grid-area: main; min-width: 0; }
+.desk-cell-price { grid-area: price; min-width: 0; }
+.desk-cell-status { grid-area: status; min-width: 0; }
+.desk-trow .desk-thumb {
+  width: 3.25rem;
+  height: 3.25rem;
 }
 
 .desk-trow > .desk-trow-tail {
@@ -434,6 +461,7 @@
 @media (min-width: 64rem) {
   .desk-trow {
     grid-template-columns: 2rem 3.25rem minmax(0, 1.4fr) 8.5rem 10rem minmax(0, 1fr);
+    grid-template-areas: "check thumb main price status tail";
     gap: 0 0.9rem;
     padding: 0.4rem 0;
   }
@@ -509,6 +537,103 @@
   .desk-skeleton {
     animation: none;
   }
+}
+
+.desk-needs {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  scrollbar-width: none;
+}
+
+.desk-needs::-webkit-scrollbar { display: none; }
+
+@media (min-width: 64rem) {
+  .desk-needs {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+}
+
+.desk-fold {
+  border-top: 1px solid var(--line);
+}
+
+.desk-fold > summary {
+  display: flex;
+  min-height: 56px;
+  align-items: center;
+  cursor: pointer;
+  font-size: 1.5rem;
+  font-weight: 700;
+  list-style: none;
+}
+
+.desk-fold > summary::-webkit-details-marker { display: none; }
+
+.desk-fold > summary::after {
+  content: "+";
+  margin-left: auto;
+  color: var(--tar-soft);
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.desk-fold[open] > summary::after { content: "−"; }
+
+.desk-fold > div {
+  padding: 0.35rem 0 1.25rem;
+}
+
+.desk-photo-picker {
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  background: var(--wall);
+}
+
+.desk-photo-picker > summary {
+  display: flex;
+  min-height: 56px;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.55rem 0.75rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.desk-photo-picker > summary::-webkit-details-marker { display: none; }
+
+.desk-photo-picker > summary::after {
+  content: "Change";
+  margin-left: auto;
+  color: var(--tar-soft);
+  font-size: 1.25rem;
+}
+
+.desk-photo-picker[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.desk-photo-picker[open] > summary::after { content: "Close"; }
+
+.desk-photo-picker > .desk-photo-choice {
+  padding: 0.75rem;
+}
+
+.desk-photo-current {
+  position: relative;
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
+  flex: 0 0 auto;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 0.45rem;
+  background: var(--wall-sink);
+  color: var(--tar-soft);
+  font-size: 1rem;
+  text-align: center;
 }
 
 .desk-photo-choice {
@@ -597,3 +722,54 @@
 .desk .h-10,
 .desk .h-11,
 .desk .h-12 { min-height: 56px; }
+
+
+/* Compact settings index */
+.desk-settings-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.desk-setting-link {
+  display: grid;
+  min-height: 56px;
+  align-content: center;
+  gap: 0.15rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--line);
+  color: inherit;
+  text-decoration: none;
+}
+
+.desk-setting-link span {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.desk-setting-link small {
+  color: var(--tar-soft);
+  font-size: 1.25rem;
+  line-height: 1.35;
+}
+
+.desk-setting-link:hover span {
+  color: var(--sap);
+}
+
+/* Width utilities inside the wider desk canvas. */
+.desk-page.max-w-xl { max-width: 48rem; }
+.desk-page.max-w-3xl { max-width: 72rem; }
+
+/* Keep the row action menu inside narrow phone screens. */
+.desk-more-menu {
+  max-width: calc(100vw - 2rem);
+}
+
+@media (max-width: 63.99rem) {
+  .desk-trow-tail > select {
+    flex: 1 1 100%;
+  }
+}

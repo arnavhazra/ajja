@@ -100,7 +100,7 @@ export function PhotoUpload({ productId, prefix = "" }: { productId?: string; pr
           accept="image/jpeg,image/png,image/webp,image/heic,.heic"
           onChange={(event) => void onChange(event)}
         />
-        <span>Choose photo from this device</span>
+        <span>Choose photos from this device</span>
       </label>
       {!productId ? (
         <details className="desk-note">

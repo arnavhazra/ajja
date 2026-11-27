@@ -160,7 +160,7 @@ export function PiecesTable({
       <div className="desk-table" role="table" aria-label="Pieces">
         {rows.map((row) => (
           <div key={row.id} className="desk-trow" role="row">
-            <div className="flex min-h-11 items-center" role="cell">
+            <div className="desk-cell-check flex min-h-11 items-center" role="cell">
               <input
                 type="checkbox"
                 checked={selected.has(row.id)}
@@ -168,13 +168,13 @@ export function PiecesTable({
                 aria-label={`Select ${row.displayTitle}`}
               />
             </div>
-            <Link className="desk-thumb" href={`${prefix}/pieces/${row.id}`} tabIndex={-1} aria-hidden="true" role="cell">
+            <Link className="desk-thumb desk-cell-thumb" href={`${prefix}/pieces/${row.id}`} tabIndex={-1} aria-hidden="true" role="cell">
               {row.imageUrl ? <Image src={row.imageUrl} alt="" width={128} height={128} sizes="52px" /> : <span>No photo</span>}
             </Link>
-            <div className="min-w-0" role="cell">
+            <div className="desk-cell-main min-w-0" role="cell">
               <div className="flex flex-wrap items-center gap-2">
                 <input
-                  className="field min-h-12 min-w-40 flex-1 text-base font-semibold"
+                  className="field min-h-12 min-w-0 flex-1 text-base font-semibold"
                   value={valueOf(row, "title")}
                   placeholder="Name this piece"
                   aria-label={`Name of ${row.displayTitle}`}
@@ -207,7 +207,7 @@ export function PiecesTable({
                 ) : null}
               </p>
             </div>
-            <div role="cell">
+            <div className="desk-cell-price min-w-0" role="cell">
               <label className="sr-only" htmlFor={`price-${row.id}`}>
                 {`Price for ${row.displayTitle}`}
               </label>
@@ -224,7 +224,7 @@ export function PiecesTable({
                 }}
               />
             </div>
-            <div role="cell">
+            <div className="desk-cell-status min-w-0" role="cell">
               <label className="sr-only" htmlFor={`status-${row.id}`}>
                 {`Status of ${row.displayTitle}`}
               </label>
@@ -273,28 +273,28 @@ export function PiecesTable({
                 </form>
               ) : (
                 <span className="flex flex-wrap items-center gap-1">
-                  {row.status === "draft" ? (
-                    <Link className="btn btn-secondary min-h-11 px-3 text-xs" href={`${prefix}/add?piece=${row.id}`}>
-                      Continue draft
-                    </Link>
-                  ) : null}
-                  <form action={sellPiece}>
-                    <input type="hidden" name="id" value={row.id} />
-                    <input type="hidden" name="back" value="/pieces" />
-                    <button className="btn btn-secondary min-h-11 px-3 text-xs" type="submit">
-                      Mark as sold
-                    </button>
-                  </form>
-                  <form action={hidePiece}>
-                    <input type="hidden" name="id" value={row.id} />
-                    <input type="hidden" name="back" value="/pieces" />
-                    <button className="btn btn-secondary min-h-11 px-3 text-xs" type="submit">
-                      Hide
-                    </button>
-                  </form>
                   <details className="desk-more">
-                    <summary className="btn btn-quiet min-h-11 px-3 text-xs">More</summary>
+                    <summary className="btn btn-secondary min-h-11 px-3 text-xs">More</summary>
                     <span className="desk-more-menu">
+                      {row.status === "draft" ? (
+                        <Link className="btn btn-quiet min-h-11 px-3 text-xs" href={`${prefix}/add?piece=${row.id}`}>
+                          Continue draft
+                        </Link>
+                      ) : null}
+                      <form action={sellPiece}>
+                        <input type="hidden" name="id" value={row.id} />
+                        <input type="hidden" name="back" value="/pieces" />
+                        <button className="btn btn-quiet min-h-11 px-3 text-xs" type="submit">
+                          Mark as sold
+                        </button>
+                      </form>
+                      <form action={hidePiece}>
+                        <input type="hidden" name="id" value={row.id} />
+                        <input type="hidden" name="back" value="/pieces" />
+                        <button className="btn btn-quiet min-h-11 px-3 text-xs" type="submit">
+                          Hide
+                        </button>
+                      </form>
                       <form action={publishPiece}>
                         <input type="hidden" name="id" value={row.id} />
                         <input type="hidden" name="back" value="/pieces" />

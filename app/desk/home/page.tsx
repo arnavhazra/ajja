@@ -77,15 +77,13 @@ async function HomeEditor({ searchParams }: { searchParams: Promise<Record<strin
             Show the announcement
           </label>
         </fieldset>
-        <fieldset className="grid gap-3">
-          <legend className="text-2xl">Photographs</legend>
+        <details className="desk-fold"><summary>Photographs</summary><div className="grid gap-3">
           <PhotoChoice name="heroImage" label="Hero photograph" current={settings.heroImage} photos={photos} noneLabel="No hero photograph" />
           <input type="hidden" name="heroFocalX" value={String(settings.heroFocalX)} />
           <input type="hidden" name="heroFocalY" value={String(settings.heroFocalY)} />
           <PhotoChoice name="ownerPhoto" label="Your photo" current={settings.ownerPhoto} photos={photos} noneLabel="Not added yet" />
-        </fieldset>
-        <fieldset className="grid gap-3">
-          <legend className="text-2xl">Ways to reach you</legend>
+        </div></details>
+        <details className="desk-fold"><summary>Ways to reach you</summary><div className="grid gap-3">
           <label className="grid gap-1">
             WhatsApp number
             <input className="field" name="whatsapp" defaultValue={settings.whatsapp} />
@@ -122,9 +120,8 @@ async function HomeEditor({ searchParams }: { searchParams: Promise<Record<strin
             How you reply
             <textarea className="field" name="responseNote" defaultValue={settings.responseNote} />
           </label>
-        </fieldset>
-        <fieldset className="grid gap-3">
-          <legend className="text-2xl">Hours</legend>
+        </div></details>
+        <details className="desk-fold"><summary>Hours</summary><div className="grid gap-3">
           {WEEKDAY_NAMES.map((day) => {
             const row = settings.hours.find((entry) => entry.day === day);
             return (
@@ -139,9 +136,8 @@ async function HomeEditor({ searchParams }: { searchParams: Promise<Record<strin
               </div>
             );
           })}
-        </fieldset>
-        <fieldset className="grid gap-3">
-          <legend className="text-2xl">Questions</legend>
+        </div></details>
+        <details className="desk-fold"><summary>Questions</summary><div className="grid gap-3">
           {settings.faqs.map((faq, index) => (
             <div key={`${faq.q}-${index}`} className="grid gap-2">
               <input className="field" name="faqQ" aria-label={`Question ${index + 1}`} defaultValue={faq.q} />
@@ -152,9 +148,8 @@ async function HomeEditor({ searchParams }: { searchParams: Promise<Record<strin
             <input className="field" name="faqQ" aria-label="New question" placeholder="New question" />
             <textarea className="field" name="faqA" aria-label="New answer" placeholder="Answer" />
           </div>
-        </fieldset>
-        <fieldset className="grid gap-3">
-          <legend className="text-2xl">Commissions &amp; timing</legend>
+        </div></details>
+        <details className="desk-fold"><summary>Commissions & timing</summary><div className="grid gap-3">
           <label className="grid gap-1">
             Lead times — how long a piece or a commission takes
             <textarea className="field" name="leadTime" defaultValue={settings.leadTime} />
@@ -167,9 +162,8 @@ async function HomeEditor({ searchParams }: { searchParams: Promise<Record<strin
             Custom work — what commissions you take on
             <textarea className="field" name="commissions" defaultValue={settings.commissions} />
           </label>
-        </fieldset>
-        <fieldset className="grid gap-3">
-          <legend className="text-2xl">Terms shown on the site</legend>
+        </div></details>
+        <details className="desk-fold"><summary>Terms shown on the site</summary><div className="grid gap-3">
           <label className="grid gap-1">
             Payment note
             <textarea className="field" name="paymentNote" defaultValue={settings.paymentNote} />
@@ -186,7 +180,7 @@ async function HomeEditor({ searchParams }: { searchParams: Promise<Record<strin
             Returns
             <textarea className="field" name="returns" defaultValue={settings.policies.returns} />
           </label>
-        </fieldset>
+        </div></details>
         <input type="hidden" name="theme" value={settings.theme} />
         <input type="hidden" name="fontPair" value={settings.fontPair} />
         <label className="flex min-h-12 items-center gap-3">

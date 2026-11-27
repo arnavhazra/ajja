@@ -20,7 +20,13 @@ export function DeskNavLinks({ prefix, sections }: { prefix: string; sections: D
           <p className="desk-nav-group">{section.title}</p>
           {section.links.map(([href, label, count]) => {
             const target = `${prefix}${href}`;
-            const current = href === "" ? local === "" || local === "/" : local === href || local.startsWith(`${href}/`);
+            const morePaths = ["/settings", "/home", "/poster", "/account", "/help", "/review", "/groups", "/insights", "/files", "/history"];
+            const current =
+              href === ""
+                ? local === "" || local === "/"
+                : href === "/settings"
+                  ? morePaths.some((path) => local === path || local.startsWith(`${path}/`))
+                  : local === href || local.startsWith(`${href}/`);
             return (
               <Link key={label} className={cn("desk-link")} href={target || "/"} aria-current={current ? "page" : undefined}>
                 {label}

@@ -12,24 +12,10 @@ export async function DeskNav({ email }: { email: string }) {
       title: "Desk",
       links: [
         ["", "Today"],
-        ["/home", "Home page"],
         ["/add", "Add a piece"],
         ["/pieces", "My pieces"],
         ["/messages", "Messages", counts.waiting],
-        ["/poster", "Poster"],
-        ["/account", "Account"],
-        ["/help", "Help"],
-      ],
-    },
-    {
-      title: "More",
-      links: [
-        ["/review", "Review drafts"],
-        ["/groups", "Groups"],
-        ["/insights", "Numbers"],
-        ["/files", "Files"],
-        ["/history", "History"],
-        ["/settings", "Settings"],
+        ["/settings", "More"],
       ],
     },
   ];
