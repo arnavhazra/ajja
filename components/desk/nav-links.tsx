@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { cn } from "@/lib/cn";
 
 export type DeskNavSection = {
@@ -11,33 +12,53 @@ export type DeskNavSection = {
 
 export function DeskNavLinks({ prefix, sections }: { prefix: string; sections: DeskNavSection[] }) {
   const raw = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
   const base = raw.startsWith(prefix) ? prefix : "/desk";
   const local = raw.startsWith(base) ? raw.slice(base.length) : raw;
   return (
-    <nav className="desk-nav" aria-label="Desk">
-      {sections.map((section) => (
-        <div key={section.title} className="desk-nav-section">
-          <p className="desk-nav-group">{section.title}</p>
-          {section.links.map(([href, label, count]) => {
-            const target = `${prefix}${href}`;
-            const morePaths = ["/settings", "/home", "/poster", "/account", "/help", "/review", "/groups", "/insights", "/files", "/history"];
-            const current =
-              href === ""
-                ? local === "" || local === "/"
-                : href === "/settings"
-                  ? morePaths.some((path) => local === path || local.startsWith(`${path}/`))
-                  : local === href || local.startsWith(`${href}/`);
-            return (
-              <Link key={label} className={cn("desk-link")} href={target || "/"} aria-current={current ? "page" : undefined}>
-                {label}
-                {count ? (
-                  <span className={cn("desk-badge", current && "desk-badge-current")}>{count > 99 ? "99+" : count}</span>
-                ) : null}
-              </Link>
-            );
-          })}
-        </div>
-      ))}
-    </nav>
+    <div className="desk-nav-shell">
+      <button
+        type="button"
+        className="desk-menu-toggle"
+        aria-expanded={menuOpen}
+        aria-controls="desk-navigation"
+        onClick={() => setMenuOpen((open) => !open)}
+      >
+        {menuOpen ? "Close menu" : "Menu"}
+      </button>
+      <div id="desk-navigation" className={cn("desk-nav-collapse", menuOpen && "is-open")}>
+        <nav className="desk-nav" aria-label="Desk">
+          {sections.map((section) => (
+            <div key={section.title} className="desk-nav-section">
+              <p className="desk-nav-group">{section.title}</p>
+              {section.links.map(([href, label, count]) => {
+                const target = `${prefix}${href}`;
+                const morePaths = ["/settings", "/home", "/poster", "/account", "/help", "/review", "/groups", "/insights", "/files", "/history"];
+                const current =
+                  href === ""
+                    ? local === "" || local === "/"
+                    : href === "/settings"
+                      ? morePaths.some((path) => local === path || local.startsWith(`${path}/`))
+                      : local === href || local.startsWith(`${href}/`);
+                return (
+                  <Link
+                    key={label}
+                    className={cn("desk-link")}
+                    href={target || "/"}
+                    aria-current={current ? "page" : undefined}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {label}
+                    {count ? (
+                      <span className={cn("desk-badge", current && "desk-badge-current")}>{count > 99 ? "99+" : count}</span>
+                    ) : null}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
+        </nav>
+      </div>
+    </div>
   );
 }

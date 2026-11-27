@@ -25,7 +25,7 @@ async function Messages({ searchParams }: { searchParams: Promise<Record<string,
       <Flash note={one(params.note)} undo="" back="/messages" />
       <div className="desk-lead">
         <h1 className="text-4xl">Messages</h1>
-        <p className="desk-note">New, replied, or closed. Old messages are deleted after the number of days you set.</p>
+        <p className="desk-note">Old messages are deleted after the number of days you set.</p>
       </div>
       <nav className="flex flex-wrap gap-2" aria-label="Message status">
         {([

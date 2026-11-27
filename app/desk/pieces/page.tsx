@@ -93,7 +93,7 @@ async function Pieces({ searchParams }: { searchParams: Promise<Record<string, s
       <Flash note={one(params.note)} undo={one(params.undo)} back="/pieces" />
       <div className="desk-lead">
         <h1 className="text-4xl">Pieces</h1>
-        <p className="desk-note">Search, change a name, price, group, or status right here — changes save when you leave the field.</p>
+        <p className="desk-note">Edit names, prices, groups, or statuses here — changes save when you leave the field.</p>
       </div>
       <nav className="flex flex-wrap gap-2" aria-label="Which pieces to show">
         {[
@@ -132,7 +132,7 @@ async function Pieces({ searchParams }: { searchParams: Promise<Record<string, s
         </>
       ) : null}
       {!trash ? (
-        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Show pieces that need something">
+        <div className="desk-chip-row flex items-center gap-2" role="group" aria-label="Show pieces that need something">
           <span className="text-sm text-tar-soft">Needs:</span>
           {NEEDS.map(({ key, label }) => (
             <Link

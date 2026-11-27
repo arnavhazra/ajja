@@ -122,6 +122,18 @@
   color: var(--tar-soft);
 }
 
+.desk-nav-shell {
+  display: contents;
+}
+
+.desk-menu-toggle {
+  display: none;
+}
+
+.desk-nav-collapse {
+  display: contents;
+}
+
 .desk-nav {
   display: flex;
   gap: 0.25rem;
@@ -214,9 +226,74 @@
     margin-left: auto;
   }
 
+  .desk-nav-shell {
+    display: grid;
+  }
+
+  .desk-menu-toggle {
+    display: flex;
+    min-height: 56px;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--tar-soft);
+    cursor: pointer;
+    font: inherit;
+    padding: 0 1rem;
+  }
+
+  .desk-menu-toggle::after {
+    content: "+";
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .desk-menu-toggle[aria-expanded="true"]::after {
+    content: "−";
+  }
+
+  .desk-nav-collapse {
+    display: none;
+  }
+
+  .desk-nav-collapse.is-open {
+    display: block;
+  }
+
   .desk-nav {
     flex-wrap: wrap;
     overflow-x: visible;
+    margin-top: 0.35rem;
+  }
+
+  .desk-main {
+    padding: 1rem 1rem 3rem;
+  }
+
+  .desk-page {
+    gap: 1.25rem;
+  }
+
+  .desk-lead {
+    gap: 0.65rem;
+  }
+
+  .desk-lead h1 {
+    font-size: 2rem;
+    line-height: 1.1;
+  }
+
+  .desk-note {
+    padding: 0.65rem 0.9rem;
+  }
+
+  .desk-page nav .desk-link,
+  .desk-page nav .btn {
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
   }
 }
 
@@ -419,7 +496,7 @@
   margin: 0;
   padding: 0.85rem 1.1rem;
   background: var(--wall-deep);
-  border-left: 3px solid var(--sap);
+  border: 1px solid var(--line);
   border-radius: 0.5rem;
   color: var(--tar-soft);
 }
@@ -514,6 +591,29 @@
   font-size: 1.25rem;
   color: var(--tar-soft);
   text-decoration: none;
+}
+
+
+.desk-chip-row {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 63.99rem) {
+  .desk-chip-row {
+    flex-wrap: nowrap;
+    margin: 0 -1rem;
+    overflow-x: auto;
+    padding: 0 1rem 0.25rem;
+    scrollbar-width: none;
+  }
+
+  .desk-chip-row > * {
+    flex: none;
+  }
+
+  .desk-chip-row::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .desk-chip[aria-current="true"] {
