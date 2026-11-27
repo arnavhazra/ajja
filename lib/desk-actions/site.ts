@@ -135,15 +135,6 @@ export async function saveRetention(formData: FormData) {
   return go("/messages", `Messages are kept for ${days} days.`);
 }
 
-export async function toggleChecklist(formData: FormData) {
-  const session = await actor();
-  const key = String(formData.get("key") ?? "").slice(0, 40);
-  const current = await readSettings();
-  await writeSettings({ ...current, checklist: { ...current.checklist, [key]: formData.get("done") === "on" } });
-  await audit(session.userId, "Updated the checklist", "settings", "shop");
-  return go("", "Checklist saved.");
-}
-
 export async function confirmImport(formData: FormData) {
   const session = await actor();
   const table = parseCsv(String(formData.get("csv") ?? ""));

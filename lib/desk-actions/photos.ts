@@ -100,29 +100,6 @@ export async function retryEnhance(formData: FormData) {
   return go(`/pieces/${parsed.data.productId}`, "Tidying photo…");
 }
 
-/** Set every enhanced version as its piece's cover — the approved catalogue sweep. */
-export async function approveEnhancedCovers() {
-  const session = await actor();
-  const db = getDb();
-  const rows = await db.select({ id: products.id, attributes: products.attributes }).from(products);
-  let applied = 0;
-  for (const row of rows) {
-    const versions = (((row.attributes ?? {}) as unknown as Record<string, unknown>).enhancedVersions ?? {}) as Record<string, string>;
-    for (const enhancedId of Object.values(versions)) {
-      const images = await db.select().from(productImages).where(eq(productImages.productId, row.id)).orderBy(asc(productImages.sortOrder));
-      if (!images.some((i) => i.id === enhancedId)) continue;
-      let order = 1;
-      for (const item of images) {
-        await db.update(productImages).set({ sortOrder: item.id === enhancedId ? 0 : order++ }).where(eq(productImages.id, item.id));
-      }
-      await audit(session.userId, "Chose the cover photo", "product", row.id);
-      applied += 1;
-    }
-  }
-  refresh();
-  return go("/settings", `Enhanced cover set on ${applied} pieces.`);
-}
-
 export async function coverImage(formData: FormData) {
   const session = await actor();
   const imageId = String(formData.get("imageId"));

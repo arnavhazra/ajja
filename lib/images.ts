@@ -1,11 +1,11 @@
 import "server-only";
 
-import { del, put } from "@vercel/blob";
+import { put } from "@vercel/blob";
 import sharp from "sharp";
 
 const MAX_BYTES = 15 * 1024 * 1024;
 
-export function sniffImage(buffer: Buffer) {
+function sniffImage(buffer: Buffer) {
   if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return "image/jpeg";
   if (buffer.length >= 4 && buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47) {
     return "image/png";
@@ -28,7 +28,7 @@ export function assertBlobUrl(url: string) {
   return parsed;
 }
 
-export async function optimizeImage(buffer: Buffer) {
+async function optimizeImage(buffer: Buffer) {
   if (buffer.length > MAX_BYTES) throw new Error("That photo is larger than 15 MB.");
   if (!sniffImage(buffer)) throw new Error("Use a JPEG, PNG, WebP, or HEIC photo.");
   const rotated = await sharp(buffer, { failOn: "none" }).rotate().toBuffer();
@@ -54,10 +54,4 @@ export async function storeImage(bytes: Buffer, name: string) {
     addRandomSuffix: true,
   });
   return { ...image, url: blob.url };
-}
-
-export async function replaceStoredImage(url: string, bytes: Buffer) {
-  const stored = await storeImage(bytes, "pieces/edited.webp");
-  await del(url).catch(() => undefined);
-  return stored;
 }

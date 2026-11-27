@@ -124,16 +124,6 @@ export const siteSettings = pgTable("site_settings", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-export const pageSections = pgTable("page_sections", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  page: text("page").notNull(),
-  type: text("type").notNull(),
-  content: jsonb("content").notNull().default({}),
-  sortOrder: integer("sort_order").notNull().default(0),
-  status: text("status").notNull().default("draft"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
 export const testimonials = pgTable("testimonials", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
@@ -187,16 +177,6 @@ export const auditLog = pgTable("audit_log", {
   meta: jsonb("meta").notNull().default({}),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
-
-export const rateLimits = pgTable(
-  "rate_limits",
-  {
-    bucket: text("bucket").notNull(),
-    windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
-    count: integer("count").notNull().default(0),
-  },
-  (table) => [primaryKey({ columns: [table.bucket, table.windowStart] })],
-);
 
 export const redirects = pgTable("redirects", {
   id: uuid("id").primaryKey().defaultRandom(),

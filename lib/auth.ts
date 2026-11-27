@@ -8,8 +8,9 @@ import { adminUsers, auditLog, loginCodes, sessions } from "./db/schema";
 import { checkPassword, hashPassword } from "./password";
 import { verifyTotp } from "./totp";
 import { allowRate } from "./rate-limit";
+import { clientIp } from "./request-ip";
 
-export const SESSION_COOKIE = "ajja_session";
+const SESSION_COOKIE = "ajja_session";
 const MONTH = 60 * 60 * 24 * 30;
 
 function getSessionSecret(): string {
@@ -32,7 +33,7 @@ function same(left: string, right: string) {
   return timingSafeEqual(a, b);
 }
 
-export function allowedEmails() {
+function allowedEmails() {
   return [process.env.OWNER_EMAIL, process.env.DEV_ADMIN_EMAIL, ...(process.env.E2E_DESK_EMAIL ?? "").split(",")]
     .map((email) => email?.trim().toLowerCase())
     .filter((email): email is string => Boolean(email));
@@ -100,8 +101,7 @@ export async function requestCode(emailRaw: string) {
   if (!allowedEmails().includes(email)) return { ok: true as const, message: generic };
 
   const headerList = await headers();
-  const forwardedFor = headerList.get("x-forwarded-for");
-  const ip = forwardedFor?.split(",").pop()?.trim() || headerList.get("x-real-ip")?.trim() || "127.0.0.1";
+  const ip = clientIp(headerList);
   const rateBucket = `req-code:${email}:${ip.slice(0, 64)}`;
   const allowed = await allowRate(rateBucket, 3, 60 * 10);
   if (!allowed) {
@@ -161,8 +161,7 @@ export async function verifyStaff(emailRaw: string, password: string, token: str
   const secret = process.env.DEV_ADMIN_TOTP_SECRET ?? "";
 
   const headerList = await headers();
-  const forwardedFor = headerList.get("x-forwarded-for");
-  const ip = forwardedFor?.split(",").pop()?.trim() || headerList.get("x-real-ip")?.trim() || "127.0.0.1";
+  const ip = clientIp(headerList);
   const rateAllowed = await allowRate(`verify-staff:${ip.slice(0, 64)}`, 10, 60 * 15);
   if (!rateAllowed) {
     return { ok: false as const, message: "Too many tries. Wait 15 minutes." };
@@ -303,15 +302,21 @@ async function sendCode(email: string, code: string) {
   const key = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;
   if (!key || !from) return false;
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      from,
-      to: email,
-      subject: "Your megele.art sign-in code",
-      text: `Your code is ${code}. It lasts 10 minutes.`,
-    }),
-  });
-  return response.ok;
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      signal: AbortSignal.timeout(5000),
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from,
+        to: email,
+        subject: "Your megele.art sign-in code",
+        text: `Your code is ${code}. It lasts 10 minutes.`,
+      }),
+    });
+    return response.ok;
+  } catch (error) {
+    console.error("Sign-in email failed", error instanceof Error ? error.message : "unknown");
+    return false;
+  }
 }

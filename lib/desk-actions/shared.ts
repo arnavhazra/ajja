@@ -160,7 +160,7 @@ export async function writeSettings(value: ShopSettings) {
   refresh();
 }
 
-export async function imageCountOf(productId: string) {
+async function imageCountOf(productId: string) {
   return getDb().$count(productImages, eq(productImages.productId, productId));
 }
 

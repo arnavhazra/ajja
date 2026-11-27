@@ -11,7 +11,7 @@ import { categories, collections, productImages, productVersions, siteSettings }
  * group or collection cover, or an un-undone snapshot from the last 30 days.
  * `exceptProductId` ignores a product's own photo rows (trash purge).
  */
-export async function blobStillReferenced(url: string, exceptProductId?: string): Promise<boolean> {
+async function blobStillReferenced(url: string, exceptProductId?: string): Promise<boolean> {
   const db = getDb();
   const imageRows = await db
     .select({ productId: productImages.productId })

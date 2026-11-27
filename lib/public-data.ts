@@ -1,7 +1,7 @@
 import "server-only";
 
 import { cacheLife, cacheTag } from "next/cache";
-import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { getDb } from "./db";
 import { categories, productImages, products, redirects } from "./db/schema";
 import { withDefaults } from "./settings";
@@ -127,18 +127,6 @@ export async function loadProduct(slug: string) {
   return { product, redirect: null };
 }
 
-export async function hasPricedProducts() {
-  "use cache";
-  cacheTag("catalog");
-  cacheLife("minutes");
-  const [row] = await getDb()
-    .select({ id: products.id })
-    .from(products)
-    .where(and(listed(), sql`${products.priceMinor} is not null`))
-    .limit(1);
-  return Boolean(row);
-}
-
 export async function loadCategories() {
   "use cache";
   cacheTag("catalog");
@@ -179,19 +167,6 @@ export async function loadRelated(product: PublicProduct) {
     .where(and(listed(), eq(products.categoryId, product.categoryId), sql`${products.id} <> ${product.id}`))
     .orderBy(desc(products.createdAt))
     .limit(4);
-  return hydrate(rows);
-}
-
-export async function loadSold(limit = 8) {
-  "use cache";
-  cacheTag("catalog");
-  cacheLife("minutes");
-  const rows = await getDb()
-    .select()
-    .from(products)
-    .where(and(isNull(products.deletedAt), eq(products.status, "sold")))
-    .orderBy(desc(products.updatedAt))
-    .limit(limit);
   return hydrate(rows);
 }
 
