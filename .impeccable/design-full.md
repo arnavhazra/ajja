@@ -1,3 +1,73 @@
+---
+name: megele.art
+description: "A Mangalorean material index for real studio pieces"
+colors:
+  gesso: "#f3ede2"
+  surface-low: "#f9f3e8"
+  plate: "#e6dccb"
+  plate-deep: "#d8cbb6"
+  jackwood: "#2c221b"
+  jackwood-soft: "#635548"
+  laterite: "#894636"
+  cobalt: "#28489c"
+  vat: "#211913"
+  vat-ink: "#e9dfcc"
+  ok: "#2f6b45"
+  sold: "#8a5a24"
+  warn: "#9c3a2f"
+typography:
+  display:
+    fontFamily: "Bricolage Grotesque, system-ui, sans-serif"
+    fontSize: "clamp(2.45rem, 5.4vw, 4.85rem)"
+    fontWeight: 700
+    lineHeight: 0.98
+    letterSpacing: "-0.025em"
+  body:
+    fontFamily: "Bricolage Grotesque, system-ui, sans-serif"
+    fontSize: "1rem"
+    fontWeight: 400
+    lineHeight: 1.55
+  reader:
+    fontFamily: "Newsreader, Georgia, serif"
+    fontSize: "1rem"
+    fontWeight: 500
+    lineHeight: 1.55
+  label:
+    fontFamily: "Courier Prime, ui-monospace, monospace"
+    fontSize: "0.75rem"
+    fontWeight: 400
+    letterSpacing: "0.14em"
+rounded:
+  photo: "2px"
+  control: "2px"
+  desk-panel: "6px"
+spacing:
+  gutter: "clamp(18px, 3.2vw, 48px)"
+  control: "12px"
+  section: "clamp(30px, 5vh, 56px)"
+components:
+  button-primary:
+    backgroundColor: "{colors.jackwood}"
+    textColor: "{colors.gesso}"
+    rounded: "{rounded.control}"
+    padding: "10px 22px"
+  button-secondary:
+    backgroundColor: "{colors.gesso}"
+    textColor: "{colors.jackwood}"
+    rounded: "{rounded.control}"
+    padding: "10px 22px"
+  field:
+    backgroundColor: "{colors.gesso}"
+    textColor: "{colors.jackwood}"
+    rounded: "{rounded.control}"
+    padding: "10px 12px"
+  archival-plate:
+    backgroundColor: "{colors.plate}"
+    textColor: "{colors.jackwood}"
+    rounded: "{rounded.photo}"
+    padding: "14px"
+---
+
 # megele.art — Material Index
 
 ## Direction
