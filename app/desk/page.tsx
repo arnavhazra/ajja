@@ -5,7 +5,7 @@ import { Flash, one } from "@/components/desk/flash";
 import { PasswordField } from "@/components/desk/password-field";
 import { completePasswordSignIn, completeSignIn, completeStaffSignIn, sendSignInCode } from "@/lib/desk-actions/auth";
 import { loadDashboard } from "@/lib/desk-data";
-import { deskPrefix } from "@/lib/desk-path";
+import { deskPath } from "@/lib/desk-path";
 import { getSession } from "@/lib/auth";
 import { brand } from "@/lib/brand";
 
@@ -70,7 +70,7 @@ async function Home({ searchParams }: { searchParams: Promise<Record<string, str
       </main>
     );
   }
-  const [dash, prefix] = await Promise.all([loadDashboard(), deskPrefix()]);
+  const dash = await loadDashboard();
   return (
     <main className="desk-page">
       <Flash note={note} undo={one(params.undo)} back="/" />
@@ -79,17 +79,17 @@ async function Home({ searchParams }: { searchParams: Promise<Record<string, str
         <p className="desk-note">Three jobs live here. Everything else is under More in the menu.</p>
       </div>
       <nav className="grid gap-3" aria-label="What would you like to do">
-        <Link href={`${prefix}/add`} className="desk-choice">
+        <Link href={`${deskPath}/add`} className="desk-choice">
           <span className="display text-3xl">Add a piece</span>
           <span className="desk-choice-note">A photo starts a private draft — nothing goes on the site until you say so.</span>
         </Link>
-        <Link href={`${prefix}/pieces`} className="desk-choice">
+        <Link href={`${deskPath}/pieces`} className="desk-choice">
           <span className="display text-3xl">My pieces</span>
           <span className="desk-choice-note">
             {dash.drafts ? `${dash.drafts} in draft` : "Nothing in draft"} · {dash.live} on the site
           </span>
         </Link>
-        <Link href={`${prefix}/messages`} className="desk-choice">
+        <Link href={`${deskPath}/messages`} className="desk-choice">
           <span className="display text-3xl">Messages</span>
           <span className="desk-choice-note">
             {dash.waiting

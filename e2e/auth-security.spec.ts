@@ -11,6 +11,7 @@ const adminPassword = "e2e-security-password-123";
 const devEmail = process.env.DEV_ADMIN_EMAIL ?? "dev@example.test";
 const devPassword = process.env.DEV_ADMIN_PASSWORD ?? "dev-pass-long-123";
 const devTotp = process.env.DEV_ADMIN_TOTP_SECRET ?? "JBSWY3DPEHPK3PXP";
+const admin = "desk";
 
 test.describe("Security fixes verification", () => {
   test.beforeAll(async () => {
@@ -28,7 +29,6 @@ test.describe("Security fixes verification", () => {
   });
 
   test("unknown email rejected immediately", async ({ page }) => {
-    const admin = process.env.ADMIN_PATH ?? "";
     await page.goto(`/${admin}`);
     await page.getByLabel("Email").fill("unknown-attacker@nowhere.test");
     await page.getByLabel("Password").fill("some-random-password");
@@ -37,7 +37,6 @@ test.describe("Security fixes verification", () => {
   });
 
   test("staff sessions cannot change password without DEV_ADMIN_PASSWORD", async ({ page }) => {
-    const admin = process.env.ADMIN_PATH ?? "";
     // Sign in via staff door
     await page.goto(`/${admin}?staff=1`);
     await page.getByLabel("Email").fill(devEmail);
@@ -63,7 +62,6 @@ test.describe("Security fixes verification", () => {
   });
 
   test("password change invalidates existing desk sessions", async ({ page, browser }) => {
-    const admin = process.env.ADMIN_PATH ?? "";
     const sql = neon(process.env.DATABASE_URL ?? "");
 
     // Sign in on browser 1

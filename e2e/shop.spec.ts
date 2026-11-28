@@ -81,19 +81,14 @@ test("home, redirects, category routes, and a missing page", async ({ page }) =>
   await page.goto("/category/not-a-real-art-form");
   await expect(page.getByRole("heading", { name: "That page is not here" })).toBeVisible();
   await page.goto("/desk");
-  await expect(page.getByRole("heading", { name: "That page is not here" })).toBeVisible();
-  await expect(page.getByText("Sign in")).toHaveCount(0);
-  const robots = await page.request.get("/robots.txt");
-  expect(await robots.text()).not.toContain(process.env.ADMIN_PATH ?? "missing-path");
+  await expect(page.getByLabel("Password")).toBeVisible();
 });
 
 test("owner signs in with a password, prices, publishes, hides, undoes, and shares", async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "share", { configurable: true, value: undefined });
   });
-  const path = process.env.ADMIN_PATH ?? "";
-  if (path.length < 8) throw new Error("ADMIN_PATH is not loaded");
-  await page.goto(`/${path}`);
+  await page.goto("/desk");
   await page.getByLabel("Email").fill(adminEmail);
   await page.getByLabel("Password").fill("not-the-password");
   await page.getByRole("button", { name: "Sign in" }).click();
@@ -135,7 +130,7 @@ test("owner signs in with a password, prices, publishes, hides, undoes, and shar
   await expect(page.getByRole("status").filter({ hasText: "Link copied" })).toBeVisible();
 
   // The funnel ends on the desk: the note shows under Messages with a reply path.
-  await page.goto(`/${path}/messages`);
+  await page.goto("/desk/messages");
   const note = page.locator("article").filter({ hasText: "Is the studio test piece still here?" });
   await expect(note.getByRole("heading", { name: "Test buyer" })).toBeVisible();
   await expect(note.getByRole("link", { name: "Reply by email" })).toBeVisible();
@@ -143,7 +138,7 @@ test("owner signs in with a password, prices, publishes, hides, undoes, and shar
   await note.getByRole("button", { name: "Mark replied" }).click();
   await expect(note).toContainText("replied");
 
-  await page.goto(`/${path}/pieces`);
+  await page.goto("/desk/pieces");
   await page.getByRole("link", { name: `Edit ${title}`, exact: true }).click();
   await expect(page.getByRole("heading", { name: "Edit this piece" })).toBeVisible();
   await page.getByRole("button", { name: "Hide" }).click();
@@ -158,7 +153,7 @@ test("owner signs in with a password, prices, publishes, hides, undoes, and shar
 
 test("photo upload makes a private draft that publishes through review", async ({ page }) => {
   test.skip(!process.env.E2E_BLOB_READ_WRITE_TOKEN, "Needs E2E_BLOB_READ_WRITE_TOKEN for a separate test Blob store");
-  await page.goto(`/${process.env.ADMIN_PATH}`);
+  await page.goto("/desk");
   await page.getByLabel("Email").fill(adminEmail);
   await page.getByLabel("Password").fill(adminPassword);
   await page.getByRole("button", { name: "Sign in" }).click();
@@ -185,8 +180,7 @@ test("pages stay accessible", async ({ page }) => {
     const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations, path).toEqual([]);
   }
-  const admin = process.env.ADMIN_PATH ?? "";
-  await page.goto(`/${admin}`);
+  await page.goto("/desk");
   await expect(page.getByLabel("Password")).toBeVisible();
   expect((await new AxeBuilder({ page }).analyze()).violations, "sign in").toEqual([]);
   await page.getByLabel("Email").fill(adminEmail);

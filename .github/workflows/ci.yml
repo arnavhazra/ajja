@@ -78,7 +78,6 @@ jobs:
           DATABASE_URL: postgres://postgres:postgres@db.localtest.me:5432/main
           BLOB_READ_WRITE_TOKEN: "vercel_blob_rw_placeholder"
           SESSION_SECRET: "placeholder_session_secret_for_build"
-          ADMIN_PATH: "test-admin-path-placeholder"
           CRON_SECRET: "cron_placeholder_secret_for_build"
 
       - name: Bundle budgets
@@ -184,7 +183,6 @@ jobs:
           DATABASE_URL: postgres://postgres:postgres@db.localtest.me:5432/main
           BLOB_READ_WRITE_TOKEN: "vercel_blob_rw_placeholder"
           SESSION_SECRET: "placeholder_session_secret_for_build"
-          ADMIN_PATH: "test-admin-path-placeholder"
           CRON_SECRET: "cron_placeholder_secret_for_build"
           # Lets next/image fetch the loopback blob mock (see next.config.ts).
           E2E_BLOB_API_URL: "https://e2e.public.blob.vercel-storage.com"
@@ -201,7 +199,6 @@ jobs:
           DATABASE_URL: postgres://postgres:postgres@db.localtest.me:5432/main
           BLOB_READ_WRITE_TOKEN: "vercel_blob_rw_placeholder"
           SESSION_SECRET: "placeholder_session_secret_for_build"
-          ADMIN_PATH: "test-admin-path-placeholder"
           CRON_SECRET: "cron_placeholder_secret_for_build"
           E2E_BLOB_API_URL: "https://e2e.public.blob.vercel-storage.com"
           # `next start` fetches the hero through next/image from the blob
@@ -326,7 +323,6 @@ jobs:
           fi
         env:
           E2E_DATABASE_URL: "postgres://postgres:postgres@localhost:5432/main"
-          E2E_ADMIN_PATH: "e2e-desk-ci-path"
           E2E_SESSION_SECRET: "e2e-ci-session-secret-0123456789abcdef"
           E2E_BLOB_API_URL: "https://e2e.public.blob.vercel-storage.com"
           E2E_BLOB_READ_WRITE_TOKEN: "vercel_blob_rw_e2e_ci_mock"

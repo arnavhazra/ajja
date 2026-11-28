@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { cn } from "@/lib/cn";
 import { undoInline } from "@/lib/desk-actions/pieces-undo";
+import { deskPath } from "@/lib/desk-path";
 import { bulkApply, saveInlineField } from "@/lib/desk-actions/quick-edits";
 import { PiecesTableRow } from "./pieces-table-row";
 import type { CellIntent, DeskPieceRow, Group } from "./pieces-table-types";
@@ -21,12 +22,10 @@ type Toast = {
 export function PiecesTable({
   rows,
   groups,
-  prefix,
   trash,
 }: {
   rows: DeskPieceRow[];
   groups: Group[];
-  prefix: string;
   trash: boolean;
 }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -123,7 +122,7 @@ export function PiecesTable({
           {trash ? "The trash is empty." : "Try clearing the search or filters, or add a new piece."}
         </p>
         {!trash ? (
-          <Link className="btn btn-primary w-fit" href={`${prefix}/add`}>
+          <Link className="btn btn-primary w-fit" href={`${deskPath}/add`}>
             Add a piece
           </Link>
         ) : null}
@@ -139,7 +138,6 @@ export function PiecesTable({
             key={row.id}
             row={row}
             groups={groups}
-            prefix={prefix}
             trash={trash}
             selected={selected.has(row.id)}
             valueOf={valueOf}

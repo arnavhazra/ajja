@@ -118,7 +118,6 @@ export function applyFixtureEnv() {
     delete process.env.DATABASE_URL;
   }
 
-  process.env.ADMIN_PATH = (process.env.E2E_ADMIN_PATH ?? "").trim();
   process.env.SESSION_SECRET = (process.env.E2E_SESSION_SECRET ?? "").trim();
   if (!process.env.CRON_SECRET) process.env.CRON_SECRET = "e2e-cron";
 

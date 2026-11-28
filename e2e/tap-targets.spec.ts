@@ -79,10 +79,8 @@ test("folio sheet traps focus and closes on escape", async ({ page }) => {
 });
 
 test("desk editor icon buttons are at least 56px", async ({ page }) => {
-  const admin = process.env.ADMIN_PATH ?? "";
-  if (admin.length < 8) throw new Error("ADMIN_PATH is not loaded");
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto(`/${admin}`);
+  await page.goto("/desk");
   await page.getByLabel("Email").fill(adminEmail);
   await page.getByLabel("Password").fill(adminPassword);
   await page.getByRole("button", { name: "Sign in" }).click();
@@ -90,7 +88,7 @@ test("desk editor icon buttons are at least 56px", async ({ page }) => {
 
   const sql = neon(process.env.DATABASE_URL ?? "");
   const [piece] = await sql`select id from products where slug = ${slug} limit 1`;
-  await page.goto(`/${admin}/pieces/${piece.id}`);
+  await page.goto(`/desk/pieces/${piece.id}`);
   await expect(page.locator("#photos")).toBeVisible();
   // Desk controls use the senior floor: 56px, not the public 44px.
   await expectBigEnough(page.locator("#photos button"), "desk photo buttons at 390px", 56);

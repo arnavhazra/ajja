@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { requireSession } from "../auth";
 import { getDb } from "../db";
 import { auditLog, productImages, products, productVersions, redirects, siteSettings } from "../db/schema";
-import { deskPrefix } from "../desk-path";
+import { deskPath } from "../desk-path";
 import { dollarsToMinor } from "../money";
 import { canPublishPiece } from "../piece-readiness";
 import { type ShopSettings, withDefaults } from "../settings";
@@ -52,13 +52,12 @@ export function refresh() {
 }
 
 export async function go(path: string, note: string, undoId?: string): Promise<never> {
-  const prefix = await deskPrefix();
   const target = path.startsWith("/") ? path : "/";
   const url = new URL(target, "http://desk.local");
   url.searchParams.set("note", note);
   if (undoId) url.searchParams.set("undo", undoId);
   const pathname = url.pathname === "/" ? "" : url.pathname;
-  redirect(`${prefix}${pathname}?${url.searchParams.toString()}`);
+  redirect(`${deskPath}${pathname}?${url.searchParams.toString()}`);
 }
 
 export async function actor() {

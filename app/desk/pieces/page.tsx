@@ -5,7 +5,7 @@ import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import { emptyTrash } from "@/lib/desk-actions/quick-edits";
 import { PiecesTable, type DeskPieceRow } from "@/components/desk/pieces-table";
 import { loadDeskPieces, loadNeedCounts, requireDesk } from "@/lib/desk-data";
-import { deskPrefix } from "@/lib/desk-path";
+import { deskPath } from "@/lib/desk-path";
 import { evaluatePieceReadiness } from "@/lib/piece-readiness";
 import { minorToDollars } from "@/lib/money";
 import { pieceTitle } from "@/lib/piece-title";
@@ -34,10 +34,9 @@ async function Pieces({ searchParams }: { searchParams: Promise<Record<string, s
   const params = await searchParams;
   const trash = one(params.trash) === "1";
   const need = one(params.need);
-  const [{ rows, page, hasMore }, groups, prefix, globalNeeds] = await Promise.all([
+  const [{ rows, page, hasMore }, groups, globalNeeds] = await Promise.all([
     loadDeskPieces({ q: one(params.q), status: one(params.status), trash, page: Math.max(0, Number(one(params.page)) || 0) }),
     getDb().select().from(categories).orderBy(asc(categories.sortOrder)),
-    deskPrefix(),
     loadNeedCounts(),
   ]);
   const groupName = new Map(groups.map((group) => [group.id, group.name]));
@@ -85,7 +84,7 @@ async function Pieces({ searchParams }: { searchParams: Promise<Record<string, s
       if (value) merged.set(key, value);
     }
     const query = merged.toString();
-    return `${prefix}/pieces${query ? `?${query}` : ""}`;
+    return `${deskPath}/pieces${query ? `?${query}` : ""}`;
   };
 
   return (
@@ -150,7 +149,6 @@ async function Pieces({ searchParams }: { searchParams: Promise<Record<string, s
       <PiecesTable
         rows={tableRows}
         groups={groups.map((group) => ({ id: group.id, name: group.name }))}
-        prefix={prefix}
         trash={trash}
       />
       {page > 0 || hasMore ? (

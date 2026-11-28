@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import { requireDesk } from "@/lib/desk-data";
-import { deskPrefix } from "@/lib/desk-path";
+import { deskPath } from "@/lib/desk-path";
 
 export default function SettingsPage() {
   return (
@@ -14,7 +14,6 @@ export default function SettingsPage() {
 
 async function Settings() {
   await requireDesk();
-  const prefix = await deskPrefix();
   const sections: { title: string; links: [string, string, string][] }[] = [
     {
       title: "The site",
@@ -58,7 +57,7 @@ async function Settings() {
           <ul className="desk-settings-list">
             {section.links.map(([href, label, note]) => (
               <li key={href}>
-                <Link className="desk-setting-link" href={`${prefix}${href}`}>
+                <Link className="desk-setting-link" href={`${deskPath}${href}`}>
                   <span>{label}</span>
                   <small>{note}</small>
                 </Link>

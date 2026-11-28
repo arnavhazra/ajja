@@ -4,7 +4,7 @@ const schema = z.object({
   DATABASE_URL: z.string().min(1),
 });
 
-const productionKeys = ["ADMIN_PATH", "SESSION_SECRET", "CRON_SECRET", "BLOB_READ_WRITE_TOKEN"] as const;
+const productionKeys = ["SESSION_SECRET", "CRON_SECRET", "BLOB_READ_WRITE_TOKEN"] as const;
 
 export function assertEnv() {
   const parsed = schema.safeParse(process.env);

@@ -3,10 +3,9 @@ import { DeskNavLinks, type DeskNavSection } from "@/components/desk/nav-links";
 import { brand } from "@/lib/brand";
 import { leaveDesk } from "@/lib/desk-actions/auth";
 import { loadNavCounts } from "@/lib/desk-data";
-import { deskPrefix } from "@/lib/desk-path";
 
 export async function DeskNav({ email }: { email: string }) {
-  const [prefix, counts] = await Promise.all([deskPrefix(), loadNavCounts()]);
+  const counts = await loadNavCounts();
   const sections: DeskNavSection[] = [
     {
       title: "Desk",
@@ -36,7 +35,7 @@ export async function DeskNav({ email }: { email: string }) {
           </form>
         </div>
       </div>
-      <DeskNavLinks prefix={prefix} sections={sections} />
+      <DeskNavLinks sections={sections} />
       <div className="desk-foot">
         <p className="desk-signed-in truncate text-sm text-tar-soft">{email}</p>
       </div>

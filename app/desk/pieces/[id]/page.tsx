@@ -7,7 +7,7 @@ import { PhotoManager } from "@/components/desk/photo-manager";
 import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import { Flash, one } from "@/components/desk/flash";
 import { loadDeskPiece, loadPieceNeighbors, requireDesk } from "@/lib/desk-data";
-import { deskPrefix } from "@/lib/desk-path";
+import { deskPath } from "@/lib/desk-path";
 import { evaluatePieceReadiness } from "@/lib/piece-readiness";
 import { pigmentFromDataUri } from "@/lib/pigment";
 import { getSettings } from "@/lib/public-data";
@@ -49,10 +49,9 @@ async function Editor({
   await requireDesk();
   const { id } = await params;
   const query = await searchParams;
-  const [loaded, settings, prefix, neighbors] = await Promise.all([
+  const [loaded, settings, neighbors] = await Promise.all([
     loadDeskPiece(id),
     getSettings(),
-    deskPrefix(),
     loadPieceNeighbors(id),
   ]);
   if (!loaded) notFound();
@@ -161,8 +160,8 @@ async function Editor({
       <PhotoManager product={product} images={images} heroImage={settings.heroImage} />
       <EditorAids
         formId="piece-form"
-        prevHref={neighbors.prevId ? `${prefix}/pieces/${neighbors.prevId}` : ""}
-        nextHref={neighbors.nextId ? `${prefix}/pieces/${neighbors.nextId}` : ""}
+        prevHref={neighbors.prevId ? `${deskPath}/pieces/${neighbors.prevId}` : ""}
+        nextHref={neighbors.nextId ? `${deskPath}/pieces/${neighbors.nextId}` : ""}
       />
     </main>
   );

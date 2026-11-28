@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Flash, one } from "@/components/desk/flash";
 import { sprintSave } from "@/lib/desk-actions/quick-edits";
 import { requireDesk, loadReview } from "@/lib/desk-data";
-import { deskPrefix } from "@/lib/desk-path";
+import { deskPath } from "@/lib/desk-path";
 import { minorToDollars } from "@/lib/money";
 
 export default function ReviewPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
@@ -19,7 +19,7 @@ export default function ReviewPage({ searchParams }: { searchParams: Promise<Rec
 async function Review({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   await requireDesk();
   const params = await searchParams;
-  const [item, prefix] = await Promise.all([loadReview(one(params.skip)), deskPrefix()]);
+  const item = await loadReview(one(params.skip));
   return (
     <main className="desk-page">
       <Flash note={one(params.note)} undo={one(params.undo)} back="/review" />
@@ -75,11 +75,11 @@ async function Review({ searchParams }: { searchParams: Promise<Record<string, s
               <button className="btn btn-primary" type="submit">
                 Save &amp; next →
               </button>
-              <Link className="btn btn-secondary" href={`${prefix}/pieces/${item.product.id}`}>
+              <Link className="btn btn-secondary" href={`${deskPath}/pieces/${item.product.id}`}>
                 Open full editor
               </Link>
               {item.nextId ? (
-                <Link className="btn btn-quiet" href={`${prefix}/review?skip=${item.product.id}`}>
+                <Link className="btn btn-quiet" href={`${deskPath}/review?skip=${item.product.id}`}>
                   Skip
                 </Link>
               ) : null}

@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import Link from "next/link";
 import { requireDesk } from "@/lib/desk-data";
-import { deskPrefix } from "@/lib/desk-path";
+import { deskPath } from "@/lib/desk-path";
 
 export default function HelpPage() {
   return (
@@ -14,7 +14,6 @@ export default function HelpPage() {
 
 async function Help() {
   await requireDesk();
-  const prefix = await deskPrefix();
   return (
     <main className="desk-page max-w-3xl">
       <div className="desk-lead">
@@ -25,7 +24,7 @@ async function Help() {
         <p className="desk-note">Mark sold when it has gone. Hide takes it off the shop without deleting it. Trash keeps it for 30 days.</p>
         <p className="desk-note">Undo sits next to the note after you save. Sign out is at the top.</p>
         <p className="desk-note">Phone and WhatsApp buttons appear on the shop only after you type a real number.</p>
-        <Link className="btn btn-primary w-fit" href={`${prefix}/help/print`}>
+        <Link className="btn btn-primary w-fit" href={`${deskPath}/help/print`}>
           Open the one-page sheet
         </Link>
       </section>

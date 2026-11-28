@@ -10,4 +10,4 @@ Prefer undo over a confirmation box. Trash can be restored for 30 days.
 
 Check the session inside every server action and every data write. Write an audit row for every change.
 
-Do not link the secret path from the public site.
+Do not link the desk from the public site.

@@ -87,16 +87,15 @@ test.describe("Visual Audit & AI Screenshot Capture", () => {
   });
 
   test("capture desk login doors and verify email code form persistence", async ({ page }) => {
-    const admin = process.env.ADMIN_PATH ?? "";
     await page.setViewportSize({ width: 1440, height: 900 });
 
     // 1. Password Form
-    await page.goto(`/${admin}`, { waitUntil: "networkidle" });
+    await page.goto("/desk", { waitUntil: "networkidle" });
     await expect(page.getByLabel("Password")).toBeVisible();
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, "07-desk-password-form.png") });
 
     // 2. Email Code Form
-    await page.goto(`/${admin}?code=1`, { waitUntil: "networkidle" });
+    await page.goto("/desk?code=1", { waitUntil: "networkidle" });
     await expect(page.getByRole("button", { name: "Email me a code" })).toBeVisible();
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, "08-desk-code-form-initial.png") });
 
@@ -109,13 +108,12 @@ test.describe("Visual Audit & AI Screenshot Capture", () => {
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, "09-desk-code-form-requested.png") });
 
     // 3. Staff Door
-    await page.goto(`/${admin}?staff=1`, { waitUntil: "networkidle" });
+    await page.goto("/desk?staff=1", { waitUntil: "networkidle" });
     await expect(page.getByLabel("Code from your app")).toBeVisible();
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, "10-desk-staff-door.png") });
   });
 
   test("capture desk draft review framing", async ({ page }) => {
-    const admin = process.env.ADMIN_PATH ?? "";
     const sql = neon(process.env.DATABASE_URL ?? "");
     await sql`delete from product_images where product_id in (select id from products where slug = 'draft-review-test')`;
     await sql`delete from products where slug = 'draft-review-test'`;
@@ -129,14 +127,14 @@ test.describe("Visual Audit & AI Screenshot Capture", () => {
     await page.setViewportSize({ width: 1440, height: 900 });
 
     // Log in
-    await page.goto(`/${admin}`, { waitUntil: "networkidle" });
+    await page.goto("/desk", { waitUntil: "networkidle" });
     await page.getByLabel("Email").fill(adminEmail);
     await page.getByLabel("Password").fill(adminPassword);
     await page.getByRole("button", { name: "Sign in" }).click();
     await expect(page.getByRole("heading", { name: "Today" })).toBeVisible();
 
     // Visit review page
-    await page.goto(`/${admin}/review`, { waitUntil: "networkidle" });
+    await page.goto("/desk/review", { waitUntil: "networkidle" });
     await expect(page.locator("figure.photo-frame")).toBeVisible();
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, "11-desk-review-page.png") });
 

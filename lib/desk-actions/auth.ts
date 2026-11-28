@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { changePassword, requestCode, requireSession, signOut, verifyCode, verifyPassword, verifyStaff } from "../auth";
-import { deskPrefix } from "../desk-path";
+import { deskPath } from "../desk-path";
 import { passwordChangeSchema, passwordSignInSchema } from "../schemas";
 import { go } from "./shared";
 
@@ -20,8 +20,7 @@ export async function completeSignIn(formData: FormData) {
     const query = `/?code=1${email ? `&email=${encodeURIComponent(email)}` : ""}`;
     return go(query, result.message);
   }
-  const prefix = await deskPrefix();
-  redirect(prefix || "/");
+  redirect(deskPath);
 }
 
 export async function completePasswordSignIn(formData: FormData) {
@@ -29,8 +28,7 @@ export async function completePasswordSignIn(formData: FormData) {
   if (!parsed.success) return go("", parsed.error.issues[0]?.message ?? "Those details did not work.");
   const result = await verifyPassword(parsed.data.email, parsed.data.password);
   if (!result.ok) return go("", result.message);
-  const prefix = await deskPrefix();
-  redirect(prefix || "/");
+  redirect(deskPath);
 }
 
 export async function updatePassword(formData: FormData) {
@@ -53,12 +51,10 @@ export async function completeStaffSignIn(formData: FormData) {
     String(formData.get("token") ?? ""),
   );
   if (!result.ok) return go("/?staff=1", result.message);
-  const prefix = await deskPrefix();
-  redirect(prefix || "/");
+  redirect(deskPath);
 }
 
 export async function leaveDesk() {
   await signOut();
-  const prefix = await deskPrefix();
-  redirect(prefix || "/");
+  redirect(deskPath);
 }

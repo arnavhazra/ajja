@@ -17,7 +17,7 @@ Seed looks at `SEED_DIR`, then `seed/photos`, then `/Users/arnavhazra/Downloads/
 ## Folder map
 
 - `app/(home)` and `app/(shop)` — public pages
-- `app/desk` — private desk, reached only by rewrite from `ADMIN_PATH`
+- `app/desk` — private desk at `/desk`
 - `app/api` — enquiries, events, upload token, backup, cron
 - `lib` — database, auth, images, copy
 - `drizzle/0001_init.sql` — schema already applied to Neon
@@ -31,7 +31,7 @@ Seed looks at `SEED_DIR`, then `seed/photos`, then `/Users/arnavhazra/Downloads/
 - Public reads use `use cache` and tags. Desk saves call `updateTag`.
 - Money is integer cents. Empty price stays null.
 - Do not invent product facts. Drafts stay off the shop.
-- Authorise inside every desk action. The proxy rewrite is not enough.
+- Authorise inside every desk action. Routing is never authorisation.
 - Plain words in the desk.
 
 ## Environment

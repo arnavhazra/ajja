@@ -7,7 +7,7 @@ import { DeskRowsSkeleton } from "@/components/desk/skeleton";
 import { PhotoUpload } from "@/components/desk/upload";
 import { publishPiece } from "@/lib/desk-actions/pieces-status";
 import { loadDeskPiece, loadDeskPieces, requireDesk } from "@/lib/desk-data";
-import { deskPrefix } from "@/lib/desk-path";
+import { deskPath } from "@/lib/desk-path";
 import { formatMoney } from "@/lib/money";
 import { canPublishPiece } from "@/lib/piece-readiness";
 import { pieceKind, pieceTitle } from "@/lib/piece-title";
@@ -45,20 +45,18 @@ async function Add({ searchParams }: { searchParams: Promise<Record<string, stri
   const params = await searchParams;
   const pieceId = one(params.piece);
   const stage = one(params.stage);
-  const prefix = await deskPrefix();
-
   if (pieceId) {
     const loaded = await loadDeskPiece(pieceId);
     if (loaded) {
-      if (stage === "review") return <Review loaded={loaded} prefix={prefix} note={one(params.note)} />;
-      return <About loaded={loaded} prefix={prefix} note={one(params.note)} />;
+      if (stage === "review") return <Review loaded={loaded} note={one(params.note)} />;
+      return <About loaded={loaded} note={one(params.note)} />;
     }
   }
 
-  return <Photo prefix={prefix} note={one(params.note)} />;
+  return <Photo note={one(params.note)} />;
 }
 
-async function Photo({ prefix, note }: { prefix: string; note: string }) {
+async function Photo({ note }: { note: string }) {
   const { rows } = await loadDeskPieces({ status: "draft" });
   const drafts = rows.slice(0, 8);
   return (
@@ -72,7 +70,7 @@ async function Photo({ prefix, note }: { prefix: string; note: string }) {
           JPEG, PNG, WebP, or HEIC, up to 15 MB.
         </p>
       </div>
-      <PhotoUpload prefix={prefix} />
+      <PhotoUpload />
       {drafts.length ? (
         <section className="grid gap-3">
           <h2 className="text-2xl">Continue a draft</h2>
@@ -80,7 +78,7 @@ async function Photo({ prefix, note }: { prefix: string; note: string }) {
             {drafts.map((draft) => (
               <li key={draft.id}>
                 <Link
-                  href={`${prefix}/add?piece=${draft.id}`}
+                  href={`${deskPath}/add?piece=${draft.id}`}
                   className="hairline-box flex min-h-14 items-center gap-3 bg-wall px-4 transition-colors hover:bg-wall-deep"
                 >
                   {draft.image ? (
@@ -102,11 +100,9 @@ async function Photo({ prefix, note }: { prefix: string; note: string }) {
 
 async function About({
   loaded,
-  prefix,
   note,
 }: {
   loaded: NonNullable<Awaited<ReturnType<typeof loadDeskPiece>>>;
-  prefix: string;
   note: string;
 }) {
   const { product, images, groups } = loaded;
@@ -132,8 +128,8 @@ async function About({
           price: product.priceMinor == null ? "" : String(product.priceMinor / 100),
         }}
         groups={groups.map((group) => ({ id: group.id, name: group.name }))}
-        continueHref={`${prefix}/add?piece=${product.id}&stage=review`}
-        leaveHref={`${prefix}/pieces`}
+        continueHref={`${deskPath}/add?piece=${product.id}&stage=review`}
+        leaveHref={`${deskPath}/pieces`}
       />
     </main>
   );
@@ -141,11 +137,9 @@ async function About({
 
 async function Review({
   loaded,
-  prefix,
   note,
 }: {
   loaded: NonNullable<Awaited<ReturnType<typeof loadDeskPiece>>>;
-  prefix: string;
   note: string;
 }) {
   const { product, images } = loaded;
@@ -196,7 +190,7 @@ async function Review({
       {!gate.ok ? (
         <p className="desk-note border-l-4 border-sap bg-wall-deep px-4 py-3">
           {gate.reason}{" "}
-          <Link className="ink-link" href={`${prefix}/add?piece=${product.id}`}>
+          <Link className="ink-link" href={`${deskPath}/add?piece=${product.id}`}>
             Back to About this piece
           </Link>
         </p>
@@ -209,10 +203,10 @@ async function Review({
             Show on site
           </button>
         </form>
-        <Link className="btn btn-secondary" href={`${prefix}/add?piece=${product.id}`}>
+        <Link className="btn btn-secondary" href={`${deskPath}/add?piece=${product.id}`}>
           Back to about
         </Link>
-        <Link className="btn btn-quiet" href={`${prefix}/pieces`}>
+        <Link className="btn btn-quiet" href={`${deskPath}/pieces`}>
           Keep as private draft
         </Link>
       </div>

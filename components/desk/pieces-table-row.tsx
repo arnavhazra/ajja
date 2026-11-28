@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
+import { deskPath } from "@/lib/desk-path";
 import { draftPiece, duplicatePiece, hidePiece, publishPiece, restorePiece, sellPiece, trashPiece } from "@/lib/desk-actions/pieces-status";
 import { moveFeatured, toggleFeatured } from "@/lib/desk-actions/quick-edits";
 import type { CellIntent, DeskPieceRow, Group } from "./pieces-table-types";
@@ -18,7 +19,6 @@ const STATUS_OPTIONS = [
 type Props = {
   row: DeskPieceRow;
   groups: Group[];
-  prefix: string;
   trash: boolean;
   selected: boolean;
   valueOf: (row: DeskPieceRow, intent: CellIntent) => string;
@@ -27,7 +27,7 @@ type Props = {
   toggle: (id: string) => void;
 };
 
-export function PiecesTableRow({ row, groups, prefix, trash, selected, valueOf, edit, save, toggle }: Props) {
+export function PiecesTableRow({ row, groups, trash, selected, valueOf, edit, save, toggle }: Props) {
   return (
     <div className="desk-trow" role="row">
       <div className="desk-cell-check flex min-h-11 items-center" role="cell">
@@ -38,7 +38,7 @@ export function PiecesTableRow({ row, groups, prefix, trash, selected, valueOf, 
           aria-label={`Select ${row.displayTitle}`}
         />
       </div>
-      <Link className="desk-thumb desk-cell-thumb" href={`${prefix}/pieces/${row.id}`} tabIndex={-1} aria-hidden="true" role="cell">
+      <Link className="desk-thumb desk-cell-thumb" href={`${deskPath}/pieces/${row.id}`} tabIndex={-1} aria-hidden="true" role="cell">
         {row.imageUrl ? <Image src={row.imageUrl} alt="" width={128} height={128} sizes="52px" /> : <span>No photo</span>}
       </Link>
       <div className="desk-cell-main min-w-0" role="cell">
@@ -56,7 +56,7 @@ export function PiecesTableRow({ row, groups, prefix, trash, selected, valueOf, 
           />
           <Link
             className="text-sm text-tar-soft underline hover:text-tar"
-            href={`${prefix}/pieces/${row.id}`}
+            href={`${deskPath}/pieces/${row.id}`}
             aria-label={`Edit ${row.displayTitle}`}
           >
             Edit
@@ -147,7 +147,7 @@ export function PiecesTableRow({ row, groups, prefix, trash, selected, valueOf, 
               <summary className="btn btn-secondary min-h-11 px-3 text-xs">More</summary>
               <span className="desk-more-menu">
                 {row.status === "draft" ? (
-                  <Link className="btn btn-quiet min-h-11 px-3 text-xs" href={`${prefix}/add?piece=${row.id}`}>
+                  <Link className="btn btn-quiet min-h-11 px-3 text-xs" href={`${deskPath}/add?piece=${row.id}`}>
                     Continue draft
                   </Link>
                 ) : null}

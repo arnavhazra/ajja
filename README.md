@@ -17,7 +17,7 @@ A direct-enquiry catalogue and private studio desk for a family art and woodwork
 3. Apply the SQL files in `drizzle/` to the target Neon branch in order.
 4. Run the app: `pnpm dev`
 
-The production build requires real `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `SESSION_SECRET`, `ADMIN_PATH`, and `CRON_SECRET` values because Next.js prerenders cached catalogue queries.
+The production build requires real `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `SESSION_SECRET`, and `CRON_SECRET` values because Next.js prerenders cached catalogue queries.
 
 ## Commands
 
@@ -35,7 +35,7 @@ The production build requires real `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `SES
 
 ## Private desk
 
-The desk lives under the secret `ADMIN_PATH` and is rewritten by `proxy.ts`; direct `/desk` access is not the intended public route. Authentication is checked again inside server actions and API routes. Use plain desk language and prefer undo over destructive confirmation flows.
+The desk lives at `/desk`. Authentication is checked inside server actions and API routes. Use plain desk language and prefer undo over destructive confirmation flows.
 
 ## Browser tests
 

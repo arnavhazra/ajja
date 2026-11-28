@@ -4,17 +4,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/cn";
+import { deskPath } from "@/lib/desk-path";
 
 export type DeskNavSection = {
   title: string;
   links: ReadonlyArray<readonly [href: string, label: string, count?: number]>;
 };
 
-export function DeskNavLinks({ prefix, sections }: { prefix: string; sections: DeskNavSection[] }) {
+export function DeskNavLinks({ sections }: { sections: DeskNavSection[] }) {
   const raw = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-  const base = raw.startsWith(prefix) ? prefix : "/desk";
-  const local = raw.startsWith(base) ? raw.slice(base.length) : raw;
+  const local = raw.startsWith(deskPath) ? raw.slice(deskPath.length) : raw;
   return (
     <div className="desk-nav-shell">
       <button
@@ -32,7 +32,7 @@ export function DeskNavLinks({ prefix, sections }: { prefix: string; sections: D
             <div key={section.title} className="desk-nav-section">
               <p className="desk-nav-group">{section.title}</p>
               {section.links.map(([href, label, count]) => {
-                const target = `${prefix}${href}`;
+                const target = `${deskPath}${href}`;
                 const morePaths = ["/settings", "/home", "/poster", "/account", "/help", "/review", "/groups", "/insights", "/files", "/history"];
                 const current =
                   href === ""

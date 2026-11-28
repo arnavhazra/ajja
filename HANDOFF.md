@@ -10,7 +10,6 @@ Shop:
 
 - `DATABASE_URL`
 - `BLOB_READ_WRITE_TOKEN`
-- `ADMIN_PATH`
 - `SESSION_SECRET`
 - `CRON_SECRET`
 
@@ -62,7 +61,7 @@ Categories Paintings, Woodwork, and Handwork are labels he can rename. The photo
 
 ## Desk
 
-The desk is the exact `ADMIN_PATH` (no leading slash in the variable), rewritten onto `app/desk`. A direct visit to `/desk` is the public 404.
+The desk lives at `/desk`. The sign-in form is public; every inner page, server action, and API write still checks the session.
 
 Main sign-in is email + password, checked against `admin_users.password_hash` (scrypt). Five wrong tries lock that account for 15 minutes. Change the password at the desk screen **Account**.
 
@@ -76,7 +75,7 @@ It prints a new random password once. Set `NEW_ADMIN_PASSWORD` to choose one ins
 
 Other doors, linked under the form: **Email me a code** (`?code=1`) waits on `OWNER_EMAIL`, `RESEND_API_KEY`, and `EMAIL_FROM`. **Staff with app code** (`?staff=1`) asks for `DEV_ADMIN_EMAIL`, `DEV_ADMIN_PASSWORD`, and a TOTP code from `DEV_ADMIN_TOTP_SECRET`.
 
-Cheat sheet: the secret desk path plus `/help/print` (`app/desk/help/print/page.tsx`).
+Cheat sheet: `/desk/help/print` (`app/desk/help/print/page.tsx`).
 
 The hero headline in settings is “Paintings, woodwork, and pieces made by hand.” The desk keeps `copyNeedsApproval` and shows “Needs your approval.” That line is on the desk. The public site does not show it.
 
@@ -110,7 +109,7 @@ The public site does not list a street or hours until the owner supplies them. D
 ## Sign-in recovery
 
 The desk has a password door and an email-code door. If the owner forgets the
-password: visit `/{ADMIN_PATH}?code=1`, enter the `OWNER_EMAIL` address from the
+password: visit `/desk?code=1`, enter the `OWNER_EMAIL` address from the
 env, and a one-time code is emailed to it. That door only appears when
 `OWNER_EMAIL` is set (it is, in `.env.local` / Vercel env). There is no
 password-reset email — the code door is the recovery path.
@@ -121,7 +120,6 @@ password-reset email — the code door is the recovery path.
 
 - `E2E_ISOLATED=1` — confirms the suite targets a throwaway database
 - `E2E_DATABASE_URL` — pooled connection string for the isolated branch
-- `E2E_ADMIN_PATH` — desk path fixture (e.g. `e2e-desk-secret-path`)
 - `E2E_SESSION_SECRET` — session secret fixture (e.g. `e2e-fixture-secret-32chars`)
 - `E2E_BLOB_API_URL` — point uploads at the local blob mock (e.g. `https://e2e.public.blob.vercel-storage.com`)
 - `E2E_BLOB_READ_WRITE_TOKEN` — dummy token accepted by the local blob mock

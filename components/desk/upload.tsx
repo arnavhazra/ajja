@@ -3,6 +3,7 @@
 import { put } from "@vercel/blob/client";
 import { useState } from "react";
 import { addPhotoToPiece, ingestUpload } from "@/lib/desk-actions/pieces-ingest";
+import { deskPath } from "@/lib/desk-path";
 import { UPLOAD_ATTEMPTS, UPLOAD_MAX_FILES, planUpload } from "@/lib/upload-plan";
 
 async function uploadOne(file: File, signal: AbortSignal) {
@@ -24,7 +25,7 @@ async function uploadOne(file: File, signal: AbortSignal) {
   });
 }
 
-export function PhotoUpload({ productId, prefix = "" }: { productId?: string; prefix?: string }) {
+export function PhotoUpload({ productId }: { productId?: string }) {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [grouped, setGrouped] = useState(false);
@@ -79,9 +80,9 @@ export function PhotoUpload({ productId, prefix = "" }: { productId?: string; pr
       }
       setStatus("Done.");
       if (ids.length === 1) {
-        window.location.assign(new URL(`${prefix}/add?piece=${ids[0]}`, window.location.origin).toString());
+        window.location.assign(new URL(`${deskPath}/add?piece=${ids[0]}`, window.location.origin).toString());
       } else {
-        window.location.assign(new URL(`${prefix}/pieces?status=draft`, window.location.origin).toString());
+        window.location.assign(new URL(`${deskPath}/pieces?status=draft`, window.location.origin).toString());
       }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "The photo did not upload.");

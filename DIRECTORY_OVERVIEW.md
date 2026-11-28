@@ -7,7 +7,7 @@ megele.art is a Next.js 16 direct-enquiry catalogue plus a private studio desk. 
 ## Runtime architecture
 
 - **Public storefront**: `app/(home)` and `app/(shop)` render cached public catalogue reads. Shared chrome is consolidated in `components/public-shell.tsx`.
-- **Private desk**: `app/desk` is reached through the secret `ADMIN_PATH` rewrite in `proxy.ts`. The rewrite is not authorization: desk server actions call `actor()`/`requireSession()`, and desk API routes check the session.
+- **Private desk**: `app/desk` is served directly at `/desk`. Routing is not authorization: desk server actions call `actor()`/`requireSession()`, and desk API routes check the session.
 - **Data access**: `lib/public-data.ts` covers cached public reads; `lib/desk-data.ts` covers uncached desk reads; `lib/desk-actions/` groups writes by domain.
 - **Database**: Neon Postgres. `lib/db/schema.ts` is the typed Drizzle schema; `drizzle/*.sql` is the applied migration chain.
 - **Images**: Vercel Blob. Uploads are size/type checked, converted to WebP, stripped of metadata, given blur data, and reference-checked before deletion.
@@ -52,9 +52,9 @@ e2e/                   production-build Playwright fixtures/specs/blob mock
 - `components/shop/piece-viewer.tsx` — fit-contained artwork viewer and accessible figure picker.
 - `components/shop/collectors-folio.tsx` — local saved-piece folio and multi-piece enquiry handoff.
 - `components/desk/pieces-table.tsx` — dense inventory quick-edit table.
-- `lib/desk-actions/pieces.ts` — piece ingest, editing, status transitions, duplication, trash/restore, undo.
+- `lib/desk-actions/pieces.ts` plus `pieces-ingest.ts`, `pieces-status.ts`, and `pieces-undo.ts` — piece editing, ingest, status transitions, trash/restore, and undo separated by responsibility.
 - `lib/env.ts` + `instrumentation.ts` — runtime environment validation outside the production build phase.
-- `proxy.ts` — secret desk rewrite and public route protection.
+- `lib/desk-path.ts` — the permanent `/desk` path constant.
 - `next.config.ts` — image security, security headers, bundling, and cache behavior.
 
 ## Verification model
